@@ -2,8 +2,8 @@
 A Firefox extension which displays an author's pronouns next to their name on Mastodon.
 ![A Mastodon screenshot showing off pronouns next to a person's name](documentation/firefox_ehHwJufMau.png)
 
-## Download
-uuuuhhh i dunno, i've probably sent it to you
+## Download/Installation
+Go to [the releases page](https://github.com/ItsVipra/ProToots/releases) and follow the instructions there.
 
 ## FAQ
 Why does it need permission for all websites?
