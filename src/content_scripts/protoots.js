@@ -66,34 +66,77 @@ async function checkSite() {
  */
 function main() {
 	// debug('selection for id mastodon', {'result': document.querySelector("#mastodon")})
-	if (document.querySelector("#mastodon")) {
-		log("Mastodon instance, activating Protoots");
-
-		let lastUrl = location.href;
-		new MutationObserver((mutations) => {
-			const url = location.href;
-			if (url !== lastUrl) {
-				lastUrl = url;
-				onUrlChange();
-			}
-
-			for (const m of mutations) {
-				m.addedNodes.forEach((n) => {
-					if (!(n instanceof HTMLElement)) return;
-
-					if (n.className == "column") {
-						debug("found a column: ", n);
-						createObserver(n);
-						//TODO: yet another bad hack, pls fix
-						//TODO: doesn't work when going from detailed-status to detailed-status
-						document.querySelectorAll(".detailed-status").forEach((el) => addProplate(el));
-					}
-				});
-			}
-		}).observe(document, { subtree: true, childList: true });
-	} else {
+	if (!document.querySelector("#mastodon")) {
 		warn("Not a Mastodon instance");
 	}
+
+	log("Mastodon instance, activating Protoots");
+
+	// We are tracking navigation changes with the location and a MutationObserver on `document`,
+	// because the popstate event from the History API is only triggered with the back/forward buttons.
+	let lastUrl = location.href;
+	new MutationObserver((mutations) => {
+		const url = location.href;
+		if (url !== lastUrl) {
+			lastUrl = url;
+		}
+
+		// Checks whether the given n is a column in the Mastodon interface. This is true for the simple
+		// as well as the advanced interface.
+		const isColumn = (n) => n instanceof HTMLElement && containsClass(n.classList, "column");
+
+		// Observe and wait for added columns. We are using flatMap on all addedNodes, because columns
+		// multiple nodes might be added in one single mutation. By flattening the tree, we can be sure
+		// that we are observing all columns _only once_.
+		mutations
+			.flatMap((m) => [...m.addedNodes].filter(isColumn))
+			.forEach((column) => attachColumnObserver(column));
+
+		// We might have existing statuses in this mutation, therefore we are also searching for those.
+		// For some weird reason, this does not work with the findStatusesAndAddProplates method
+		// below, only with the querySelector.
+		document.querySelectorAll(".status, .detailed-status").forEach(s => addProplate(s));
+	}).observe(document, { subtree: true, childList: true });
+}
+
+/**
+ * Searches for any statuses inside the mutations and adds the proplates.
+ *
+ * @param {MutationRecord[]} mutations
+ */
+function findStatusesAndAddProplates(mutations) {
+	// Checks whether the given n is a status in the Mastodon interface.
+	const isStatus = (n) =>
+		n instanceof HTMLElement && containsClass(n.classList, ["status", "detailed-status"]);
+
+	mutations.flatMap((m) => [...m.addedNodes].filter(isStatus)).forEach((s) => addProplate(s));
+}
+
+/**
+ * The shared observer for all columns. Since one observer can track multiple elements,
+ * we use a single observer with the same callback for all columns.
+ */
+const columnObserver = new MutationObserver(findStatusesAndAddProplates);
+
+/**
+ * Attaches an MutationObserver to the given column if it's not already tracked.
+ *
+ * @param {HTMLElement|Node} el
+ */
+function attachColumnObserver(el) {
+	if (!(el instanceof HTMLElement)) return;
+
+	// In order to avoid multiple trackings of the same column, we mark them with the attribute.
+	// If it exists, we don't add another observer for the column.
+	if (el.hasAttribute("protoots-tracked")) return;
+
+	el.setAttribute("protoots-tracked", "true");
+	columnObserver.observe(el, {
+		childList: true,
+		subtree: true,
+		attributes: true,
+		attributeFilter: ["data-id", "style"],
+	});
 }
 
 /**
@@ -250,7 +293,7 @@ function onError(error) {
  *
  * Although it's possible to pass raw {@type Element}s, the method only does things on elements of type {@type HTMLElement}.
  *
- * @param {Element | HTMLElement} element The status where the element should be added.
+ * @param {Node | Element | HTMLElement} element The status where the element should be added.
  */
 async function addProplate(element) {
 	if (!(element instanceof HTMLElement)) return;
@@ -258,8 +301,6 @@ async function addProplate(element) {
 	//check whether element has already had a proplate added
 	if (element.hasAttribute("protoots-checked")) return;
 
-	//if not add the attribute
-	element.setAttribute("protoots-checked", "true");
 	let statusId = element.dataset.id;
 	if (!statusId) {
 		// We don't have a status ID, pronouns might not be in cache
@@ -293,6 +334,11 @@ async function addProplate(element) {
 		return;
 	}
 
+	// Add the checked attribute only _after_ we've passed the basic checks.
+	// This allows us to pass incomplete nodes into this method, because
+	// we only process them after we have all required information.
+	element.setAttribute("protoots-checked", "true");
+
 	nametagEl.style.display = "flex";
 	nametagEl.style.alignItems = "baseline";
 
@@ -317,77 +363,22 @@ async function addProplate(element) {
 	nametagEl.appendChild(proplate);
 }
 
-function createObserver(element) {
-	// select column as observation target
-	// const targetNode = document.querySelector(".column");
-	const targetNode = element;
-
-	// observe childlist and subtree events
-	// docs: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-	const config = { childList: true, subtree: true, attributes: true };
-
-	// define callback inline
-	const callback = (
-		/** @type {MutationRecord[]} */ mutationList,
-		/** @type {MutationObserver} */ observer,
-	) => {
-		for (const mutation of mutationList) {
-			mutation.addedNodes.forEach((n) => {
-				if (!(n instanceof HTMLElement)) return;
-
-				//case for all the other normal statuses
-				if (
-					containsClass(n.classList, "status") &&
-					!containsClass(n.classList, "status__prepend")
-				) {
-					//|| containsClass(n.classList, "detailed-status"))) {
-					addProplate(n);
-				} else {
-					//for nodes that have a broken classlist
-					let statusElement = n.querySelector(".status");
-					if (statusElement) {
-						addProplate(statusElement);
-					}
-					//potential solution for dirty hack?
-					// debug(".status not found looking for .detailed-status", {"element:": n})
-					// statusElement = n.querySelector(".detailed-status")
-					// if (statusElement != null) {
-					//     addProplate(statusElement);
-					// }
-				}
-			});
-		}
-		//TODO: bad hack, please remove
-		document.querySelectorAll(".status").forEach((el) => addProplate(el));
-		document.querySelectorAll(".detailed-status").forEach((el) => addProplate(el));
-	};
-
-	// Create an observer instance linked to the callback function
-	const observer = new MutationObserver(callback);
-
-	// Start observing the target node for configured mutations
-	observer.observe(targetNode, config);
-}
-
-/**
- * Called by MutationObserver when the url changes.
- * Creates a new MutationObserver for each column on the page.
- */
-function onUrlChange() {
-	//select all columns for advanced interface
-	document.querySelectorAll(".column").forEach((el) => {
-		createObserver(el);
-	});
-	// createObserver();
-}
-
 /**
  * @param {DOMTokenList} classList The class list.
- * @param {string} cl The class to check for.
+ * @param {string|string[]} cl The class(es) to check for.
  * @returns Whether the classList contains the class.
  */
 function containsClass(classList, cl) {
 	if (!classList || !cl) return false;
+
+	if (Array.isArray(cl)) {
+		for (const c of classList) {
+			for (const c2 of cl) {
+				if (c === c2) return true;
+			}
+		}
+		return false;
+	}
 
 	for (const c of classList) {
 		if (c === cl) {
