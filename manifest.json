@@ -1,7 +1,7 @@
 {
-    "manifest_version": 2,
-    "name": "ProToots",
-    "version": "0.99",
+	"manifest_version": 2,
+	"name": "ProToots",
+	"version": "0.99",
 
     "icons":{
         "48": "src/icons/icon small_size/icon small_size.png",
@@ -21,27 +21,22 @@
         "default_popup": "src/options/options.html"
     },
 
-    "content_scripts": [
-        {
-            "matches": [
-                "*://*/*"
-            ],
-            "js" : [
-                "src/content_scripts/protoots.js"
-            ],
-            "css": ["src/styles/proplate.css"],
-            "run_at": "document_start"
-        }
-    ],
+	"content_scripts": [
+		{
+			"matches": ["*://*/*"],
+			"js": ["src/content_scripts/protoots.js"],
+			"css": ["src/styles/proplate.css"],
+			"run_at": "document_start"
+		}
+	],
 
-    "options_ui": {
-        "page": "src/options/options.html"
-    },
+	"options_ui": {
+		"page": "src/options/options.html"
+	},
 
-    "browser_specific_settings": {
-        "gecko": {
-            "id": "protoots@trans.rights"
-        }
-    }
-
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "protoots@trans.rights"
+		}
+	}
 }
