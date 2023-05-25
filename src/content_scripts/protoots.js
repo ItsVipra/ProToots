@@ -5,7 +5,7 @@
 
 // const max_age = 8.64e7
 const max_age = 24 * 60 * 60 * 1000; //time after which cached pronouns should be checked again: 24h
-const host_name = location.hostname;
+const host_name = location.host;
 
 //before anything else, check whether we're on a Mastodon page
 checkSite();
@@ -165,7 +165,7 @@ async function fetchPronouns(statusID, account_name) {
 async function fetchStatus(statusID) {
 	const accessToken = await getActiveAccessToken();
 	//fetch status from home server with access token
-	const response = await fetch(`https://${host_name}/api/v1/statuses/${statusID}`, {
+	const response = await fetch(`${location.protocol}//${host_name}/api/v1/statuses/${statusID}`, {
 		headers: { Authorization: `Bearer ${accessToken}` },
 	});
 
