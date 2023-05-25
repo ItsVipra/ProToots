@@ -193,12 +193,9 @@ function getPronounField(status, account_name) {
 		if (field["name"].toLowerCase().includes("pronouns")) {
 			debug(`${account["acct"]}: ${field["value"]}`);
 
-			if (!field["value"].includes("a href")) {
-				//filter links
-				let pronounSet = generatePronounSet(account_name, field["value"]);
-				cachePronouns(account_name, pronounSet);
-				return field["value"];
-			}
+			let pronounSet = generatePronounSet(account_name, field["value"]);
+			cachePronouns(account_name, pronounSet);
+			return field["value"];
 		}
 	}
 
@@ -305,7 +302,7 @@ async function addProplate(element) {
 	if (pronouns == "null" && !logging) {
 		return;
 	}
-	proplate.textContent = pronouns;
+	proplate.innerHTML = sanitizePronouns(pronouns);
 	proplate.classList.add("protoots-proplate");
 	if (
 		(host_name == "queer.group" && (accountName == "@vivien" || accountName == "@jasmin")) ||
@@ -417,4 +414,19 @@ async function getActiveAccessToken() {
 	// Parse the JSON inside the script tag and extract the meta element from it.
 	const { meta } = JSON.parse(initialStateEl.innerText);
 	return meta.access_token;
+}
+
+/**
+ * Sanitizes the pronoun field by removing various long information parts.
+ * As of today, this just removes custom emojis from the field.
+ *
+ * @param {string} str The input string.
+ * @returns The sanitized string.
+ */
+function sanitizePronouns(str) {
+	// Remove all custom emojis with the :shortcode: format.
+	str = str.replace(/:[\w_]+:/gi, "");
+
+	// Finally, remove leading and trailing whitespace.
+	return str.trim();
 }
