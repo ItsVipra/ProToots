@@ -43,14 +43,14 @@ function debug(...arguments) {
  * If so creates an 'readystatechange' EventListener, with callback to main()
  */
 async function checkSite() {
-	await browser.storage.sync.get("logging").then(
-		(res) => {
-			logging = res["logging"];
-		},
-		() => {
-			logging = true;
-		},
-	);
+	try {
+		let { logging: optionValue } = await browser.storage.sync.get("logging");
+		logging = optionValue;
+	} catch {
+		//  Enable the logging automatically if we cannot determine the user preference.
+		logging = true;
+	}
+
 	let requestDest = location.protocol + "//" + host_name + "/api/v1/instance";
 	let response = await fetch(requestDest);
 
