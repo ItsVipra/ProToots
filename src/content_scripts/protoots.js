@@ -305,7 +305,7 @@ async function addProplate(element) {
 	if (pronouns == "null" && !logging) {
 		return;
 	}
-	proplate.textContent = pronouns;
+	proplate.textContent = sanitizePronouns(pronouns);
 	proplate.classList.add("protoots-proplate");
 	if (
 		(host_name == "queer.group" && (accountName == "@vivien" || accountName == "@jasmin")) ||
@@ -417,4 +417,19 @@ async function getActiveAccessToken() {
 	// Parse the JSON inside the script tag and extract the meta element from it.
 	const { meta } = JSON.parse(initialStateEl.innerText);
 	return meta.access_token;
+}
+
+/**
+ * Sanitizes the pronoun field by removing various long information parts.
+ * As of today, this just removes custom emojis from the field.
+ *
+ * @param {string} str The input string.
+ * @returns The sanitized string.
+ */
+function sanitizePronouns(str) {
+	// Remove all custom emojis with the :shortcode: format.
+	str = str.replace(/:[\w_]+:/gi, "");
+
+	// Finally, remove leading and trailing whitespace.
+	return str.trim();
 }
