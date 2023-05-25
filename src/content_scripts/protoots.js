@@ -193,12 +193,9 @@ function getPronounField(status, account_name) {
 		if (field["name"].toLowerCase().includes("pronouns")) {
 			debug(`${account["acct"]}: ${field["value"]}`);
 
-			if (!field["value"].includes("a href")) {
-				//filter links
-				let pronounSet = generatePronounSet(account_name, field["value"]);
-				cachePronouns(account_name, pronounSet);
-				return field["value"];
-			}
+			let pronounSet = generatePronounSet(account_name, field["value"]);
+			cachePronouns(account_name, pronounSet);
+			return field["value"];
 		}
 	}
 
@@ -305,7 +302,7 @@ async function addProplate(element) {
 	if (pronouns == "null" && !logging) {
 		return;
 	}
-	proplate.textContent = sanitizePronouns(pronouns);
+	proplate.innerHTML = sanitizePronouns(pronouns);
 	proplate.classList.add("protoots-proplate");
 	if (
 		(host_name == "queer.group" && (accountName == "@vivien" || accountName == "@jasmin")) ||
