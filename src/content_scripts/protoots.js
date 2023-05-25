@@ -11,24 +11,29 @@ const host_name = location.hostname;
 checkSite();
 let logging;
 
-function error() {
-	if (logging) console.error(arguments);
+/** @param {any[]} arguments */
+function error(...arguments) {
+	if (logging) console.error(...arguments);
 }
 
-function warn() {
-	if (logging) console.warn(arguments);
+/** @param {any[]} arguments */
+function warn(...arguments) {
+	if (logging) console.warn(...arguments);
 }
 
-function log() {
-	if (logging) console.log(arguments);
+/** @param {any[]} arguments */
+function log(...arguments) {
+	if (logging) console.log(...arguments);
 }
 
-function info() {
-	if (logging) console.info(arguments);
+/** @param {any[]} arguments */
+function info(...arguments) {
+	if (logging) console.info(...arguments);
 }
 
-function debug() {
-	if (logging) console.debug(arguments);
+/** @param {any[]} arguments */
+function debug(...arguments) {
+	if (logging) console.debug(...arguments);
 }
 
 // log("hey vippy, du bist cute <3")
