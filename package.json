@@ -2,5 +2,11 @@
 	"devDependencies": {
 		"prettier": "^2.8.8",
 		"web-ext": "^7.6.2"
+	},
+	"prettier": {
+		"endOfLine": "lf",
+		"printWidth": 100,
+		"useTabs": true,
+		"trailingComma": "all"
 	}
 }
