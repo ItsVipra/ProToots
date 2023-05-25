@@ -1,0 +1,56 @@
+<svg viewBox="0 0 1000 250" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        .outer {
+            background-fill: #eeeee;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .inner {
+            background-fill: white;
+            border-radius: 1em;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .gradient {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        span {
+            font-family: "cascadia code";
+            font-size: 1000%;
+            background-size: 100%;
+        }
+
+        .P {
+            margin-left: 0.25em;
+            fill: #5bcffa;
+        }
+
+        .slash {
+            justify-self: center;
+            align-self: center;
+            margin-left: 0;
+            margin-right: 0.1em;
+        }
+
+        .T {
+            margin-right: 0.25em;
+            fill: #f5abb9;
+        }
+
+    </style>
+
+<g>
+<rect style='outer' width='1000' height='1000'/>
+    <g>
+    <rect class='inner' rx='20%' ry='20%'/>
+        <text class="P">P</text>
+        <text class="slash">/</text>
+        <text class="T">T</text>
+    </g>
+</g>
+</svg>

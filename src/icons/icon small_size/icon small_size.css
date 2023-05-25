@@ -1,0 +1,43 @@
+body {
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+div {
+    background-color: white;
+    border-radius: 2em;
+    justify-content: center;
+    align-items: center;
+
+
+}
+
+.gradient {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+span {
+    font-family: "cascadia code";
+    font-size: 500%;
+    background-size: 100%;
+}
+
+.P {
+    margin-left: 0.25em;
+    color: #5bcffa;
+}
+
+.slash {
+    justify-self: center;
+    align-self: center;
+    margin-left: 0;
+    margin-right: 0.1em;
+}
+
+.T {
+    margin-right: 0.25em;
+    color: #f5abb9;
+}

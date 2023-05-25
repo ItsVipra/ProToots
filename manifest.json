@@ -3,6 +3,11 @@
     "name": "ProToots",
     "version": "0.99",
 
+    "icons":{
+        "48": "src/icons/icon small_size/icon small_size.png",
+        "96": "src/icons/icon small_size/icon small_size.png"
+    },
+
 
     "description": "puts pronouns next to usernames on mastodon",
     "homepage_url": "https://github.com/ItsVipra/ProToots",
@@ -11,7 +16,7 @@
     ],
 
     "browser_action": {
-        "default_icon": "src/icons/beasts-32.png",
+        "default_icon": "src/icons/icon small_size/icon small_size.png",
         "default_title": "ProToots",
         "default_popup": "src/options/options.html"
     },
