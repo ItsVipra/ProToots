@@ -1,46 +1,44 @@
 body {
-    background-color: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+	background-color: black;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 div {
-    background-color: white;
-    border-radius: 1em;
-    justify-content: center;
-    align-items: center;
-
-
+	background-color: white;
+	border-radius: 1em;
+	justify-content: center;
+	align-items: center;
 }
 
 .gradient {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    background-image: linear-gradient(90deg,#5bcffa, 30%,#f5abb9);
-    -webkit-background-clip: text;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	background-image: linear-gradient(90deg, #5bcffa, 30%, #f5abb9);
+	-webkit-background-clip: text;
 }
 
 span {
-    font-family: "cascadia code";
-    font-size: 1000%;
-    background-size: 100%;
+	font-family: "cascadia code";
+	font-size: 1000%;
+	background-size: 100%;
 
-    -webkit-text-fill-color: transparent;
+	-webkit-text-fill-color: transparent;
 }
 
 .P {
-    margin-left: 0.25em;
+	margin-left: 0.25em;
 }
 
 .slash {
-    justify-self: center;
-    align-self: center;
-    margin-left: 0;
-    margin-right: 0.1em;
-    -webkit-text-fill-color: black;
+	justify-self: center;
+	align-self: center;
+	margin-left: 0;
+	margin-right: 0.1em;
+	-webkit-text-fill-color: black;
 }
 
 .T {
-    margin-right: 0.25em;
+	margin-right: 0.25em;
 }

@@ -3,23 +3,20 @@
 	"name": "ProToots",
 	"version": "0.99",
 
-    "icons":{
-        "48": "src/icons/icon small_size/icon small_size.png",
-        "96": "src/icons/icon small_size/icon small_size.png"
-    },
+	"icons": {
+		"48": "src/icons/icon small_size/icon small_size.png",
+		"96": "src/icons/icon small_size/icon small_size.png"
+	},
 
+	"description": "puts pronouns next to usernames on mastodon",
+	"homepage_url": "https://github.com/ItsVipra/ProToots",
+	"permissions": ["storage"],
 
-    "description": "puts pronouns next to usernames on mastodon",
-    "homepage_url": "https://github.com/ItsVipra/ProToots",
-    "permissions": [
-        "storage"
-    ],
-
-    "browser_action": {
-        "default_icon": "src/icons/icon small_size/icon small_size.png",
-        "default_title": "ProToots",
-        "default_popup": "src/options/options.html"
-    },
+	"browser_action": {
+		"default_icon": "src/icons/icon small_size/icon small_size.png",
+		"default_title": "ProToots",
+		"default_popup": "src/options/options.html"
+	},
 
 	"content_scripts": [
 		{
