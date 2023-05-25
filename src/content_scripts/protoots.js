@@ -95,7 +95,7 @@ function main() {
 		// We might have existing statuses in this mutation, therefore we are also searching for those.
 		// For some weird reason, this does not work with the findStatusesAndAddProplates method
 		// below, only with the querySelector.
-		document.querySelectorAll(".status, .detailed-status").forEach(s => addProplate(s));
+		document.querySelectorAll(".status, .detailed-status").forEach((s) => addProplate(s));
 	}).observe(document, { subtree: true, childList: true });
 }
 
