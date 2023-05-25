@@ -165,7 +165,7 @@ async function fetchPronouns(statusID, account_name) {
 async function fetchStatus(statusID) {
 	const accessToken = await getActiveAccessToken();
 	//fetch status from home server with access token
-	const response = await fetch(`https://${host_name}/api/v1/statuses/${statusID}`, {
+	const response = await fetch(`${location.protocol}//${host_name}/api/v1/statuses/${statusID}`, {
 		headers: { Authorization: `Bearer ${accessToken}` },
 	});
 
