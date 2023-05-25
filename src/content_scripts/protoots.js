@@ -3,6 +3,9 @@
 //proplate.textContent = "pro/nouns";
 //document.body.display-name__html.append();
 
+// obligatory crime. because be gay, do crime.
+// 8======D
+
 // const max_age = 8.64e7
 const max_age = 24 * 60 * 60 * 1000; //time after which cached pronouns should be checked again: 24h
 const host_name = location.host;
