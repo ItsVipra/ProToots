@@ -83,7 +83,7 @@ function main() {
 
 		// Checks whether the given n is a column in the Mastodon interface. This is true for the simple
 		// as well as the advanced interface.
-		const isColumn = (n) => n instanceof HTMLElement && containsClass(n.classList, "column");
+		const isColumn = (n) => n instanceof HTMLElement && hasClasses(n.classList, "column");
 
 		// Observe and wait for added columns. We are using flatMap on all addedNodes, because columns
 		// multiple nodes might be added in one single mutation. By flattening the tree, we can be sure
@@ -107,7 +107,7 @@ function main() {
 function findStatusesAndAddProplates(mutations) {
 	// Checks whether the given n is a status in the Mastodon interface.
 	const isStatus = (n) =>
-		n instanceof HTMLElement && containsClass(n.classList, ["status", "detailed-status"]);
+		n instanceof HTMLElement && hasClasses(n.classList, "status", "detailed-status");
 
 	mutations.flatMap((m) => [...m.addedNodes].filter(isStatus)).forEach((s) => addProplate(s));
 }
@@ -365,27 +365,17 @@ async function addProplate(element) {
 
 /**
  * @param {DOMTokenList} classList The class list.
- * @param {string|string[]} cl The class(es) to check for.
+ * @param {string[]} cl The class(es) to check for.
  * @returns Whether the classList contains the class.
  */
-function containsClass(classList, cl) {
+function hasClasses(classList, ...cl) {
 	if (!classList || !cl) return false;
 
-	if (Array.isArray(cl)) {
-		for (const c of classList) {
-			for (const c2 of cl) {
-				if (c === c2) return true;
-			}
-		}
-		return false;
-	}
-
 	for (const c of classList) {
-		if (c === cl) {
-			return true;
+		for (const c2 of cl) {
+			if (c === c2) return true;
 		}
 	}
-
 	return false;
 }
 
