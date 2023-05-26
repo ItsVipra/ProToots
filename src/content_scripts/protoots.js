@@ -419,11 +419,14 @@ async function getActiveAccessToken() {
 /**
  * Sanitizes the pronoun field by removing various long information parts.
  * As of today, this just removes custom emojis from the field.
+ * If the passed string is not defined, an empty string is returned.
  *
  * @param {string} str The input string.
  * @returns The sanitized string.
  */
 function sanitizePronouns(str) {
+	if (!str) return "";
+
 	// Remove all custom emojis with the :shortcode: format.
 	str = str.replace(/:[\w_]+:/gi, "");
 
