@@ -105,38 +105,33 @@ function main() {
  */
 async function fetchPronouns(statusID, account_name) {
 	// log(`searching for ${account_name}`);
-
-	let cacheResult = await browser.storage.local.get().then(getSuccess, onError);
+	let cacheResult = { pronounsCache: {} };
+	try {
+		cacheResult = await browser.storage.local.get();
+	} catch {
+		// ignore errors, we have an empty object as fallback.
+	}
 
 	if (account_name[0] == "@") account_name = account_name.substring(1);
+
 	// if the username doesn't contain an @ (i.e. the post we're looking at is from this instance)
 	// append the host name to it, to avoid cache overlap between instances
 	if (!account_name.includes("@")) {
 		account_name = account_name + "@" + host_name;
 	}
 
-	// debug(cacheResult);
+	// Extract the current cache by using object destructuring.
+	if (account_name in cacheResult.pronounsCache) {
+		let { value, timestamp } = cacheResult.pronounsCache[account_name];
 
-	if (Object.keys(cacheResult).length == 0) {
-		let pronounsCache = {};
-		await browser.storage.local.set({ pronounsCache }).then(setSuccess, onError);
-		warn("created pronounsCache in storage");
-	}
-
-	let cacheKeys = Object.keys(cacheResult["pronounsCache"]);
-
-	if (cacheKeys.includes(account_name)) {
-		let entryValue = cacheResult["pronounsCache"][account_name].value;
-		let entryTimestamp = cacheResult["pronounsCache"][account_name].timestamp;
-		if (Date.now() - entryTimestamp < max_age) {
-			info(`${account_name} in cache:`, {
-				"cache entry": cacheResult["pronounsCache"][account_name],
-			});
-			return entryValue;
-		} else {
-			info(`${account_name} entry is stale, refreshing`);
+		// If we have a cached value and it's not outdated, use it.
+		if (value && Date.now() - timestamp < max_age) {
+			info(`${account_name} in cache with value: ${value}`);
+			return value;
 		}
 	}
+
+	info(`${account_name} cache entry is stale, refreshing`);
 
 	if (!statusID) {
 		console.warn(
@@ -224,22 +219,20 @@ function generatePronounSet(account, value) {
  * @param {{ acct: any; timestamp: number; value: any; }} set The data to cache.
  */
 async function cachePronouns(account, set) {
-	let result = await browser.storage.local.get("pronounsCache").then(getSuccess, onError);
-	let pronounsCache = result["pronounsCache"];
-	pronounsCache[account] = set;
-	await browser.storage.local.set({ pronounsCache }).then(setSuccess, onError);
-	debug(`caching ${account}`);
-	// return
-}
+	let cache = { pronounsCache: {} };
+	try {
+		cache = await browser.storage.local.get();
+	} catch {
+		// ignore errors, we have an empty object as fallback.
+	}
 
-function getSuccess(result) {
-	return result;
-}
-
-function setSuccess() {}
-
-function onError(error) {
-	error("Failed save to storage!");
+	cache.pronounsCache[account] = set;
+	try {
+		await browser.storage.local.set(cache);
+		debug(`${account} cached`);
+	} catch (e) {
+		error(`${account} could not been cached: `, e);
+	}
 }
 
 /**
