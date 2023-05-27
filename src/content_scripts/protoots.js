@@ -84,62 +84,106 @@ function main() {
 			lastUrl = url;
 		}
 
-		// Checks whether the given n is a column in the Mastodon interface. This is true for the simple
-		// as well as the advanced interface.
-		const isColumn = (n) => n instanceof HTMLElement && hasClasses(n.classList, "column");
+		/**
+		 * Checks whether the given n is an article or detailed status.
+		 * @param {Node} n
+		 * @returns {Boolean}
+		 */
+		function isArticleOrDetailedStatus(n) {
+			return (
+				n instanceof HTMLElement && (n.hasAttribute("data-id") || hasClasses(n, "detailed-status"))
+			);
+		}
 
-		// Observe and wait for added columns. We are using flatMap on all addedNodes, because columns
-		// multiple nodes might be added in one single mutation. By flattening the tree, we can be sure
-		// that we are observing all columns _only once_.
 		mutations
-			.flatMap((m) => [...m.addedNodes].filter(isColumn))
-			.forEach((column) => attachColumnObserver(column));
-
-		// We might have existing statuses in this mutation, therefore we are also searching for those.
-		// For some weird reason, this does not work with the findStatusesAndAddProplates method
-		// below, only with the querySelector.
-		document.querySelectorAll(".status, .detailed-status").forEach((s) => addProplate(s));
+			.flatMap((m) => Array.from(m.addedNodes).map((m) => findAllDescendants(m)))
+			.flat()
+			// .map((n) => console.log("found node: ", n));
+			.filter(isArticleOrDetailedStatus)
+			.forEach((a) => addtoTootObserver(a));
 	}).observe(document, { subtree: true, childList: true });
 }
 
 /**
- * Searches for any statuses inside the mutations and adds the proplates.
- *
- * @param {MutationRecord[]} mutations
+ * Recursively finds all descendants of a node.
+ * @param {Node} node
+ * @return {Node[]} Array containing the root node and all its descendants
  */
-function findStatusesAndAddProplates(mutations) {
-	// Checks whether the given n is a status in the Mastodon interface.
-	const isStatus = (n) =>
-		n instanceof HTMLElement && hasClasses(n.classList, "status", "detailed-status");
-
-	mutations.flatMap((m) => [...m.addedNodes].filter(isStatus)).forEach((s) => addProplate(s));
+function findAllDescendants(node) {
+	return [node, ...node.childNodes, ...[...node.childNodes].flatMap((n) => findAllDescendants(n))];
 }
 
 /**
- * The shared observer for all columns. Since one observer can track multiple elements,
- * we use a single observer with the same callback for all columns.
+ * Searches for any statuses inside the mutations and adds it to the tootObserver.
+ *
+ * @param {MutationRecord[]} mutations
  */
-const columnObserver = new MutationObserver(findStatusesAndAddProplates);
+function findStatuses(mutations) {
+	// Checks whether the given n is a status in the Mastodon interface.
+	function isStatus(n) {
+		return n instanceof HTMLElement && n.nodeName == "ARTICLE";
+	}
+
+	mutations.flatMap((m) => [...m.addedNodes].filter(isStatus)).forEach((s) => addtoTootObserver(s));
+}
+
+//create a global tootObserver to handle all article objects
+let tootObserver = new IntersectionObserver((entries) => {
+	onTootIntersection(entries);
+});
 
 /**
- * Attaches an MutationObserver to the given column if it's not already tracked.
+ * Waits until the given selector appears below the given node. Then removes itself.
+ * TODO: turn into single MutationObserver?
  *
- * @param {HTMLElement|Node} el
+ * @param {Element} node
+ * @param {string} selector
+ * @param {(el: Element) => void} callback
+ * @copyright CC-BY-SA 4.0 wOxxoM https://stackoverflow.com/a/71488320
  */
-function attachColumnObserver(el) {
-	if (!(el instanceof HTMLElement)) return;
+function waitForElement(node, selector, callback) {
+	let el = node.querySelector(selector);
+	if (el) {
+		callback(el);
+		return;
+	}
 
-	// In order to avoid multiple trackings of the same column, we mark them with the attribute.
-	// If it exists, we don't add another observer for the column.
-	if (el.hasAttribute("protoots-tracked")) return;
+	new MutationObserver((mutations, observer) => {
+		el = node.querySelector(selector);
+		if (el) {
+			observer.disconnect();
+			callback(el);
+		}
+	}).observe(node, { subtree: true, childList: true });
+}
 
-	el.setAttribute("protoots-tracked", "true");
-	columnObserver.observe(el, {
-		childList: true,
-		subtree: true,
-		attributes: true,
-		attributeFilter: ["data-id", "style"],
-	});
+/**
+ * Callback for TootObserver
+ *
+ * Loops through all IntersectionObserver entries and checks whether each toot is on screen. If so a proplate will be added once the toot is ready.
+ *
+ * Once a toot has left the viewport its "protoots-checked" attribute will be removed.
+ * @param {IntersectionObserverEntry[]} observerentries
+ */
+function onTootIntersection(observerentries) {
+	for (let observation of observerentries) {
+		let ArticleElement = observation.target;
+		if (!observation.isIntersecting) {
+			ArticleElement.removeAttribute("protoots-checked");
+			continue;
+		}
+		waitForElement(ArticleElement, ".display-name", () => addProplate(ArticleElement));
+	}
+}
+
+/**
+ * Adds ActionElement to the tootObserver, if it has not been added before.
+ * @param {Element} ActionElement
+ */
+function addtoTootObserver(ActionElement) {
+	if (ActionElement.hasAttribute("protoots-tracked")) return;
+	ActionElement.setAttribute("protoots-tracked", "true");
+	tootObserver.observe(ActionElement);
 }
 
 /**
@@ -216,6 +260,9 @@ async function fetchStatus(statusID) {
 	});
 
 	let status = await response.json();
+
+	//if status contains a reblog get that for further processing - we want the embedded post's author
+	if (status.reblog) status = status.reblog;
 	return status;
 }
 
@@ -301,7 +348,15 @@ function onError(error) {
 async function addProplate(element) {
 	if (!(element instanceof HTMLElement)) return;
 
-	//check whether element has already had a proplate added
+	//check whether element OR article parent has already had a proplate added
+	if (hasClasses(element, "status")) {
+		let parent = element.parentElement;
+		while (parent && parent.nodeName != "ARTICLE") {
+			parent = parent.parentElement;
+		}
+		if (parent.hasAttribute("protoots-checked")) return;
+	}
+
 	if (element.hasAttribute("protoots-checked")) return;
 
 	let statusId = element.dataset.id;
@@ -367,11 +422,14 @@ async function addProplate(element) {
 }
 
 /**
- * @param {DOMTokenList} classList The class list.
+ * Checks whether the given element has one of the passed classes.
+ *
+ * @param {HTMLElement} element The element to check.
  * @param {string[]} cl The class(es) to check for.
  * @returns Whether the classList contains the class.
  */
-function hasClasses(classList, ...cl) {
+function hasClasses(element, ...cl) {
+	let classList = element.classList;
 	if (!classList || !cl) return false;
 
 	for (const c of classList) {
