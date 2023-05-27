@@ -1,4 +1,5 @@
 {
+	"name": "protoots",
 	"scripts": {
 		"format": "prettier --write --ignore-path .gitignore ."
 	},
