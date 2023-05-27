@@ -4,8 +4,8 @@
 	"version": "1.0",
 
 	"icons": {
-		"48": "src/icons/icon small_size/icon small_size.png",
-		"96": "src/icons/icon small_size/icon small_size.png"
+		"48": "icons/icon small_size/icon small_size.png",
+		"96": "icons/icon small_size/icon small_size.png"
 	},
 
 	"description": "puts pronouns next to usernames on mastodon",
@@ -13,22 +13,22 @@
 	"permissions": ["storage"],
 
 	"browser_action": {
-		"default_icon": "src/icons/icon small_size/icon small_size.png",
+		"default_icon": "icons/icon small_size/icon small_size.png",
 		"default_title": "ProToots",
-		"default_popup": "src/options/options.html"
+		"default_popup": "options/options.html"
 	},
 
 	"content_scripts": [
 		{
 			"matches": ["*://*/*"],
-			"js": ["src/content_scripts/protoots.js"],
-			"css": ["src/styles/proplate.css"],
+			"js": ["content_scripts/protoots.js"],
+			"css": ["styles/proplate.css"],
 			"run_at": "document_start"
 		}
 	],
 
 	"options_ui": {
-		"page": "src/options/options.html"
+		"page": "options/options.html"
 	},
 
 	"browser_specific_settings": {
