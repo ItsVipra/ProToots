@@ -407,7 +407,7 @@ async function addProplate(element) {
 		accountName == "@vivien@queer.group"
 	) {
 		//i think you can figure out what this does on your own
-		proplate.classList.add("pog");
+		proplate.classList.add("proplate-pog");
 	}
 
 	//add plate to nametag
