@@ -19,5 +19,6 @@
 	},
 	"files.trimTrailingWhitespace": true,
 	"files.trimFinalNewlines": true,
-	"files.insertFinalNewline": true
+	"files.insertFinalNewline": true,
+	"editor.formatOnSave": true
 }
