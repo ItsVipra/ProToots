@@ -3,6 +3,9 @@
 //proplate.textContent = "pro/nouns";
 //document.body.display-name__html.append();
 
+// obligatory crime. because be gay, do crime.
+// 8======D
+
 // const max_age = 8.64e7
 const max_age = 24 * 60 * 60 * 1000; //time after which cached pronouns should be checked again: 24h
 const host_name = location.host;
@@ -66,34 +69,121 @@ async function checkSite() {
  */
 function main() {
 	// debug('selection for id mastodon', {'result': document.querySelector("#mastodon")})
-	if (document.querySelector("#mastodon")) {
-		log("Mastodon instance, activating Protoots");
-
-		let lastUrl = location.href;
-		new MutationObserver((mutations) => {
-			const url = location.href;
-			if (url !== lastUrl) {
-				lastUrl = url;
-				onUrlChange();
-			}
-
-			for (const m of mutations) {
-				m.addedNodes.forEach((n) => {
-					if (!(n instanceof HTMLElement)) return;
-
-					if (n.className == "column") {
-						debug("found a column: ", n);
-						createObserver(n);
-						//TODO: yet another bad hack, pls fix
-						//TODO: doesn't work when going from detailed-status to detailed-status
-						document.querySelectorAll(".detailed-status").forEach((el) => addProplate(el));
-					}
-				});
-			}
-		}).observe(document, { subtree: true, childList: true });
-	} else {
+	if (!document.querySelector("#mastodon")) {
 		warn("Not a Mastodon instance");
 	}
+
+	log("Mastodon instance, activating Protoots");
+
+	// We are tracking navigation changes with the location and a MutationObserver on `document`,
+	// because the popstate event from the History API is only triggered with the back/forward buttons.
+	let lastUrl = location.href;
+	new MutationObserver((mutations) => {
+		const url = location.href;
+		if (url !== lastUrl) {
+			lastUrl = url;
+		}
+
+		/**
+		 * Checks whether the given n is an article or detailed status.
+		 * @param {Node} n
+		 * @returns {Boolean}
+		 */
+		function isArticleOrDetailedStatus(n) {
+			return (
+				n instanceof HTMLElement && (n.hasAttribute("data-id") || hasClasses(n, "detailed-status"))
+			);
+		}
+
+		mutations
+			.flatMap((m) => Array.from(m.addedNodes).map((m) => findAllDescendants(m)))
+			.flat()
+			// .map((n) => console.log("found node: ", n));
+			.filter(isArticleOrDetailedStatus)
+			.forEach((a) => addtoTootObserver(a));
+	}).observe(document, { subtree: true, childList: true });
+}
+
+/**
+ * Recursively finds all descendants of a node.
+ * @param {Node} node
+ * @return {Node[]} Array containing the root node and all its descendants
+ */
+function findAllDescendants(node) {
+	return [node, ...node.childNodes, ...[...node.childNodes].flatMap((n) => findAllDescendants(n))];
+}
+
+/**
+ * Searches for any statuses inside the mutations and adds it to the tootObserver.
+ *
+ * @param {MutationRecord[]} mutations
+ */
+function findStatuses(mutations) {
+	// Checks whether the given n is a status in the Mastodon interface.
+	function isStatus(n) {
+		return n instanceof HTMLElement && n.nodeName == "ARTICLE";
+	}
+
+	mutations.flatMap((m) => [...m.addedNodes].filter(isStatus)).forEach((s) => addtoTootObserver(s));
+}
+
+//create a global tootObserver to handle all article objects
+let tootObserver = new IntersectionObserver((entries) => {
+	onTootIntersection(entries);
+});
+
+/**
+ * Waits until the given selector appears below the given node. Then removes itself.
+ * TODO: turn into single MutationObserver?
+ *
+ * @param {Element} node
+ * @param {string} selector
+ * @param {(el: Element) => void} callback
+ * @copyright CC-BY-SA 4.0 wOxxoM https://stackoverflow.com/a/71488320
+ */
+function waitForElement(node, selector, callback) {
+	let el = node.querySelector(selector);
+	if (el) {
+		callback(el);
+		return;
+	}
+
+	new MutationObserver((mutations, observer) => {
+		el = node.querySelector(selector);
+		if (el) {
+			observer.disconnect();
+			callback(el);
+		}
+	}).observe(node, { subtree: true, childList: true });
+}
+
+/**
+ * Callback for TootObserver
+ *
+ * Loops through all IntersectionObserver entries and checks whether each toot is on screen. If so a proplate will be added once the toot is ready.
+ *
+ * Once a toot has left the viewport its "protoots-checked" attribute will be removed.
+ * @param {IntersectionObserverEntry[]} observerentries
+ */
+function onTootIntersection(observerentries) {
+	for (let observation of observerentries) {
+		let ArticleElement = observation.target;
+		if (!observation.isIntersecting) {
+			ArticleElement.removeAttribute("protoots-checked");
+			continue;
+		}
+		waitForElement(ArticleElement, ".display-name", () => addProplate(ArticleElement));
+	}
+}
+
+/**
+ * Adds ActionElement to the tootObserver, if it has not been added before.
+ * @param {Element} ActionElement
+ */
+function addtoTootObserver(ActionElement) {
+	if (ActionElement.hasAttribute("protoots-tracked")) return;
+	ActionElement.setAttribute("protoots-tracked", "true");
+	tootObserver.observe(ActionElement);
 }
 
 /**
@@ -165,6 +255,9 @@ async function fetchStatus(statusID) {
 	});
 
 	let status = await response.json();
+
+	//if status contains a reblog get that for further processing - we want the embedded post's author
+	if (status.reblog) status = status.reblog;
 	return status;
 }
 
@@ -243,16 +336,22 @@ async function cachePronouns(account, set) {
  *
  * Although it's possible to pass raw {@type Element}s, the method only does things on elements of type {@type HTMLElement}.
  *
- * @param {Element | HTMLElement} element The status where the element should be added.
+ * @param {Node | Element | HTMLElement} element The status where the element should be added.
  */
 async function addProplate(element) {
 	if (!(element instanceof HTMLElement)) return;
 
-	//check whether element has already had a proplate added
+	//check whether element OR article parent has already had a proplate added
+	if (hasClasses(element, "status")) {
+		let parent = element.parentElement;
+		while (parent && parent.nodeName != "ARTICLE") {
+			parent = parent.parentElement;
+		}
+		if (parent.hasAttribute("protoots-checked")) return;
+	}
+
 	if (element.hasAttribute("protoots-checked")) return;
 
-	//if not add the attribute
-	element.setAttribute("protoots-checked", "true");
 	let statusId = element.dataset.id;
 	if (!statusId) {
 		// We don't have a status ID, pronouns might not be in cache
@@ -286,6 +385,11 @@ async function addProplate(element) {
 		return;
 	}
 
+	// Add the checked attribute only _after_ we've passed the basic checks.
+	// This allows us to pass incomplete nodes into this method, because
+	// we only process them after we have all required information.
+	element.setAttribute("protoots-checked", "true");
+
 	nametagEl.style.display = "flex";
 	nametagEl.style.alignItems = "baseline";
 
@@ -310,84 +414,22 @@ async function addProplate(element) {
 	nametagEl.appendChild(proplate);
 }
 
-function createObserver(element) {
-	// select column as observation target
-	// const targetNode = document.querySelector(".column");
-	const targetNode = element;
-
-	// observe childlist and subtree events
-	// docs: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-	const config = { childList: true, subtree: true, attributes: true };
-
-	// define callback inline
-	const callback = (
-		/** @type {MutationRecord[]} */ mutationList,
-		/** @type {MutationObserver} */ observer,
-	) => {
-		for (const mutation of mutationList) {
-			mutation.addedNodes.forEach((n) => {
-				if (!(n instanceof HTMLElement)) return;
-
-				//case for all the other normal statuses
-				if (
-					containsClass(n.classList, "status") &&
-					!containsClass(n.classList, "status__prepend")
-				) {
-					//|| containsClass(n.classList, "detailed-status"))) {
-					addProplate(n);
-				} else {
-					//for nodes that have a broken classlist
-					let statusElement = n.querySelector(".status");
-					if (statusElement) {
-						addProplate(statusElement);
-					}
-					//potential solution for dirty hack?
-					// debug(".status not found looking for .detailed-status", {"element:": n})
-					// statusElement = n.querySelector(".detailed-status")
-					// if (statusElement != null) {
-					//     addProplate(statusElement);
-					// }
-				}
-			});
-		}
-		//TODO: bad hack, please remove
-		document.querySelectorAll(".status").forEach((el) => addProplate(el));
-		document.querySelectorAll(".detailed-status").forEach((el) => addProplate(el));
-	};
-
-	// Create an observer instance linked to the callback function
-	const observer = new MutationObserver(callback);
-
-	// Start observing the target node for configured mutations
-	observer.observe(targetNode, config);
-}
-
 /**
- * Called by MutationObserver when the url changes.
- * Creates a new MutationObserver for each column on the page.
- */
-function onUrlChange() {
-	//select all columns for advanced interface
-	document.querySelectorAll(".column").forEach((el) => {
-		createObserver(el);
-	});
-	// createObserver();
-}
-
-/**
- * @param {DOMTokenList} classList The class list.
- * @param {string} cl The class to check for.
+ * Checks whether the given element has one of the passed classes.
+ *
+ * @param {HTMLElement} element The element to check.
+ * @param {string[]} cl The class(es) to check for.
  * @returns Whether the classList contains the class.
  */
-function containsClass(classList, cl) {
+function hasClasses(element, ...cl) {
+	let classList = element.classList;
 	if (!classList || !cl) return false;
 
 	for (const c of classList) {
-		if (c === cl) {
-			return true;
+		for (const c2 of cl) {
+			if (c === c2) return true;
 		}
 	}
-
 	return false;
 }
 
