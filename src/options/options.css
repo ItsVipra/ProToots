@@ -44,7 +44,7 @@ input {
 	padding: 1em;
 	border-top: 1px dashed var(--border);
 	display: flex;
-	gap: .5em;
+	gap: 0.5em;
 	align-items: baseline;
 	justify-content: space-between;
 }

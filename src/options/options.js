@@ -20,4 +20,6 @@ function restoreOptions() {
 
 document.addEventListener("DOMContentLoaded", restoreOptions);
 document.querySelector("form").addEventListener("submit", saveOptions);
-document.querySelector("#resetbutton").addEventListener("click", async () => {await browser.storage.local.clear()})
+document.querySelector("#resetbutton").addEventListener("click", async () => {
+	await browser.storage.local.clear();
+});
