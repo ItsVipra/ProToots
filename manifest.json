@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "ProToots",
-	"version": "0.99",
+	"version": "1.0",
 
 	"icons": {
 		"48": "src/icons/icon small_size/icon small_size.png",
