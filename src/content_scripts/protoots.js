@@ -198,10 +198,16 @@ async function fetchPronouns(statusID, account_name) {
 	let cacheResult = { pronounsCache: {} };
 	try {
 		cacheResult = await browser.storage.local.get();
+		if (!cacheResult.pronounsCache) {
+			//if result doesn't have "pronounsCache" create it
+			let pronounsCache = {};
+			await browser.storage.local.set({ pronounsCache });
+			cacheResult = { pronounsCache: {} };
+		}
 	} catch {
+		cacheResult = { pronounsCache: {} };
 		// ignore errors, we have an empty object as fallback.
 	}
-
 	if (account_name[0] == "@") account_name = account_name.substring(1);
 
 	// if the username doesn't contain an @ (i.e. the post we're looking at is from this instance)
