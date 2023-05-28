@@ -410,7 +410,7 @@ async function addProplate(element) {
 	if (pronouns == "null" && !logging) {
 		return;
 	}
-	proplate.innerHTML = sanitizePronouns(pronouns);
+	proplate.appendChild(sanitizePronouns(pronouns));
 	proplate.classList.add("protoots-proplate");
 	if (
 		(host_name == "queer.group" && (accountName == "@vivien" || accountName == "@jasmin")) ||
@@ -468,14 +468,25 @@ async function getActiveAccessToken() {
  * If the passed string is not defined, an empty string is returned.
  *
  * @param {string} str The input string.
- * @returns The sanitized string.
+ * @returns {Node} The sanitized string.
  */
 function sanitizePronouns(str) {
-	if (!str) return "";
+	if (!str) return document.createTextNode("");
+
+	//find a href, check whether pronouns.page, create new link to said page with textcontent "pronouns.page"
+	let pronounsPageRegex = /href="(https:\/\/[A-z]{2}\.pronouns\.page\/@[A-z0-9\-_.]{4,16})"/;
+	let match = str.match(pronounsPageRegex);
+	if (match) {
+		//generate html
+		let pplink = document.createElement("a");
+		pplink.href = match[1];
+		pplink.textContent = "pronouns.page";
+		return pplink;
+	}
 
 	// Remove all custom emojis with the :shortcode: format.
 	str = str.replace(/:[\w_]+:/gi, "");
 
 	// Finally, remove leading and trailing whitespace.
-	return str.trim();
+	return document.createTextNode(str.trim());
 }
