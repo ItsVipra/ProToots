@@ -76,6 +76,7 @@ function main() {
 	// debug('selection for id mastodon', {'result': document.querySelector("#mastodon")})
 	if (!document.querySelector("#mastodon")) {
 		warn("Not a Mastodon instance");
+		return;
 	}
 
 	log("Mastodon instance, activating Protoots");
