@@ -5,6 +5,7 @@
 	margin-left: 0.5rem;
 	display: inline-flex;
 	text-transform: lowercase;
+	animation: proplate-fadein .15s linear;
 }
 
 /* dark theme */
@@ -67,4 +68,19 @@
 		rgba(251, 7, 217, 1) 90%,
 		rgba(255, 0, 0, 1) 100%
 	);
+}
+
+@keyframes proplate-fadein {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@media (prefers-reduced-motion) {
+	.protoots-proplate {
+		animation: none;
+	}
 }
