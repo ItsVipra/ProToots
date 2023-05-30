@@ -16,29 +16,29 @@ const host_name = location.host;
 checkSite();
 let logging;
 
-/** @param {any[]} arguments */
-function error(...arguments) {
-	if (logging) console.error(...arguments);
+/** @param {any[]} args */
+function error(...args) {
+	if (logging) console.error(...args);
 }
 
-/** @param {any[]} arguments */
-function warn(...arguments) {
-	if (logging) console.warn(...arguments);
+/** @param {any[]} args */
+function warn(...args) {
+	if (logging) console.warn(...args);
 }
 
-/** @param {any[]} arguments */
-function log(...arguments) {
-	if (logging) console.log(...arguments);
+/** @param {any[]} args */
+function log(...args) {
+	if (logging) console.log(...args);
 }
 
-/** @param {any[]} arguments */
-function info(...arguments) {
-	if (logging) console.info(...arguments);
+/** @param {any[]} args */
+function info(...args) {
+	if (logging) console.info(...args);
 }
 
-/** @param {any[]} arguments */
-function debug(...arguments) {
-	if (logging) console.debug(...arguments);
+/** @param {any[]} args */
+function debug(...args) {
+	if (logging) console.debug(...args);
 }
 
 // log("hey vippy, du bist cute <3")
