@@ -6,6 +6,8 @@
 // obligatory crime. because be gay, do crime.
 // 8======D
 
+import { storage } from "webextension-polyfill";
+
 // const max_age = 8.64e7
 const max_age = 24 * 60 * 60 * 1000; //time after which cached pronouns should be checked again: 24h
 const host_name = location.host;
@@ -47,7 +49,7 @@ function debug(...arguments) {
  */
 async function checkSite() {
 	try {
-		let { logging: optionValue } = await browser.storage.sync.get("logging");
+		let { logging: optionValue } = await storage.sync.get("logging");
 		logging = optionValue;
 	} catch {
 		//  Enable the logging automatically if we cannot determine the user preference.
@@ -203,11 +205,11 @@ async function fetchPronouns(statusID, account_name) {
 	// log(`searching for ${account_name}`);
 	let cacheResult = { pronounsCache: {} };
 	try {
-		cacheResult = await browser.storage.local.get();
+		cacheResult = await storage.local.get();
 		if (!cacheResult.pronounsCache) {
 			//if result doesn't have "pronounsCache" create it
 			let pronounsCache = {};
-			await browser.storage.local.set({ pronounsCache });
+			await storage.local.set({ pronounsCache });
 			cacheResult = { pronounsCache: {} };
 		}
 	} catch {
@@ -326,14 +328,14 @@ function generatePronounSet(account, value) {
 async function cachePronouns(account, set) {
 	let cache = { pronounsCache: {} };
 	try {
-		cache = await browser.storage.local.get();
+		cache = await storage.local.get();
 	} catch {
 		// ignore errors, we have an empty object as fallback.
 	}
 
 	cache.pronounsCache[account] = set;
 	try {
-		await browser.storage.local.set(cache);
+		await storage.local.set(cache);
 		debug(`${account} cached`);
 	} catch (e) {
 		error(`${account} could not been cached: `, e);

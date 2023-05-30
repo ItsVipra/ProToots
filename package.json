@@ -24,5 +24,8 @@
 	},
 	"webExt": {
 		"sourceDir": "dist/"
+	},
+	"dependencies": {
+		"webextension-polyfill": "^0.10.0"
 	}
 }
