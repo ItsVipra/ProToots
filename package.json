@@ -5,7 +5,7 @@
 		"build:webext": "web-ext build --overwrite-dest",
 		"start": "run-p -l -r watch:**",
 		"watch:scripts": "node scripts/watch.mjs",
-		"watch:webext": "web-ext run --keep-profile-changes --profile-create-if-missing --firefox-profile=.cache/profile/",
+		"watch:webext": "web-ext run --keep-profile-changes --profile-create-if-missing --firefox-profile=.firefox-profile/",
 		"format": "prettier --write --ignore-path .gitignore .",
 		"package": "run-s -l build:**"
 	},
