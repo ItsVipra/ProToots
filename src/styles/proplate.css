@@ -54,19 +54,25 @@
 
 /* rainbow pronouns for jasmin and i cause why not */
 .proplate-pog:hover {
-	background-image: linear-gradient(
+	color: inherit;
+
+	/*
+		The 12-bit rainbow palette by https://fosstodon.org/@kate, adjusted to rgba value with funny opacity.
+		https://iamkate.com/data/12-bit-rainbow
+	*/
+	background: linear-gradient(
 		45deg,
-		rgba(255, 0, 0, 1) 0%,
-		rgba(255, 154, 0, 1) 10%,
-		rgba(208, 222, 33, 1) 20%,
-		rgba(79, 220, 74, 1) 30%,
-		rgba(63, 218, 216, 1) 40%,
-		rgba(47, 201, 226, 1) 50%,
-		rgba(28, 127, 238, 1) 60%,
-		rgba(95, 21, 242, 1) 70%,
-		rgba(186, 12, 248, 1) 80%,
-		rgba(251, 7, 217, 1) 90%,
-		rgba(255, 0, 0, 1) 100%
+		rgba(136, 17, 119, 0.69) 0%,
+		rgba(170, 51, 85, 0.69) 10%,
+		rgba(204, 102, 102, 0.69) 20%,
+		rgba(238, 153, 68, 0.69) 30%,
+		rgba(238, 221, 0, 0.69) 40%,
+		rgba(153, 221, 85, 0.69) 50%,
+		rgba(68, 221, 136, 0.69) 60%,
+		rgba(34, 204, 187, 0.69) 70%,
+		rgba(0, 187, 204, 0.69) 80%,
+		rgba(0, 153, 204, 0.69) 90%,
+		rgba(51, 102, 187, 0.69) 100%
 	);
 }
 
