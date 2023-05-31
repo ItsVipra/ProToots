@@ -1,5 +1,5 @@
 {
-	"manifest_version": 2,
+	"manifest_version": 3,
 	"name": "ProToots",
 	"version": "1.2.1",
 
@@ -10,14 +10,13 @@
 
 	"description": "puts pronouns next to usernames on mastodon",
 	"homepage_url": "https://github.com/ItsVipra/ProToots",
-	"permissions": ["storage", "https://en.pronouns.page/api/*"],
+	"permissions": ["storage", "activeTab", "https://en.pronouns.page/api/*"],
 
-	"browser_action": {
+	"action": {
 		"default_icon": "icons/icon small_size/icon small_size.png",
 		"default_title": "ProToots",
 		"default_popup": "options/options.html"
 	},
-
 	"content_scripts": [
 		{
 			"matches": ["*://*/*"],
@@ -28,7 +27,8 @@
 	],
 
 	"options_ui": {
-		"page": "options/options.html"
+		"page": "options/options.html",
+		"browser_style": false
 	},
 
 	"browser_specific_settings": {
