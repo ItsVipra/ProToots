@@ -43,7 +43,9 @@ export const defaultBuildOptions = {
 			src: "./src/",
 			dest: "./dist/",
 			recursive: true,
-			filter: (src) => files.includes(src) || ignore.includes(src),
+
+			// Return true if the file should be copied and false otherwise.
+			filter: (src) => ![...files, ...ignore].includes(src),
 		}),
 	],
 };
