@@ -3,9 +3,11 @@
 	"scripts": {
 		"build:scripts": "node scripts/build.mjs",
 		"build:webext": "web-ext build --overwrite-dest --filename protoots-firefox.zip",
-		"start": "run-p -l -r watch:**",
+		"start": "run-p -l -r watch:scripts watch:webext-firefox",
+		"start:chrome": "run-p -l -r watch:scripts watch:webext-chrome",
 		"watch:scripts": "node scripts/watch.mjs",
-		"watch:webext": "web-ext run --keep-profile-changes --profile-create-if-missing --firefox-profile=.firefox-profile/",
+		"watch:webext-firefox": "web-ext run --keep-profile-changes --profile-create-if-missing --firefox-profile=.firefox-profile/",
+		"watch:webext-chrome": "web-ext run --target chromium  --keep-profile-changes --profile-create-if-missing --chromium-profile=.chromium-profile/",
 		"format": "prettier --write --ignore-path .gitignore .",
 		"package": "run-s -l build:**",
 		"archive": "git archive --format zip main -o protoots_source.zip",
