@@ -6,39 +6,16 @@
 // obligatory crime. because be gay, do crime.
 // 8======D
 
+import { fetchPronouns } from "../libs/fetchPronouns";
+import { getLogging, isLogging } from "../libs/logging";
+import { error, warn, log, info, debug } from "../libs/logging";
+
 // const max_age = 8.64e7
 const max_age = 24 * 60 * 60 * 1000; //time after which cached pronouns should be checked again: 24h
 const host_name = location.host;
 
 //before anything else, check whether we're on a Mastodon page
 checkSite();
-let logging;
-
-/** @param {any[]} arguments */
-function error(...arguments) {
-	if (logging) console.error(...arguments);
-}
-
-/** @param {any[]} arguments */
-function warn(...arguments) {
-	if (logging) console.warn(...arguments);
-}
-
-/** @param {any[]} arguments */
-function log(...arguments) {
-	if (logging) console.log(...arguments);
-}
-
-/** @param {any[]} arguments */
-function info(...arguments) {
-	if (logging) console.info(...arguments);
-}
-
-/** @param {any[]} arguments */
-function debug(...arguments) {
-	if (logging) console.debug(...arguments);
-}
-
 // log("hey vippy, du bist cute <3")
 
 /**
@@ -46,14 +23,7 @@ function debug(...arguments) {
  * If so creates an 'readystatechange' EventListener, with callback to main()
  */
 async function checkSite() {
-	try {
-		let { logging: optionValue } = await browser.storage.sync.get("logging");
-		logging = optionValue;
-	} catch {
-		//  Enable the logging automatically if we cannot determine the user preference.
-		logging = true;
-	}
-
+	getLogging();
 	let requestDest = location.protocol + "//" + host_name + "/api/v1/instance";
 	let response = await fetch(requestDest);
 
@@ -193,154 +163,6 @@ function addtoTootObserver(ActionElement) {
 }
 
 /**
- * Fetches pronouns associated with account name.
- * If cache misses status is fetched from the instance.
- *
- * @param {string | undefined} statusID ID of the status being requested, in case cache misses.
- * @param {string} account_name The account name, used for caching. Should have the "@" prefix.
- */
-async function fetchPronouns(statusID, account_name) {
-	// log(`searching for ${account_name}`);
-	let cacheResult = { pronounsCache: {} };
-	try {
-		cacheResult = await browser.storage.local.get();
-		if (!cacheResult.pronounsCache) {
-			//if result doesn't have "pronounsCache" create it
-			let pronounsCache = {};
-			await browser.storage.local.set({ pronounsCache });
-			cacheResult = { pronounsCache: {} };
-		}
-	} catch {
-		cacheResult = { pronounsCache: {} };
-		// ignore errors, we have an empty object as fallback.
-	}
-	if (account_name[0] == "@") account_name = account_name.substring(1);
-
-	// if the username doesn't contain an @ (i.e. the post we're looking at is from this instance)
-	// append the host name to it, to avoid cache overlap between instances
-	if (!account_name.includes("@")) {
-		account_name = account_name + "@" + host_name;
-	}
-
-	// Extract the current cache by using object destructuring.
-	if (account_name in cacheResult.pronounsCache) {
-		let { value, timestamp } = cacheResult.pronounsCache[account_name];
-
-		// If we have a cached value and it's not outdated, use it.
-		if (value && Date.now() - timestamp < max_age) {
-			info(`${account_name} in cache with value: ${value}`);
-			return value;
-		}
-	}
-
-	info(`${account_name} cache entry is stale, refreshing`);
-
-	if (!statusID) {
-		console.warn(
-			`Could not fetch pronouns for user ${account_name}, because no status ID was passed. This is an issue we're working on.`,
-		);
-		return;
-	}
-
-	info(`${account_name} not in cache, fetching status`);
-	let status = await fetchStatus(statusID);
-
-	let PronounField = getPronounField(status, account_name);
-	if (PronounField == "null") {
-		//TODO: if no field check bio
-		info(`no pronouns found for ${account_name}, cached null`);
-	}
-	return PronounField;
-}
-
-/**
- * Fetches status by statusID from host_name with user's access token.
- *
- * @param {string} statusID ID of status being requested.
- * @returns {Promise<object>} Contents of the status in json form.
- */
-async function fetchStatus(statusID) {
-	const accessToken = await getActiveAccessToken();
-	//fetch status from home server with access token
-	const response = await fetch(`${location.protocol}//${host_name}/api/v1/statuses/${statusID}`, {
-		headers: { Authorization: `Bearer ${accessToken}` },
-	});
-
-	let status = await response.json();
-
-	//if status contains a reblog get that for further processing - we want the embedded post's author
-	if (status.reblog) status = status.reblog;
-	return status;
-}
-
-/**
- * Searches for fields labelled "pronouns" in the statuses' author.
- * If found returns the value of said field.
- *
- * @param {string} status
- * @param {string} account_name
- * @returns {string} Author pronouns if found. Otherwise returns "null"
- */
-function getPronounField(status, account_name) {
-	debug(status);
-	// get account from status and pull out fields
-	let account = status["account"];
-	let fields = account["fields"];
-
-	for (let field of fields) {
-		//match fields against "pronouns"
-		//TODO: multiple languages
-		if (field["name"].toLowerCase().includes("pronouns")) {
-			debug(`${account["acct"]}: ${field["value"]}`);
-
-			let pronounSet = generatePronounSet(account_name, field["value"]);
-			cachePronouns(account_name, pronounSet);
-			return field["value"];
-		}
-	}
-
-	//if not returned by this point no field with pronouns was found
-	let pronounSet = generatePronounSet(account_name, "null");
-
-	cachePronouns(account_name, pronounSet);
-	return "null";
-}
-
-/**
- * Generates object with pronoun related data to be saved to storage.
- *
- * @param {string} account Full account name as generated in fetchPronouns()
- * @param {string} value Contents of the found field's value
- * @returns {object} Object containing account name, timestamp and pronouns
- */
-function generatePronounSet(account, value) {
-	return { acct: account, timestamp: Date.now(), value: value }; //TODO: this should be just account right
-}
-
-/**
- * Appends an entry to the "pronounsCache" object in local storage.
- *
- * @param {string} account The account ID
- * @param {{ acct: any; timestamp: number; value: any; }} set The data to cache.
- */
-async function cachePronouns(account, set) {
-	let cache = { pronounsCache: {} };
-	try {
-		cache = await browser.storage.local.get();
-	} catch {
-		// ignore errors, we have an empty object as fallback.
-	}
-
-	cache.pronounsCache[account] = set;
-	try {
-		await browser.storage.local.set(cache);
-		debug(`${account} cached`);
-	} catch (e) {
-		error(`${account} could not been cached: `, e);
-	}
-}
-
-/**
  * Adds the pro-plate to the element. The caller needs to ensure that the passed element
  * is defined and that it's either a:
  * 	- <article> with the "status" class or
@@ -387,6 +209,13 @@ async function addProplate(element) {
 		return;
 	}
 
+	if (accountName[0] == "@") accountName = accountName.substring(1);
+	// if the username doesn't contain an @ (i.e. the post we're looking at is from this instance)
+	// append the host name to it, to avoid cache overlap between instances
+	if (!accountName.includes("@")) {
+		accountName = accountName + "@" + host_name;
+	}
+
 	//get the name element and apply CSS
 	let nametagEl = /** @type {HTMLElement|null} */ (element.querySelector(".display-name__html"));
 	if (!nametagEl) {
@@ -408,16 +237,12 @@ async function addProplate(element) {
 	//create plate
 	const proplate = document.createElement("span");
 	let pronouns = await fetchPronouns(statusId, accountName);
-	if (pronouns == "null" && !logging) {
+	if (pronouns == "null" && !isLogging()) {
 		return;
 	}
 	proplate.innerHTML = sanitizePronouns(pronouns);
 	proplate.classList.add("protoots-proplate");
-	if (
-		(host_name == "queer.group" && (accountName == "@vivien" || accountName == "@jasmin")) ||
-		accountName == "@jasmin@queer.group" ||
-		accountName == "@vivien@queer.group"
-	) {
+	if (accountName == "jasmin@queer.group" || accountName == "vivien@queer.group") {
 		//i think you can figure out what this does on your own
 		proplate.classList.add("proplate-pog");
 	}
@@ -443,24 +268,6 @@ function hasClasses(element, ...cl) {
 		}
 	}
 	return false;
-}
-
-/**
- * Fetches the current access token for the user.
- * @returns {Promise<string>} The accessToken for the current user if we are logged in.
- */
-async function getActiveAccessToken() {
-	// Fortunately, Mastodon provides the initial state in a <script> element at the beginning of the page.
-	// Besides a lot of other information, it contains the access token for the current user.
-	const initialStateEl = document.getElementById("initial-state");
-	if (!initialStateEl) {
-		error("user not logged in yet");
-		return "";
-	}
-
-	// Parse the JSON inside the script tag and extract the meta element from it.
-	const { meta } = JSON.parse(initialStateEl.innerText);
-	return meta.access_token;
 }
 
 /**

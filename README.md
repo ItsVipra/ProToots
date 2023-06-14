@@ -70,6 +70,7 @@ Alternatively you can download an unsigned version from the [releases page](http
 ## Developer setup
 
 - Clone the repository
-- [Install web-ext](https://extensionworkshop.com/documentation/develop/getting-started-with-web-ext/#installation-section) and [set it up](https://extensionworkshop.com/documentation/develop/getting-started-with-web-ext/#using-web-ext-section)
+- Install the required dependencies using `npm install`
+- Start the development workflow with `npm start`
 - Mess around with with [protoots.js](/src/content_scripts/protoots.js)
 - Trans rights!
