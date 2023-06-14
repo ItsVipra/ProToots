@@ -14,14 +14,6 @@ const files = [
 ];
 
 /**
- * This array contains all files that we don't want to copy from the `src` folder.
- * For now, only exact filenames are supported, neither directories, glob patterns or regular expressions.
- *
- * @type {string[]}
- */
-const ignore = [];
-
-/**
  * @type {import("esbuild").BuildOptions}
  */
 export const defaultBuildOptions = {
@@ -49,7 +41,7 @@ export const defaultBuildOptions = {
 			recursive: true,
 
 			// Return true if the file should be copied and false otherwise.
-			filter: (src) => ![...files, ...ignore].includes(src),
+			filter: (src) => !src.endsWith(".js"),
 		}),
 	],
 };
