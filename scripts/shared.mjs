@@ -1,4 +1,5 @@
 import copyPluginPkg from "@sprout2000/esbuild-copy-plugin";
+import path from "path";
 const { copyPlugin } = copyPluginPkg; // js and your fucking mess of imports, sigh.
 
 /**
@@ -7,7 +8,10 @@ const { copyPlugin } = copyPluginPkg; // js and your fucking mess of imports, si
  *
  * @type {string[]}
  */
-const files = ["src/content_scripts/protoots.js", "src/options/options.js"];
+const files = [
+	path.join("src", "content_scripts", "protoots.js"),
+	path.join("src", "options", "options.js"),
+];
 
 /**
  * This array contains all files that we don't want to copy from the `src` folder.
