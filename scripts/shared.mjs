@@ -44,8 +44,8 @@ export const defaultBuildOptions = {
 	// Copy all files from src/ except our build files (they would be overwritten) to dist/.
 	plugins: [
 		copyPlugin({
-			src: "./src/",
-			dest: "./dist/",
+			src: "src",
+			dest: "dist",
 			recursive: true,
 
 			// Return true if the file should be copied and false otherwise.
