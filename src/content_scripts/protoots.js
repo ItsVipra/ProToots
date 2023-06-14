@@ -389,6 +389,13 @@ async function addProplate(element) {
 		return;
 	}
 
+	if (accountName[0] == "@") accountName = accountName.substring(1);
+	// if the username doesn't contain an @ (i.e. the post we're looking at is from this instance)
+	// append the host name to it, to avoid cache overlap between instances
+	if (!accountName.includes("@")) {
+		accountName = accountName + "@" + host_name;
+	}
+
 	//get the name element and apply CSS
 	let nametagEl = /** @type {HTMLElement|null} */ (element.querySelector(".display-name__html"));
 	if (!nametagEl) {
@@ -415,11 +422,7 @@ async function addProplate(element) {
 	}
 	proplate.innerHTML = sanitizePronouns(pronouns);
 	proplate.classList.add("protoots-proplate");
-	if (
-		(host_name == "queer.group" && (accountName == "@vivien" || accountName == "@jasmin")) ||
-		accountName == "@jasmin@queer.group" ||
-		accountName == "@vivien@queer.group"
-	) {
+	if (accountName == "jasmin@queer.group" || accountName == "vivien@queer.group") {
 		//i think you can figure out what this does on your own
 		proplate.classList.add("proplate-pog");
 	}
