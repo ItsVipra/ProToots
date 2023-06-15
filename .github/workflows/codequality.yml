@@ -24,3 +24,12 @@ jobs:
         name: Commit possible changes
         with:
           commit_message: "Format files using prettier"
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: npm ci
+      - name: Run eslint
+        run: npm run lint
