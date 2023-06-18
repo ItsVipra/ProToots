@@ -1,8 +1,10 @@
 /* eslint-disable no-console -- Logging should only be done with this module. */
 
+import { storage } from "webextension-polyfill";
+
 export async function getLogging() {
 	try {
-		let { logging: optionValue } = await storage.sync.get("logging");
+		const { logging: optionValue } = await storage.sync.get("logging");
 		logging = optionValue;
 	} catch {
 		//  Enable the logging automatically if we cannot determine the user preference.

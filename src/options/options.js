@@ -1,4 +1,5 @@
 import { storage } from "webextension-polyfill";
+import { error } from "../libs/logging";
 
 function saveOptions(e) {
 	e.preventDefault();
@@ -12,11 +13,11 @@ function restoreOptions() {
 		document.querySelector("#logging").checked = result.logging || false;
 	}
 
-	function onError(error) {
-		console.log(`Error: ${error}`);
+	function onError(err) {
+		error(`Error: ${err}`);
 	}
 
-	let getting = storage.sync.get("logging");
+	const getting = storage.sync.get("logging");
 	getting.then(setCurrentChoice, onError);
 }
 

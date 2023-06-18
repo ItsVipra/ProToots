@@ -8,11 +8,10 @@
 
 import { fetchPronouns } from "../libs/fetchPronouns";
 import { getLogging, isLogging } from "../libs/logging";
-import { error, warn, log, info, debug } from "../libs/logging";
+import { warn, log } from "../libs/logging";
 
 // const max_age = 8.64e7
-const max_age = 24 * 60 * 60 * 1000; //time after which cached pronouns should be checked again: 24h
-const host_name = location.host;
+const hostName = location.host;
 
 //before anything else, check whether we're on a Mastodon page
 checkSite();
@@ -24,8 +23,8 @@ checkSite();
  */
 async function checkSite() {
 	getLogging();
-	let requestDest = location.protocol + "//" + host_name + "/api/v1/instance";
-	let response = await fetch(requestDest);
+	const requestDest = location.protocol + "//" + hostName + "/api/v1/instance";
+	const response = await fetch(requestDest);
 
 	if (response) {
 		// debug('checksite response got', {'response' : response.json()})
@@ -89,22 +88,8 @@ function findAllDescendants(node) {
 	return [node, ...node.childNodes, ...[...node.childNodes].flatMap((n) => findAllDescendants(n))];
 }
 
-/**
- * Searches for any statuses inside the mutations and adds it to the tootObserver.
- *
- * @param {MutationRecord[]} mutations
- */
-function findStatuses(mutations) {
-	// Checks whether the given n is a status in the Mastodon interface.
-	function isStatus(n) {
-		return n instanceof HTMLElement && n.nodeName == "ARTICLE";
-	}
-
-	mutations.flatMap((m) => [...m.addedNodes].filter(isStatus)).forEach((s) => addtoTootObserver(s));
-}
-
 //create a global tootObserver to handle all article objects
-let tootObserver = new IntersectionObserver((entries) => {
+const tootObserver = new IntersectionObserver((entries) => {
 	onTootIntersection(entries);
 });
 
@@ -142,8 +127,8 @@ function waitForElement(node, selector, callback) {
  * @param {IntersectionObserverEntry[]} observerentries
  */
 function onTootIntersection(observerentries) {
-	for (let observation of observerentries) {
-		let ArticleElement = observation.target;
+	for (const observation of observerentries) {
+		const ArticleElement = observation.target;
 		if (!observation.isIntersecting) {
 			ArticleElement.removeAttribute("protoots-checked");
 			continue;
@@ -186,7 +171,7 @@ async function addProplate(element) {
 
 	if (element.hasAttribute("protoots-checked")) return;
 
-	let statusId = element.dataset.id;
+	const statusId = element.dataset.id;
 	if (!statusId) {
 		// We don't have a status ID, pronouns might not be in cache
 		warn(
@@ -195,7 +180,7 @@ async function addProplate(element) {
 		);
 	}
 
-	let accountNameEl = element.querySelector(".display-name__account");
+	const accountNameEl = element.querySelector(".display-name__account");
 	if (!accountNameEl) {
 		warn(
 			"The element passed to addProplate does not have a .display-name__account, although it should have one.",
@@ -213,11 +198,11 @@ async function addProplate(element) {
 	// if the username doesn't contain an @ (i.e. the post we're looking at is from this instance)
 	// append the host name to it, to avoid cache overlap between instances
 	if (!accountName.includes("@")) {
-		accountName = accountName + "@" + host_name;
+		accountName = accountName + "@" + hostName;
 	}
 
 	//get the name element and apply CSS
-	let nametagEl = /** @type {HTMLElement|null} */ (element.querySelector(".display-name__html"));
+	const nametagEl = /** @type {HTMLElement|null} */ (element.querySelector(".display-name__html"));
 	if (!nametagEl) {
 		warn(
 			"The element passed to addProplate does not have a .display-name__html, although it should have one.",
@@ -236,7 +221,7 @@ async function addProplate(element) {
 
 	//create plate
 	const proplate = document.createElement("span");
-	let pronouns = await fetchPronouns(statusId, accountName);
+	const pronouns = await fetchPronouns(statusId, accountName);
 	if (pronouns == "null" && !isLogging()) {
 		return;
 	}
@@ -259,7 +244,7 @@ async function addProplate(element) {
  * @returns Whether the classList contains the class.
  */
 function hasClasses(element, ...cl) {
-	let classList = element.classList;
+	const classList = element.classList;
 	if (!classList || !cl) return false;
 
 	for (const c of classList) {
