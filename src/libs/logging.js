@@ -1,3 +1,5 @@
+/* eslint-disable no-console -- Logging should only be done with this module. */
+
 export async function getLogging() {
 	try {
 		let { logging: optionValue } = await storage.sync.get("logging");
