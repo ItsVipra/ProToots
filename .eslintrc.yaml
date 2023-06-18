@@ -13,3 +13,8 @@ parserOptions:
 
 rules:
   no-console: error
+  camelcase: warn
+  consistent-return: warn
+  dot-notation: warn
+  func-style: ["warn", "declaration"]
+  prefer-const: warn
