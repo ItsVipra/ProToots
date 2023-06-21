@@ -1,6 +1,5 @@
-import { debug, error, info, warn } from "./logging";
-import { cachePronouns } from "./caching";
-import { storage } from "webextension-polyfill";
+import { debug, error, info, log, warn } from "./logging";
+import { cachePronouns, getPronouns } from "./caching";
 
 const cacheMaxAge = 24 * 60 * 60 * 1000; // time after which cached pronouns should be checked again: 24h
 
@@ -11,21 +10,10 @@ const cacheMaxAge = 24 * 60 * 60 * 1000; // time after which cached pronouns sho
  * @param {string | undefined} statusID ID of the status being requested, in case cache misses.
  * @param {string} accountName The account name, used for caching. Should have the "@" prefix.
  */
-export async function fetchPronouns(statusID, accountName) {
+export async function fetchPronouns(statusID, accountName, type) {
 	// log(`searching for ${account_name}`);
-	let cacheResult = {};
-	try {
-		cacheResult = await storage.local.get();
-		if (!cacheResult.pronounsCache) {
-			//if result doesn't have "pronounsCache" create it
-			const pronounsCache = {};
-			await storage.local.set({ pronounsCache });
-			cacheResult = { pronounsCache: {} };
-		}
-	} catch {
-		cacheResult = { pronounsCache: {} };
-		// ignore errors, we have an empty object as fallback.
-	}
+	const cacheResult = await getPronouns();
+	log(cacheResult);
 	// Extract the current cache by using object destructuring.
 	if (accountName in cacheResult.pronounsCache) {
 		const { value, timestamp } = cacheResult.pronounsCache[accountName];
@@ -34,6 +22,8 @@ export async function fetchPronouns(statusID, accountName) {
 		if (value && Date.now() - timestamp < cacheMaxAge) {
 			info(`${accountName} in cache with value: ${value}`);
 			return value;
+		} else {
+			info(`${accountName} cache entry is stale, refreshing`);
 		}
 	}
 
@@ -47,7 +37,13 @@ export async function fetchPronouns(statusID, accountName) {
 	}
 
 	info(`${accountName} not in cache, fetching status`);
-	const status = await fetchStatus(statusID);
+	// const status = await fetchStatus(statusID);
+	let status;
+	if (type === "notification") {
+		status = await fetchNotification(statusID);
+	} else {
+		status = await fetchStatus(statusID);
+	}
 
 	const PronounField = getPronounField(status, accountName);
 	if (PronounField == "null") {
@@ -80,11 +76,30 @@ async function fetchStatus(statusID) {
 	return status;
 }
 
+async function fetchNotification(notificationID) {
+	const accessToken = await getActiveAccessToken();
+
+	const response = await fetch(
+		`${location.protocol}//${location.host}/api/v1/notifications/${notificationID}`,
+		{
+			headers: { Authorization: `Bearer ${accessToken}` },
+		},
+	);
+
+	const notification = await response.json();
+
+	const actioner = notification.account; //person who performed notification action
+
+	debug(notification);
+
+	return notification;
+}
+
 /**
  * Searches for fields labelled "pronouns" in the statuses' author.
  * If found returns the value of said field.
  *
- * @param {string} status
+ * @param {any} status
  * @param {string} accountName
  * @returns {string} Author pronouns if found. Otherwise returns "null"
  */
