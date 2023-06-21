@@ -9,6 +9,7 @@
 import { fetchPronouns } from "../libs/fetchPronouns";
 import { getLogging, isLogging } from "../libs/logging";
 import { warn, log } from "../libs/logging";
+import { findAllDescendants, hasClasses, insertAfter, waitForElement } from "../libs/domhelpers";
 
 // const max_age = 8.64e7
 const hostName = location.host;
@@ -70,53 +71,51 @@ function main() {
 			);
 		}
 
+		function isName(n) {
+			return (
+				n instanceof HTMLElement &&
+				(hasClasses(n, "display-name") || hasClasses(n, "notification__display-name"))
+			);
+		}
+
+		/**
+		 * Checks whether the given n is eligible to have a proplate added
+		 * @param {Node} n
+		 * @returns {Boolean}
+		 */
+		function isPronounableElement(n) {
+			return (
+				n instanceof HTMLElement &&
+				((n.nodeName == "ARTICLE" && n.hasAttribute("data-id")) ||
+					hasClasses(n, "detailed-status") ||
+					hasClasses(n, "status") ||
+					hasClasses(n, "conversation") ||
+					hasClasses(n, "account-authorize") ||
+					hasClasses(n, "notification"))
+			);
+		}
+
+		function isProPlate(n) {
+			return n.nodeName == "SPAN" && n.classList.contains("proplate");
+		}
+
+		function isSpan(n) {
+			return n.nodeName == "SPAN";
+		}
+
 		mutations
 			.flatMap((m) => Array.from(m.addedNodes).map((m) => findAllDescendants(m)))
 			.flat()
 			// .map((n) => console.log("found node: ", n));
-			.filter(isArticleOrDetailedStatus)
+			.filter(isPronounableElement)
 			.forEach((a) => addtoTootObserver(a));
 	}).observe(document, { subtree: true, childList: true });
-}
-
-/**
- * Recursively finds all descendants of a node.
- * @param {Node} node
- * @return {Node[]} Array containing the root node and all its descendants
- */
-function findAllDescendants(node) {
-	return [node, ...node.childNodes, ...[...node.childNodes].flatMap((n) => findAllDescendants(n))];
 }
 
 //create a global tootObserver to handle all article objects
 const tootObserver = new IntersectionObserver((entries) => {
 	onTootIntersection(entries);
 });
-
-/**
- * Waits until the given selector appears below the given node. Then removes itself.
- * TODO: turn into single MutationObserver?
- *
- * @param {Element} node
- * @param {string} selector
- * @param {(el: Element) => void} callback
- * @copyright CC-BY-SA 4.0 wOxxoM https://stackoverflow.com/a/71488320
- */
-function waitForElement(node, selector, callback) {
-	let el = node.querySelector(selector);
-	if (el) {
-		callback(el);
-		return;
-	}
-
-	new MutationObserver((mutations, observer) => {
-		el = node.querySelector(selector);
-		if (el) {
-			observer.disconnect();
-			callback(el);
-		}
-	}).observe(node, { subtree: true, childList: true });
-}
 
 /**
  * Callback for TootObserver
@@ -130,7 +129,8 @@ function onTootIntersection(observerentries) {
 	for (const observation of observerentries) {
 		const ArticleElement = observation.target;
 		if (!observation.isIntersecting) {
-			ArticleElement.removeAttribute("protoots-checked");
+			if (ArticleElement.getAttribute("protoots-type") == "status")
+				ArticleElement.removeAttribute("protoots-checked");
 			continue;
 		}
 		waitForElement(ArticleElement, ".display-name", () => addProplate(ArticleElement));
@@ -139,11 +139,27 @@ function onTootIntersection(observerentries) {
 
 /**
  * Adds ActionElement to the tootObserver, if it has not been added before.
- * @param {Element} ActionElement
+ * @param {HTMLElement} ActionElement
  */
 function addtoTootObserver(ActionElement) {
+	// console.log(ActionElement);
 	if (ActionElement.hasAttribute("protoots-tracked")) return;
+
 	ActionElement.setAttribute("protoots-tracked", "true");
+	if (hasClasses(ActionElement, "status")) {
+		ActionElement.setAttribute("protoots-type", "status");
+	} else if (hasClasses(ActionElement, "detailed-status")) {
+		ActionElement.setAttribute("protoots-type", "detailed-status");
+	} else if (hasClasses(ActionElement, "conversation")) {
+		ActionElement.setAttribute("protoots-type", "conversation");
+		ActionElement.parentElement?.parentElement?.setAttribute("protoots-type", "conversation");
+	} else if (hasClasses(ActionElement, "account-authorize")) {
+		ActionElement.setAttribute("protoots-type", "account-authorize");
+		ActionElement.parentElement?.parentElement?.setAttribute("protoots-type", "account-authorize");
+	} else if (hasClasses(ActionElement, "notification")) {
+		ActionElement.setAttribute("protoots-type", "notification");
+		ActionElement.parentElement?.parentElement?.setAttribute("protoots-type", "notification");
+	}
 	tootObserver.observe(ActionElement);
 }
 
@@ -161,98 +177,207 @@ async function addProplate(element) {
 	if (!(element instanceof HTMLElement)) return;
 
 	//check whether element OR article parent has already had a proplate added
-	if (hasClasses(element, "status")) {
-		let parent = element.parentElement;
-		while (parent && parent.nodeName != "ARTICLE") {
-			parent = parent.parentElement;
-		}
-		if (parent.hasAttribute("protoots-checked")) return;
-	}
+	// if (hasClasses(element, "notification", "status")) {
+	// 	let parent = element.parentElement;
+	// 	while (parent && parent.nodeName != "ARTICLE") {
+	// 		parent = parent.parentElement;
+	// 	}
+	// 	if (parent.hasAttribute("protoots-checked")) return;
+	// }
 
 	if (element.hasAttribute("protoots-checked")) return;
 
-	const statusId = element.dataset.id;
-	if (!statusId) {
-		// We don't have a status ID, pronouns might not be in cache
-		warn(
-			"The element passed to addProplate does not have a data-id attribute, although it should have one.",
-			element,
-		);
+	console.log(element.querySelectorAll(".protoots-proplate"));
+
+	if (element.querySelector(".protoots-proplate")) return; //TODO: does this work without the attribute check?
+
+	switch (element.getAttribute("protoots-type")) {
+		case "status":
+			addtostatus(element);
+			break;
+		case "detailed-status":
+			addtoDetailedStatus(element);
+			break;
+		case "notification":
+			addtonotification(element);
+			break;
+		case "account-authorize":
+			break;
+		case "conversation":
+			break;
 	}
 
-	const accountNameEl = element.querySelector(".display-name__account");
-	if (!accountNameEl) {
-		warn(
-			"The element passed to addProplate does not have a .display-name__account, although it should have one.",
-			element,
-		);
-		return;
-	}
-	let accountName = accountNameEl.textContent;
-	if (!accountName) {
-		warn("Could not extract the account name from the element.");
-		return;
-	}
-
-	if (accountName[0] == "@") accountName = accountName.substring(1);
-	// if the username doesn't contain an @ (i.e. the post we're looking at is from this instance)
-	// append the host name to it, to avoid cache overlap between instances
-	if (!accountName.includes("@")) {
-		accountName = accountName + "@" + hostName;
-	}
-
-	//get the name element and apply CSS
-	const nametagEl = /** @type {HTMLElement|null} */ (element.querySelector(".display-name__html"));
-	if (!nametagEl) {
-		warn(
-			"The element passed to addProplate does not have a .display-name__html, although it should have one.",
-			element,
-		);
-		return;
-	}
-
-	// Add the checked attribute only _after_ we've passed the basic checks.
-	// This allows us to pass incomplete nodes into this method, because
-	// we only process them after we have all required information.
-	element.setAttribute("protoots-checked", "true");
-
-	nametagEl.style.display = "flex";
-	nametagEl.style.alignItems = "baseline";
-
-	//create plate
-	const proplate = document.createElement("span");
-	const pronouns = await fetchPronouns(statusId, accountName);
-	if (pronouns == "null" && !isLogging()) {
-		return;
-	}
-	proplate.innerHTML = sanitizePronouns(pronouns);
-	proplate.classList.add("protoots-proplate");
-	if (accountName == "jasmin@queer.group" || accountName == "vivien@queer.group") {
-		//i think you can figure out what this does on your own
-		proplate.classList.add("proplate-pog");
-	}
-
-	//add plate to nametag
-	nametagEl.appendChild(proplate);
-}
-
-/**
- * Checks whether the given element has one of the passed classes.
- *
- * @param {HTMLElement} element The element to check.
- * @param {string[]} cl The class(es) to check for.
- * @returns Whether the classList contains the class.
- */
-function hasClasses(element, ...cl) {
-	const classList = element.classList;
-	if (!classList || !cl) return false;
-
-	for (const c of classList) {
-		for (const c2 of cl) {
-			if (c === c2) return true;
+	async function addtostatus(element) {
+		const statusId = element.dataset.id;
+		if (!statusId) {
+			// We don't have a status ID, pronouns might not be in cache
+			warn(
+				"The element passed to addProplate does not have a data-id attribute, although it should have one.",
+				element,
+			);
 		}
+
+		const accountNameEl = element.querySelector(".display-name__account");
+		if (!accountNameEl) {
+			warn(
+				"The element passed to addProplate does not have a .display-name__account, although it should have one.",
+				element,
+			);
+			return;
+		}
+		let accountName = accountNameEl.textContent;
+		if (!accountName) {
+			warn("Could not extract the account name from the element.");
+			return;
+		}
+
+		if (accountName[0] == "@") accountName = accountName.substring(1);
+		// if the username doesn't contain an @ (i.e. the post we're looking at is from this instance)
+		// append the host name to it, to avoid cache overlap between instances
+		if (!accountName.includes("@")) {
+			accountName = accountName + "@" + hostName;
+		}
+
+		//get the name element and apply CSS
+		const nametagEl = /** @type {HTMLElement|null} */ (element.querySelector(".display-name__html"));
+		if (!nametagEl) {
+			warn(
+				"The element passed to addProplate does not have a .display-name__html, although it should have one.",
+				element,
+			);
+			return;
+		}
+
+		// Add the checked attribute only _after_ we've passed the basic checks.
+		// This allows us to pass incomplete nodes into this method, because
+		// we only process them after we have all required information.
+		element.setAttribute("protoots-checked", "true");
+
+		//create plate
+		const proplate = document.createElement("span");
+		const pronouns = await fetchPronouns(statusId, accountName, "status");
+
+		if (pronouns == "null" && !isLogging()) {
+			return;
+		}
+		proplate.innerHTML = sanitizePronouns(pronouns);
+		proplate.classList.add("protoots-proplate");
+		if (accountName == "jasmin@queer.group" || accountName == "vivien@queer.group") {
+			//i think you can figure out what this does on your own
+			proplate.classList.add("proplate-pog");
+		}
+
+		//add plate to nametag
+		insertAfter(proplate, nametagEl);
 	}
-	return false;
+
+	async function addtoDetailedStatus(element) {
+		const statusId = element.dataset.id;
+		if (!statusId) {
+			// We don't have a status ID, pronouns might not be in cache
+			warn(
+				"The element passed to addProplate does not have a data-id attribute, although it should have one.",
+				element,
+			);
+		}
+
+		const accountNameEl = element.querySelector(".display-name__account");
+		if (!accountNameEl) {
+			warn(
+				"The element passed to addProplate does not have a .display-name__account, although it should have one.",
+				element,
+			);
+			return;
+		}
+		let accountName = accountNameEl.textContent;
+		if (!accountName) {
+			warn("Could not extract the account name from the element.");
+			return;
+		}
+
+		if (accountName[0] == "@") accountName = accountName.substring(1);
+		// if the username doesn't contain an @ (i.e. the post we're looking at is from this instance)
+		// append the host name to it, to avoid cache overlap between instances
+		if (!accountName.includes("@")) {
+			accountName = accountName + "@" + hostName;
+		}
+
+		//get the name element and apply CSS
+		const nametagEl = /** @type {HTMLElement|null} */ (element.querySelector(".display-name__html"));
+		if (!nametagEl) {
+			warn(
+				"The element passed to addProplate does not have a .display-name__html, although it should have one.",
+				element,
+			);
+			return;
+		}
+
+		// Add the checked attribute only _after_ we've passed the basic checks.
+		// This allows us to pass incomplete nodes into this method, because
+		// we only process them after we have all required information.
+		element.setAttribute("protoots-checked", "true");
+
+		nametagEl.parentElement.style.display = "flex";
+		//create plate
+		const proplate = document.createElement("span");
+		const pronouns = await fetchPronouns(statusId, accountName, "status");
+
+		if (pronouns == "null" && !isLogging()) {
+			return;
+		}
+		proplate.innerHTML = sanitizePronouns(pronouns);
+		proplate.classList.add("protoots-proplate");
+		if (accountName == "jasmin@queer.group" || accountName == "vivien@queer.group") {
+			//i think you can figure out what this does on your own
+			proplate.classList.add("proplate-pog");
+		}
+
+		//add plate to nametag
+		insertAfter(proplate, nametagEl);
+	}
+	async function addtonotification(element) {
+		console.debug(element);
+
+		const statusId = element.dataset.id;
+		const accountNameEl = element.querySelector(".notification__display-name");
+		let accountName = accountNameEl.getAttribute("title");
+
+		if (!accountName) {
+			warn("Could not extract the account name from the element.");
+			return;
+		}
+
+		if (accountName[0] == "@") accountName = accountName.substring(1);
+		// if the username doesn't contain an @ (i.e. the post we're looking at is from this instance)
+		// append the host name to it, to avoid cache overlap between instances
+		if (!accountName.includes("@")) {
+			accountName = accountName + "@" + hostName;
+		}
+
+		log(accountName);
+
+		const nametagEl = element.querySelector(".notification__display-name");
+
+		element.setAttribute("protoots-checked", "true");
+
+		//create plate
+		const proplate = document.createElement("span");
+		const pronouns = await fetchPronouns(statusId, accountName, "notification");
+		if (pronouns == "null" && !isLogging()) {
+			return;
+		}
+		proplate.innerHTML = sanitizePronouns(pronouns);
+		proplate.classList.add("protoots-proplate");
+		if (accountName == "jasmin@queer.group" || accountName == "vivien@queer.group") {
+			//i think you can figure out what this does on your own
+			proplate.classList.add("proplate-pog");
+		}
+
+		//add plate to nametag
+		insertAfter(proplate, nametagEl);
+
+		//TODO: add to contained status
+	}
 }
 
 /**
