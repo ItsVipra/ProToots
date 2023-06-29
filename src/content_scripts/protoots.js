@@ -9,7 +9,7 @@
 import { fetchPronouns } from "../libs/fetchPronouns";
 import { getLogging, isLogging } from "../libs/logging";
 import { warn, log } from "../libs/logging";
-import { findAllDescendants, hasClasses, insertAfter, waitForElement } from "../libs/domhelpers";
+import { addTypeAttribute, normaliseAccountName, sanitizePronouns } from "../libs/protootshelpers";
 
 // const max_age = 8.64e7
 const hostName = location.host;
@@ -145,21 +145,8 @@ function addtoTootObserver(ActionElement) {
 	// console.log(ActionElement);
 	if (ActionElement.hasAttribute("protoots-tracked")) return;
 
+	addTypeAttribute(ActionElement);
 	ActionElement.setAttribute("protoots-tracked", "true");
-	if (hasClasses(ActionElement, "status")) {
-		ActionElement.setAttribute("protoots-type", "status");
-	} else if (hasClasses(ActionElement, "detailed-status")) {
-		ActionElement.setAttribute("protoots-type", "detailed-status");
-	} else if (hasClasses(ActionElement, "conversation")) {
-		ActionElement.setAttribute("protoots-type", "conversation");
-		ActionElement.parentElement?.parentElement?.setAttribute("protoots-type", "conversation");
-	} else if (hasClasses(ActionElement, "account-authorize")) {
-		ActionElement.setAttribute("protoots-type", "account-authorize");
-		ActionElement.parentElement?.parentElement?.setAttribute("protoots-type", "account-authorize");
-	} else if (hasClasses(ActionElement, "notification")) {
-		ActionElement.setAttribute("protoots-type", "notification");
-		ActionElement.parentElement?.parentElement?.setAttribute("protoots-type", "notification");
-	}
 	tootObserver.observe(ActionElement);
 }
 
@@ -295,11 +282,7 @@ async function addProplate(element) {
 			return;
 		}
 
-		if (accountName[0] == "@") accountName = accountName.substring(1);
-		// if the username doesn't contain an @ (i.e. the post we're looking at is from this instance)
-		// append the host name to it, to avoid cache overlap between instances
-		if (!accountName.includes("@")) {
-			accountName = accountName + "@" + hostName;
+		accountName = normaliseAccountName(accountName);
 		}
 
 		//get the name element and apply CSS
@@ -379,21 +362,4 @@ async function addProplate(element) {
 		//TODO: add to contained status
 	}
 }
-
-/**
- * Sanitizes the pronoun field by removing various long information parts.
- * As of today, this just removes custom emojis from the field.
- * If the passed string is not defined, an empty string is returned.
- *
- * @param {string} str The input string.
- * @returns The sanitized string.
- */
-function sanitizePronouns(str) {
-	if (!str) return "";
-
-	// Remove all custom emojis with the :shortcode: format.
-	str = str.replace(/:[\w_]+:/gi, "");
-
-	// Finally, remove leading and trailing whitespace.
-	return str.trim();
 }
