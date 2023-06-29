@@ -160,7 +160,7 @@ async function addProplate(element) {
 
 	//objects that are not statuses would be added twice,
 	//notifications and such do not have their own data-id, just their articles
-	if (element.nodeName == "DIV" && type != "status") {
+	if (element.nodeName == "DIV" && !(type === "status" || type === "detailed-status")) {
 		element.setAttribute("protoots-checked", "true");
 		return;
 	}
