@@ -6,6 +6,7 @@ import { hasClasses } from "./domhelpers";
  * @returns {string}
  */
 export function normaliseAccountName(name) {
+	if (!name) return "null";
 	if (name[0] == "@") name = name.substring(1);
 	// if the username doesn't contain an @ (i.e. the post we're looking at is from this instance)
 	// append the host name to it, to avoid cache overlap between instances
