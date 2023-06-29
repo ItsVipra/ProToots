@@ -9,6 +9,13 @@
 import { fetchPronouns } from "../libs/fetchPronouns";
 import { getLogging, isLogging } from "../libs/logging";
 import { warn, log } from "../libs/logging";
+import {
+	findAllDescendants,
+	hasClasses,
+	insertAfter,
+	waitForElement,
+	waitForElementRemoved,
+} from "../libs/domhelpers";
 import { addTypeAttribute, normaliseAccountName, sanitizePronouns } from "../libs/protootshelpers";
 
 // const max_age = 8.64e7
@@ -129,9 +136,9 @@ function onTootIntersection(observerentries) {
 	for (const observation of observerentries) {
 		const ArticleElement = observation.target;
 		if (!observation.isIntersecting) {
-			if (ArticleElement.getAttribute("protoots-type") == "status")
+			waitForElementRemoved(ArticleElement, ".protoots-proplate", () => {
 				ArticleElement.removeAttribute("protoots-checked");
-			continue;
+			});
 		}
 		waitForElement(ArticleElement, ".display-name", () => addProplate(ArticleElement));
 	}

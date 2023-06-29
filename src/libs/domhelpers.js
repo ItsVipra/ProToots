@@ -52,6 +52,31 @@ export function waitForElement(node, selector, callback) {
 }
 
 /**
+ * Waits until the given selector appears below the given node. Then removes itself.
+ * TODO: turn into single MutationObserver?
+ *
+ * @param {Element} node
+ * @param {string} selector
+ * @param {(el: Element) => void} callback
+ * @copyright CC-BY-SA 4.0 wOxxoM https://stackoverflow.com/a/71488320
+ */
+export function waitForElementRemoved(node, selector, callback) {
+	let el = node.querySelector(selector);
+	if (!el) {
+		callback(el);
+		return;
+	}
+
+	new MutationObserver((mutations, observer) => {
+		el = node.querySelector(selector);
+		if (!el) {
+			observer.disconnect();
+			callback(el);
+		}
+	}).observe(node, { subtree: true, childList: true });
+}
+
+/**
  * Inserts a given new element as a sibling of the target
  * @param {HTMLElement} insertion Element to insert
  * @param {HTMLElement} target Element, which insertion is placed after
