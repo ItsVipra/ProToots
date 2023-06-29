@@ -68,24 +68,6 @@ function main() {
 		}
 
 		/**
-		 * Checks whether the given n is an article or detailed status.
-		 * @param {Node} n
-		 * @returns {Boolean}
-		 */
-		function isArticleOrDetailedStatus(n) {
-			return (
-				n instanceof HTMLElement && (n.hasAttribute("data-id") || hasClasses(n, "detailed-status"))
-			);
-		}
-
-		function isName(n) {
-			return (
-				n instanceof HTMLElement &&
-				(hasClasses(n, "display-name") || hasClasses(n, "notification__display-name"))
-			);
-		}
-
-		/**
 		 * Checks whether the given n is eligible to have a proplate added
 		 * @param {Node} n
 		 * @returns {Boolean}
@@ -94,20 +76,16 @@ function main() {
 			return (
 				n instanceof HTMLElement &&
 				((n.nodeName == "ARTICLE" && n.hasAttribute("data-id")) ||
-					hasClasses(n, "detailed-status") ||
-					hasClasses(n, "status") ||
-					hasClasses(n, "conversation") ||
-					hasClasses(n, "account-authorize") ||
-					hasClasses(n, "notification"))
+					hasClasses(
+						n,
+						"detailed-status",
+						"status",
+						"conversation",
+						"account-authorize",
+						"notification",
+						"account",
+					))
 			);
-		}
-
-		function isProPlate(n) {
-			return n.nodeName == "SPAN" && n.classList.contains("proplate");
-		}
-
-		function isSpan(n) {
-			return n.nodeName == "SPAN";
 		}
 
 		mutations
@@ -140,7 +118,13 @@ function onTootIntersection(observerentries) {
 				ArticleElement.removeAttribute("protoots-checked");
 			});
 		}
-		waitForElement(ArticleElement, ".display-name", () => addProplate(ArticleElement));
+		if (ArticleElement.getAttribute("protoots-type") == "conversation") {
+			waitForElement(ArticleElement, ".conversation__content__names", () =>
+				addProplate(ArticleElement),
+			);
+		} else {
+			waitForElement(ArticleElement, ".display-name", () => addProplate(ArticleElement));
+		}
 	}
 }
 
@@ -170,86 +154,48 @@ function addtoTootObserver(ActionElement) {
 async function addProplate(element) {
 	if (!(element instanceof HTMLElement)) return;
 
-	//check whether element OR article parent has already had a proplate added
-	// if (hasClasses(element, "notification", "status")) {
-	// 	let parent = element.parentElement;
-	// 	while (parent && parent.nodeName != "ARTICLE") {
-	// 		parent = parent.parentElement;
-	// 	}
-	// 	if (parent.hasAttribute("protoots-checked")) return;
-	// }
-
 	if (element.hasAttribute("protoots-checked")) return;
 
-	console.log(element.querySelectorAll(".protoots-proplate"));
+	const type = element.getAttribute("protoots-type");
 
-	if (element.querySelector(".protoots-proplate")) return; //TODO: does this work without the attribute check?
+	//objects that are not statuses would be added twice,
+	//notifications and such do not have their own data-id, just their articles
+	if (element.nodeName == "DIV" && type != "status") {
+		element.setAttribute("protoots-checked", "true");
+		return;
+	}
 
-	switch (element.getAttribute("protoots-type")) {
+	if (element.querySelector(".protoots-proplate")) return;
+
+	switch (type) {
 		case "status":
-			addtostatus(element);
-			break;
 		case "detailed-status":
-			addtoDetailedStatus(element);
+			addtostatus(element);
 			break;
 		case "notification":
 			addtonotification(element);
 			break;
+		case "account":
 		case "account-authorize":
+			addtoAccount(element);
 			break;
 		case "conversation":
+			addtoConversation(element);
 			break;
 	}
 
-	async function addtostatus(element) {
-		const statusId = element.dataset.id;
-		if (!statusId) {
-			// We don't have a status ID, pronouns might not be in cache
-			warn(
-				"The element passed to addProplate does not have a data-id attribute, although it should have one.",
-				element,
-			);
-		}
-
-		const accountNameEl = element.querySelector(".display-name__account");
-		if (!accountNameEl) {
-			warn(
-				"The element passed to addProplate does not have a .display-name__account, although it should have one.",
-				element,
-			);
-			return;
-		}
-		let accountName = accountNameEl.textContent;
-		if (!accountName) {
-			warn("Could not extract the account name from the element.");
-			return;
-		}
-
-		if (accountName[0] == "@") accountName = accountName.substring(1);
-		// if the username doesn't contain an @ (i.e. the post we're looking at is from this instance)
-		// append the host name to it, to avoid cache overlap between instances
-		if (!accountName.includes("@")) {
-			accountName = accountName + "@" + hostName;
-		}
-
-		//get the name element and apply CSS
-		const nametagEl = /** @type {HTMLElement|null} */ (element.querySelector(".display-name__html"));
-		if (!nametagEl) {
-			warn(
-				"The element passed to addProplate does not have a .display-name__html, although it should have one.",
-				element,
-			);
-			return;
-		}
-
-		// Add the checked attribute only _after_ we've passed the basic checks.
-		// This allows us to pass incomplete nodes into this method, because
-		// we only process them after we have all required information.
-		element.setAttribute("protoots-checked", "true");
-
+	/**
+	 * Generates a proplate and adds it as a sibling of the given nameTagEl
+	 * @param {string} statusId Id of the target object
+	 * @param {string} accountName Name of the account the plate is for
+	 * @param {HTMLElement} nametagEl Element to add the proplate next to
+	 * @param {string} type type of the target object
+	 * @returns
+	 */
+	async function generateProPlate(statusId, accountName, nametagEl, type) {
 		//create plate
 		const proplate = document.createElement("span");
-		const pronouns = await fetchPronouns(statusId, accountName, "status");
+		const pronouns = await fetchPronouns(statusId, accountName, type);
 
 		if (pronouns == "null" && !isLogging()) {
 			return;
@@ -260,113 +206,130 @@ async function addProplate(element) {
 			//i think you can figure out what this does on your own
 			proplate.classList.add("proplate-pog");
 		}
-
+		proplate.style.fontWeight = "500";
 		//add plate to nametag
 		insertAfter(proplate, nametagEl);
 	}
 
-	async function addtoDetailedStatus(element) {
-		const statusId = element.dataset.id;
-		if (!statusId) {
+	/**
+	 * Gets the data-id from the given element
+	 * @param {HTMLElement} element Element with data-id attribute
+	 * @returns {string}
+	 */
+	function getID(element) {
+		const id = element.dataset.id;
+		if (!id) {
 			// We don't have a status ID, pronouns might not be in cache
 			warn(
 				"The element passed to addProplate does not have a data-id attribute, although it should have one.",
 				element,
 			);
 		}
+		return id;
+	}
 
-		const accountNameEl = element.querySelector(".display-name__account");
+	/**
+	 * Basically just element.querySelector, but outputs a warning if the element isn't found
+	 * @param {HTMLElement} element
+	 * @param {string} accountNameClass
+	 * @returns {HTMLElement|null}
+	 */
+	function getAccountNameEl(element, accountNameClass) {
+		const accountNameEl = /** @type {HTMLElement|null} */ (element.querySelector(accountNameClass));
 		if (!accountNameEl) {
 			warn(
 				"The element passed to addProplate does not have a .display-name__account, although it should have one.",
 				element,
 			);
-			return;
 		}
-		let accountName = accountNameEl.textContent;
+		return accountNameEl;
+	}
+
+	/**
+	 * Gets the given element's textcontent or given attribute
+	 * @param {HTMLElement} element Element which textcontent is the account name
+	 * @param {string} attribute Attribute from which to pull the account name
+	 * @returns {string} Normalised account name
+	 */
+	function getAccountName(element, attribute = "textContent") {
+		let accountName = element.textContent;
+		if (attribute != "textContent") {
+			accountName = element.getAttribute(attribute);
+		}
 		if (!accountName) {
 			warn("Could not extract the account name from the element.");
-			return;
 		}
 
 		accountName = normaliseAccountName(accountName);
-		}
 
-		//get the name element and apply CSS
-		const nametagEl = /** @type {HTMLElement|null} */ (element.querySelector(".display-name__html"));
+		return accountName;
+	}
+
+	/**
+	 *
+	 * @param {HTMLElement} element
+	 * @param {string} nametagClass
+	 * @returns {HTMLElement|null}
+	 */
+	function getNametagEl(element, nametagClass) {
+		const nametagEl = /** @type {HTMLElement|null} */ (element.querySelector(nametagClass));
 		if (!nametagEl) {
 			warn(
 				"The element passed to addProplate does not have a .display-name__html, although it should have one.",
 				element,
 			);
-			return;
 		}
+		return nametagEl;
+	}
 
+	async function addtostatus(element) {
+		const statusId = getID(element);
+
+		const accountNameEl = getAccountNameEl(element, ".display-name__account");
+		const accountName = getAccountName(accountNameEl);
+
+		const nametagEl = getNametagEl(element, ".display-name__html");
+
+		nametagEl.parentElement.style.display = "flex";
+
+		element.setAttribute("protoots-checked", "true");
 		// Add the checked attribute only _after_ we've passed the basic checks.
 		// This allows us to pass incomplete nodes into this method, because
 		// we only process them after we have all required information.
+
+		generateProPlate(statusId, accountName, nametagEl, "status");
+	}
+
+	async function addtonotification(element) {
+		const statusId = getID(element);
+
+		const accountNameEl = getAccountNameEl(element, ".notification__display-name");
+		const accountName = getAccountName(accountNameEl, "title");
+
+		const nametagEl = getNametagEl(element, ".notification__display-name");
+
 		element.setAttribute("protoots-checked", "true");
+		generateProPlate(statusId, accountName, nametagEl, "notification");
+	}
+
+	async function addtoAccount(element) {
+		const statusId = getID(element);
+		const nametagEl = element.querySelector(".display-name__html");
+		const accountName = getAccountName(element.querySelector(".display-name__account"));
 
 		nametagEl.parentElement.style.display = "flex";
-		//create plate
-		const proplate = document.createElement("span");
-		const pronouns = await fetchPronouns(statusId, accountName, "status");
-
-		if (pronouns == "null" && !isLogging()) {
-			return;
-		}
-		proplate.innerHTML = sanitizePronouns(pronouns);
-		proplate.classList.add("protoots-proplate");
-		if (accountName == "jasmin@queer.group" || accountName == "vivien@queer.group") {
-			//i think you can figure out what this does on your own
-			proplate.classList.add("proplate-pog");
-		}
-
-		//add plate to nametag
-		insertAfter(proplate, nametagEl);
-	}
-	async function addtonotification(element) {
-		console.debug(element);
-
-		const statusId = element.dataset.id;
-		const accountNameEl = element.querySelector(".notification__display-name");
-		let accountName = accountNameEl.getAttribute("title");
-
-		if (!accountName) {
-			warn("Could not extract the account name from the element.");
-			return;
-		}
-
-		if (accountName[0] == "@") accountName = accountName.substring(1);
-		// if the username doesn't contain an @ (i.e. the post we're looking at is from this instance)
-		// append the host name to it, to avoid cache overlap between instances
-		if (!accountName.includes("@")) {
-			accountName = accountName + "@" + hostName;
-		}
-
-		log(accountName);
-
-		const nametagEl = element.querySelector(".notification__display-name");
 
 		element.setAttribute("protoots-checked", "true");
-
-		//create plate
-		const proplate = document.createElement("span");
-		const pronouns = await fetchPronouns(statusId, accountName, "notification");
-		if (pronouns == "null" && !isLogging()) {
-			return;
-		}
-		proplate.innerHTML = sanitizePronouns(pronouns);
-		proplate.classList.add("protoots-proplate");
-		if (accountName == "jasmin@queer.group" || accountName == "vivien@queer.group") {
-			//i think you can figure out what this does on your own
-			proplate.classList.add("proplate-pog");
-		}
-
-		//add plate to nametag
-		insertAfter(proplate, nametagEl);
-
-		//TODO: add to contained status
+		generateProPlate(statusId, accountName, nametagEl, "account");
 	}
-}
+
+	async function addtoConversation(element) {
+		const nametagEls = element.querySelectorAll(".display-name__html");
+
+		for (const nametagEl of nametagEls) {
+			const accountName = getAccountName(nametagEl.parentElement.parentElement, "title");
+			generateProPlate("null", accountName, nametagEl, "conversation");
+		}
+		element.setAttribute("protoots-checked", "true");
+	}
 }
