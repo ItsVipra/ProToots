@@ -217,13 +217,16 @@ async function addProplate(element) {
 	 * @returns {string}
 	 */
 	function getID(element) {
-		const id = element.dataset.id;
+		let id = element.dataset.id;
 		if (!id) {
 			// We don't have a status ID, pronouns might not be in cache
 			warn(
 				"The element passed to addProplate does not have a data-id attribute, although it should have one.",
 				element,
 			);
+
+			log("Attempting to retrieve id from url - this may have unforseen consequences.");
+			id = location.pathname.split("/").pop();
 		}
 		return id;
 	}
