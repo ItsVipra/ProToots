@@ -17,6 +17,19 @@ body {
 	border-radius: 0.5em;
 	display: flex;
 	justify-content: space-between;
+	padding-right: 0.5em;
+}
+
+.row2 {
+	background-color: var(--background);
+	margin: 0.5em;
+	border-radius: 0.5em;
+	justify-content: space-between;
+}
+
+.text2 {
+	border-bottom: solid 1px grey;
+	margin-bottom: 0.5em;
 }
 
 .switch {
@@ -29,6 +42,29 @@ body {
 	margin-top: 0.25em;
 }
 
+.contexts {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	grid-template-rows: repeat(2, 1fr);
+	gap: 1em;
+	margin: 0.5em;
+	padding-bottom: 0.5em;
+}
+
+.togglebox {
+	border-radius: 1em;
+	display: flex;
+	align-items: baseline;
+}
+
+.togglebox:hover {
+	background-color: #ffffff69;
+}
+
+label {
+	flex-grow: 1;
+}
+
 input {
 	margin: 0.75em;
 }
@@ -37,6 +73,10 @@ input {
 	/* up right down left */
 	padding: 0 0 0 0.75em;
 	margin: 0 0 0.5em 0;
+}
+
+.description.toggle {
+	user-select: none;
 }
 
 .footer {
@@ -62,6 +102,16 @@ button:hover {
 
 a {
 	color: var(--link);
+}
+
+.beta {
+	border-radius: 0.5em;
+	border: 1px solid orange;
+	background-color: rgba(255, 140, 0, 0.411);
+	padding-left: 0.25em;
+	padding-right: 0.25em;
+	margin: 0;
+	font-size: small;
 }
 
 @media (prefers-color-scheme: dark) {

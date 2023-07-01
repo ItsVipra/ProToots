@@ -1,13 +1,16 @@
 // @ts-check
-//const proplate = document.createElement("bdi");
-//proplate.textContent = "pro/nouns";
-//document.body.display-name__html.append();
-
 // obligatory crime. because be gay, do crime.
 // 8======D
 
 import { fetchPronouns } from "../libs/fetchPronouns";
-import { getLogging, isLogging } from "../libs/logging";
+import {
+	accountVisibility,
+	conversationVisibility,
+	getSettings,
+	isLogging,
+	notificationVisibility,
+	statusVisibility,
+} from "../libs/settings";
 import { warn, log } from "../libs/logging";
 import {
 	findAllDescendants,
@@ -18,7 +21,6 @@ import {
 } from "../libs/domhelpers";
 import { addTypeAttribute, normaliseAccountName, sanitizePronouns } from "../libs/protootshelpers";
 
-// const max_age = 8.64e7
 const hostName = location.host;
 
 //before anything else, check whether we're on a Mastodon page
@@ -30,7 +32,7 @@ checkSite();
  * If so creates an 'readystatechange' EventListener, with callback to main()
  */
 async function checkSite() {
-	getLogging();
+	await getSettings();
 	const requestDest = location.protocol + "//" + hostName + "/api/v1/instance";
 	const response = await fetch(requestDest);
 
@@ -56,6 +58,7 @@ function main() {
 		return;
 	}
 
+	//All of this is Mastodon specific - factor out into mastodon.js?
 	log("Mastodon instance, activating Protoots");
 
 	// We are tracking navigation changes with the location and a MutationObserver on `document`,
@@ -144,8 +147,10 @@ function addtoTootObserver(ActionElement) {
 /**
  * Adds the pro-plate to the element. The caller needs to ensure that the passed element
  * is defined and that it's either a:
- * 	- <article> with the "status" class or
- * 	- <article> with the "detailed-status" class.
+ *
+ * 	- <article> with the "protoots-type" attribute
+ *
+ * 	- <div> with the "protoots-type" of either "status" or "detailed-status"
  *
  * Although it's possible to pass raw {@type Element}s, the method only does things on elements of type {@type HTMLElement}.
  *
@@ -170,17 +175,17 @@ async function addProplate(element) {
 	switch (type) {
 		case "status":
 		case "detailed-status":
-			addtostatus(element);
+			if (statusVisibility()) addToStatus(element);
 			break;
 		case "notification":
-			addtonotification(element);
+			if (notificationVisibility()) addToNotification(element);
 			break;
 		case "account":
 		case "account-authorize":
-			addtoAccount(element);
+			if (accountVisibility()) addToAccount(element);
 			break;
 		case "conversation":
-			addtoConversation(element);
+			if (conversationVisibility()) addToConversation(element);
 			break;
 	}
 
@@ -201,6 +206,7 @@ async function addProplate(element) {
 			return;
 		}
 		proplate.innerHTML = sanitizePronouns(pronouns);
+		//TODO?: alt text
 		proplate.classList.add("protoots-proplate");
 		if (accountName == "jasmin@queer.group" || accountName == "vivien@queer.group") {
 			//i think you can figure out what this does on your own
@@ -285,7 +291,7 @@ async function addProplate(element) {
 		return nametagEl;
 	}
 
-	async function addtostatus(element) {
+	async function addToStatus(element) {
 		const statusId = getID(element);
 
 		const accountNameEl = getAccountNameEl(element, ".display-name__account");
@@ -303,7 +309,7 @@ async function addProplate(element) {
 		generateProPlate(statusId, accountName, nametagEl, "status");
 	}
 
-	async function addtonotification(element) {
+	async function addToNotification(element) {
 		const statusId = getID(element);
 
 		const accountNameEl = getAccountNameEl(element, ".notification__display-name");
@@ -315,7 +321,7 @@ async function addProplate(element) {
 		generateProPlate(statusId, accountName, nametagEl, "notification");
 	}
 
-	async function addtoAccount(element) {
+	async function addToAccount(element) {
 		const statusId = getID(element);
 		const nametagEl = element.querySelector(".display-name__html");
 		const accountName = getAccountName(element.querySelector(".display-name__account"));
@@ -326,7 +332,7 @@ async function addProplate(element) {
 		generateProPlate(statusId, accountName, nametagEl, "account");
 	}
 
-	async function addtoConversation(element) {
+	async function addToConversation(element) {
 		const nametagEls = element.querySelectorAll(".display-name__html");
 
 		for (const nametagEl of nametagEls) {
