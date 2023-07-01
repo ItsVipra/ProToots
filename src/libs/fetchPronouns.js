@@ -3,6 +3,7 @@ import { cachePronouns, getPronouns } from "./caching";
 import { normaliseAccountName } from "./protootshelpers";
 
 const cacheMaxAge = 24 * 60 * 60 * 1000; // time after which cached pronouns should be checked again: 24h
+let conversationsCache;
 
 /**
  * Fetches pronouns associated with account name.
@@ -138,6 +139,7 @@ async function fetchAccount(accountID) {
  * DOCS: https://docs.joinmastodon.org/methods/conversations/#response
  */
 async function fetchConversations() {
+	if (conversationsCache) return conversationsCache;
 	//the api wants status IDs, not conversation IDs
 	//as a result we can only get pronouns for the first 40 conversations max
 	//most of these should be in cache anyways
@@ -151,6 +153,7 @@ async function fetchConversations() {
 	);
 
 	const conversations = await response.json();
+	conversationsCache = conversations;
 
 	return conversations;
 }
