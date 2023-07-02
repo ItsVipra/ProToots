@@ -20,6 +20,7 @@ import {
 	waitForElementRemoved,
 } from "../libs/domhelpers";
 import { addTypeAttribute, normaliseAccountName, sanitizePronouns } from "../libs/protootshelpers";
+import { addHoverCardLayer, addHoverCardListener } from "../libs/hovercard";
 
 const hostName = location.host;
 
@@ -38,6 +39,7 @@ async function checkSite() {
 
 	if (response) {
 		// debug('checksite response got', {'response' : response.json()})
+		console.log("adding event listener");
 
 		document.addEventListener("readystatechange", main);
 	} else {
@@ -52,6 +54,7 @@ async function checkSite() {
  *
  */
 function main() {
+	document.removeEventListener("readystatechange", main);
 	// debug('selection for id mastodon', {'result': document.querySelector("#mastodon")})
 	if (!document.querySelector("#mastodon")) {
 		warn("Not a Mastodon instance");
@@ -60,7 +63,7 @@ function main() {
 
 	//All of this is Mastodon specific - factor out into mastodon.js?
 	log("Mastodon instance, activating Protoots");
-
+	addHoverCardLayer();
 	// We are tracking navigation changes with the location and a MutationObserver on `document`,
 	// because the popstate event from the History API is only triggered with the back/forward buttons.
 	let lastUrl = location.href;
@@ -126,7 +129,10 @@ function onTootIntersection(observerentries) {
 				addProplate(ArticleElement),
 			);
 		} else {
-			waitForElement(ArticleElement, ".display-name", () => addProplate(ArticleElement));
+			waitForElement(ArticleElement, ".display-name", () => {
+				addHoverCardListener(ArticleElement);
+				addProplate(ArticleElement);
+			});
 		}
 	}
 }
@@ -198,13 +204,13 @@ async function addProplate(element) {
 	 * @returns
 	 */
 	async function generateProPlate(statusId, accountName, nametagEl, type) {
+		const pronouns = await fetchPronouns(statusId, accountName, type);
+		// if (pronouns == "null" && !isLogging()) {
+		// 	return;
+		// }
+
 		//create plate
 		const proplate = document.createElement("span");
-		const pronouns = await fetchPronouns(statusId, accountName, type);
-
-		if (pronouns == "null" && !isLogging()) {
-			return;
-		}
 		proplate.innerHTML = sanitizePronouns(pronouns);
 		//TODO?: alt text
 		proplate.classList.add("protoots-proplate");
@@ -215,6 +221,7 @@ async function addProplate(element) {
 		proplate.style.fontWeight = "500";
 		//add plate to nametag
 		insertAfter(proplate, nametagEl);
+		log("added proplate to", nametagEl);
 	}
 
 	/**
@@ -328,8 +335,8 @@ async function addProplate(element) {
 
 		nametagEl.parentElement.style.display = "flex";
 
-		element.setAttribute("protoots-checked", "true");
 		generateProPlate(statusId, accountName, nametagEl, "account");
+		element.setAttribute("protoots-checked", "true");
 	}
 
 	async function addToConversation(element) {

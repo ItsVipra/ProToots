@@ -11,6 +11,7 @@ const { copyPlugin } = copyPluginPkg; // js and your fucking mess of imports, si
 const files = [
 	path.join("src", "content_scripts", "protoots.js"),
 	path.join("src", "options", "options.js"),
+	path.join("src", "styles", "hovercard.css"),
 ];
 
 /**
