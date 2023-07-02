@@ -31,6 +31,7 @@ import {
 	addTypeAttribute,
 	normaliseAccountName,
 } from "../libs/protootshelpers.js";
+import { addHoverCardLayer, addHoverCardListener } from "../libs/hovercard";
 import { debug } from "../libs/logging.js";
 
 //before anything else, check whether we're on a Mastodon page
@@ -54,6 +55,7 @@ async function checkSite() {
  *
  */
 function main() {
+	document.removeEventListener("readystatechange", main);
 	// debug('selection for id mastodon', {'result': document.querySelector("#mastodon")})
 	if (!document.querySelector("#mastodon")) {
 		warn("Not a Mastodon instance");
@@ -67,7 +69,7 @@ function main() {
 	const tootObserver = new IntersectionObserver((entries) => {
 		onTootIntersection(entries);
 	});
-
+	addHoverCardLayer();
 	// We are tracking navigation changes with the location and a MutationObserver on `document`,
 	// because the popstate event from the History API is only triggered with the back/forward buttons.
 	let lastUrl = location.href;
@@ -134,7 +136,10 @@ function onTootIntersection(observerentries) {
 					addProplate(ArticleElement);
 				});
 			} else {
-				waitForElement(ArticleElement, ".display-name", () => addProplate(ArticleElement));
+				waitForElement(ArticleElement, ".display-name", () => {
+					addHoverCardListener(ArticleElement);
+					addProplate(ArticleElement);
+				});
 			}
 		}
 	}
@@ -229,6 +234,7 @@ async function addProplate(element) {
 		}
 		//add plate to nametag
 		insertAfter(proplate, nametagEl);
+		log("added proplate to", nametagEl);
 	}
 
 	/**
@@ -364,6 +370,7 @@ async function addProplate(element) {
 		element.setAttribute("protoots-checked", "true");
 
 		generateProPlate(statusId, accountName, nametagEl, "account");
+		element.setAttribute("protoots-checked", "true");
 	}
 
 	async function addToConversation(element) {

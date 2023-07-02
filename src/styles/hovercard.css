@@ -1,0 +1,101 @@
+.protoots-hovercard {
+    all: unset;
+    background-color: black;
+    box-shadow: 0px 0px 5px 1px #FFFFFF;
+    border-radius: .5em;
+    z-index: 99;
+    position: absolute;
+    width: 300px !important;
+    animation: hovercard-fadein 0.15s linear;
+    overflow: hidden;
+}
+
+.protoots-hovercard .account__header{
+    /* padding-bottom: .5em; */
+    /* border-radius: inherit; */
+}
+
+.protoots-hovercard .account__avatar {
+    width: 5.625em;
+    height: 5.635em;
+}
+
+.protoots-hovercard .account__header__info {
+    top: unset;
+    left: unset;
+    bottom: 0.33em;
+    right: .75em;
+}
+
+.protoots-hovercard .relationship-tag {
+    padding: .125em .25em;
+
+}
+
+.protoots-hovercard .account__header__image {
+    height: 4.375em !important;
+}
+
+.protoots-hovercard .account__header__bar {
+    padding: 0 1em;
+    border-bottom: unset;
+}
+
+.protoots-hovercard .account__header__tabs {
+    padding-bottom: .33em;
+}
+
+.protoots-hovercard .account__header__tabs__name {
+    margin-top: unset;
+    margin-bottom: unset;
+}
+
+.protoots-hovercard .account__header__extra {
+    margin-top: .5em;
+}
+
+.protoots-hovercard .account__header__account-note {
+    margin-bottom: unset;
+}
+
+.protoots-hovercard .account__header__account-note__content {
+    height: 37px;
+}
+
+.protoots-hovercard .account__header__content {
+    white-space: normal;
+    max-height: 25vh;
+    overflow: auto;
+}
+
+.protoots-hovercard .account__header__content p {
+    margin-bottom: .5em;
+}
+
+.protoots-hovercard .account__header__fields {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.protoots-hovercard .account__header__fields dt {
+    padding: .5em;
+}
+
+.protoots-hovercard .account__header__fields dd {
+    padding: .5em;
+}
+
+.protoots-hovercard.hidden {
+    opacity: 0;
+    user-select: none;
+    transition: opacity 0.15s linear;
+}
+
+@keyframes hovercard-fadein {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}

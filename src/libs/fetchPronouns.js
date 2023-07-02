@@ -65,7 +65,7 @@ export async function fetchPronouns(dataID, accountName, type) {
  * @param {string} statusID ID of status being requested.
  * @returns {Promise<object>} Contents of the status in json form.
  */
-async function fetchStatus(statusID) {
+export async function fetchStatus(statusID) {
 	const accessToken = await getActiveAccessToken();
 	//fetch status from home server with access token
 	const response = await fetch(
@@ -158,7 +158,7 @@ async function fetchConversations() {
  * Fetches the current access token for the user.
  * @returns {Promise<string>} The accessToken for the current user if we are logged in.
  */
-async function getActiveAccessToken() {
+export async function getActiveAccessToken() {
 	// Fortunately, Mastodon provides the initial state in a <script> element at the beginning of the page.
 	// Besides a lot of other information, it contains the access token for the current user.
 	const initialStateEl = document.getElementById("initial-state");
@@ -170,4 +170,19 @@ async function getActiveAccessToken() {
 	// Parse the JSON inside the script tag and extract the meta element from it.
 	const { meta } = JSON.parse(initialStateEl.innerText);
 	return meta.access_token;
+}
+
+export async function fetchRelationship(accountID) {
+	const accessToken = await getActiveAccessToken();
+	//fetch status from home server with access token
+	const response = await fetch(
+		`${location.protocol}//${location.host}/api/v1/accounts/relationships?id[]=${accountID}`,
+		{
+			headers: { Authorization: `Bearer ${accessToken}` },
+		},
+	);
+
+	const relationship = await response.json();
+
+	return relationship;
 }

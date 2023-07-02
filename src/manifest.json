@@ -22,7 +22,7 @@
 		{
 			"matches": ["*://*/*"],
 			"js": ["content_scripts/protoots.js"],
-			"css": ["styles/proplate.css"],
+			"css": ["styles/proplate.css", "styles/hovercard.css"],
 			"run_at": "document_start"
 		}
 	],
