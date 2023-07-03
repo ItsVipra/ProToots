@@ -10,6 +10,13 @@ function saveOptions(e) {
 		notificationVisibility: document.querySelector("#notification").checked,
 		accountVisibility: document.querySelector("#account").checked,
 		conversationVisibility: document.querySelector("#conversation").checked,
+		hoverCard: {
+			enabled: document.querySelector("#hovercards-enabled").checked,
+			stats: document.querySelector("#card-stats").checked,
+			privateNote: document.querySelector("#card-note").checked,
+			creationDate: document.querySelector("#card-creationDate").checked,
+			fields: document.querySelector("#card-fields").checked,
+		},
 	});
 }
 
@@ -23,6 +30,14 @@ function restoreOptions() {
 			document.querySelector("#notification").checked = result.notificationVisibility || false;
 			document.querySelector("#account").checked = result.accountVisibility || false;
 			document.querySelector("#conversation").checked = result.conversationVisibility || false;
+
+			document.querySelector("#hovercards-enabled").checked = result.hoverCard.enabled || false;
+			document.querySelector("#card-stats").checked = result.hoverCard.stats || false;
+			document.querySelector("#card-note").checked = result.hoverCard.privateNote || false;
+			document.querySelector("#card-creationDate").checked = result.hoverCard.creationDate || false;
+			document.querySelector("#card-fields").checked = result.hoverCard.fields || false;
+
+			setDisabled();
 		}
 	}
 
@@ -45,8 +60,41 @@ async function defaultOptions() {
 	restoreOptions();
 }
 
+function setDisabled() {
+	const hovercardToggle = document.querySelector("#hovercards-enabled");
+	const proplatesToggle = document.querySelector("#proplates-enabled");
+
+	const hovercardRow2 = document.querySelector("#hovercards-row");
+	const proplatesRow2 = document.querySelector("#proplates-row");
+
+	const hovercardButtons = hovercardRow2.querySelectorAll("input");
+	const proplatesButtons = proplatesRow2.querySelectorAll("input");
+
+	hovercardButtons.forEach((button) => {
+		button.disabled = !hovercardToggle.checked;
+	});
+	proplatesButtons.forEach((button) => {
+		button.disabled = !proplatesToggle.checked;
+	});
+
+	if (!hovercardToggle.checked) {
+		hovercardRow2.classList.add("disabled");
+	} else {
+		hovercardRow2.classList.remove("disabled");
+	}
+
+	if (!proplatesToggle.checked) {
+		proplatesRow2.classList.add("disabled");
+	} else {
+		proplatesRow2.classList.remove("disabled");
+	}
+}
+
 document.addEventListener("DOMContentLoaded", restoreOptions);
 document.querySelector("form").addEventListener("submit", saveOptions);
+document.querySelector("form").addEventListener("change", () => {
+	setDisabled();
+});
 document.querySelector("#resetbutton").addEventListener("click", async () => {
 	await storage.local.clear();
 });

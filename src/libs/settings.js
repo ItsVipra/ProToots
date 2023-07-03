@@ -9,6 +9,7 @@ export async function getSettings() {
 		//  Enable the logging automatically if we cannot determine the user preference.
 		settings = {};
 	}
+	return settings;
 }
 
 export function isLogging() {
@@ -30,3 +31,27 @@ export function accountVisibility() {
 export function conversationVisibility() {
 	return settings.conversationVisibility;
 }
+
+export function hoverCardSettings() {
+	return settings.hoverCard;
+}
+
+export function hoverCardEnabled() {
+	return settings.hoverCard.enabled;
+}
+
+// export function hoverCardStats() {
+// 	return settings.hoverCard.stats;
+// }
+
+// export function hoverCardPrivateNote() {
+// 	return settings.hoverCard.privateNote;
+// }
+
+// export function hoverCardCreationDate() {
+// 	return settings.hoverCard.creationDate;
+// }
+
+// export function hoverCardFields() {
+// 	return settings.hoverCard.fields;
+// }

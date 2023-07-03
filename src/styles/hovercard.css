@@ -36,6 +36,13 @@
     height: 4.375em !important;
 }
 
+.protoots-hovercard .account__header__image img {
+    top: -150%;
+    height: unset;
+    position: absolute;
+    animation: image-scroll 1s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
 .protoots-hovercard .account__header__bar {
     padding: 0 1em;
     border-bottom: unset;
@@ -91,11 +98,31 @@
     transition: opacity 0.15s linear;
 }
 
+.protoots-hovercard .account__header__extra__links {
+    padding: unset;
+    /* display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: .5em; */
+}
+
+/* .protoots-hovercard .account__header__extra__links {
+    padding: 0px;
+} */
+
 @keyframes hovercard-fadein {
     from {
         opacity: 0;
     }
     to {
         opacity: 1;
+    }
+}
+
+@keyframes image-scroll {
+    from {
+        top: -130%;
+    }
+    to {
+        top: -150%;
     }
 }

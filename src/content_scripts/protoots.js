@@ -14,6 +14,7 @@ import {
 	accountVisibility,
 	conversationVisibility,
 	getSettings,
+	hoverCardEnabled,
 	isLogging,
 	notificationVisibility,
 	statusVisibility,
@@ -69,7 +70,7 @@ function main() {
 	const tootObserver = new IntersectionObserver((entries) => {
 		onTootIntersection(entries);
 	});
-	addHoverCardLayer();
+	if (hoverCardEnabled()) addHoverCardLayer();
 	// We are tracking navigation changes with the location and a MutationObserver on `document`,
 	// because the popstate event from the History API is only triggered with the back/forward buttons.
 	let lastUrl = location.href;
@@ -120,7 +121,7 @@ function main() {
  */
 function onTootIntersection(observerentries) {
 	for (const observation of observerentries) {
-		const ArticleElement = observation.target;
+		const ArticleElement = /** @type {HTMLElement|null} */ (observation.target);
 		if (!observation.isIntersecting) {
 			waitForElementRemoved(ArticleElement, ".protoots-proplate", () => {
 				ArticleElement.removeAttribute("protoots-checked");
@@ -137,7 +138,7 @@ function onTootIntersection(observerentries) {
 				});
 			} else {
 				waitForElement(ArticleElement, ".display-name", () => {
-					addHoverCardListener(ArticleElement);
+					if (hoverCardEnabled) addHoverCardListener(ArticleElement);
 					addProplate(ArticleElement);
 				});
 			}
