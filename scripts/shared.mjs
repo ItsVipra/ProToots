@@ -12,6 +12,7 @@ const files = [
 	path.join("src", "content_scripts", "protoots.js"),
 	path.join("src", "options", "options.js"),
 	path.join("src", "styles", "hovercard.css"),
+	path.join("src", "styles", "proplate.css"),
 ];
 
 /**

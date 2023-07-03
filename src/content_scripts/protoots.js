@@ -7,6 +7,7 @@ import {
 	accountVisibility,
 	conversationVisibility,
 	getSettings,
+	hoverCardEnabled,
 	isLogging,
 	notificationVisibility,
 	statusVisibility,
@@ -39,7 +40,7 @@ async function checkSite() {
 
 	if (response) {
 		// debug('checksite response got', {'response' : response.json()})
-		console.log("adding event listener");
+		// console.log("adding event listener");
 
 		document.addEventListener("readystatechange", main);
 	} else {
@@ -63,7 +64,7 @@ function main() {
 
 	//All of this is Mastodon specific - factor out into mastodon.js?
 	log("Mastodon instance, activating Protoots");
-	addHoverCardLayer();
+	if (hoverCardEnabled()) addHoverCardLayer();
 	// We are tracking navigation changes with the location and a MutationObserver on `document`,
 	// because the popstate event from the History API is only triggered with the back/forward buttons.
 	let lastUrl = location.href;
@@ -118,7 +119,7 @@ const tootObserver = new IntersectionObserver((entries) => {
  */
 function onTootIntersection(observerentries) {
 	for (const observation of observerentries) {
-		const ArticleElement = observation.target;
+		const ArticleElement = /** @type {HTMLElement|null} */ (observation.target);
 		if (!observation.isIntersecting) {
 			waitForElementRemoved(ArticleElement, ".protoots-proplate", () => {
 				ArticleElement.removeAttribute("protoots-checked");
@@ -130,7 +131,7 @@ function onTootIntersection(observerentries) {
 			);
 		} else {
 			waitForElement(ArticleElement, ".display-name", () => {
-				addHoverCardListener(ArticleElement);
+				if (hoverCardEnabled) addHoverCardListener(ArticleElement);
 				addProplate(ArticleElement);
 			});
 		}
