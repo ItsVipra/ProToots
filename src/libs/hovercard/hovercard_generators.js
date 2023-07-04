@@ -69,7 +69,7 @@ function generateHeaderimage(account, relationship) {
 function generateHeaderTabs(account, relationship) {
 	const headerTabs = createElementWithClass("div", "account__header__tabs");
 
-	headerTabs.appendChild(generateAvatar());
+	headerTabs.appendChild(generateAvatar(account));
 
 	headerTabs.appendChild(generateFollowButton());
 
@@ -147,7 +147,7 @@ function generateHeaderTabsName(account, options) {
 	headerTabsName.appendChild(generateDisplayName());
 	headerTabsName.appendChild(generateUsername());
 
-	if (options.stats) headerTabsName.appendChild(generateStats());
+	if (options.stats) headerTabsName.appendChild(generateStats(account));
 
 	return headerTabsName;
 
@@ -193,7 +193,7 @@ function generateHeaderExtra(account, relationship, options) {
 	headerExtra.appendChild(headerBio.appendChild(generateBio()));
 
 	//fields
-	headerExtra.appendChild(generateFields);
+	headerExtra.appendChild(generateFields());
 
 	return headerExtra;
 
