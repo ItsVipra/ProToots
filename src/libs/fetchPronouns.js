@@ -1,5 +1,5 @@
 import { debug, error, info, warn } from "./logging";
-import { cachePronouns, getPronouns } from "./caching";
+import { cacheProfile, cachePronouns, getProfile, getPronouns } from "./caching";
 import { normaliseAccountName } from "./protootshelpers";
 
 const cacheMaxAge = 24 * 60 * 60 * 1000; // time after which cached pronouns should be checked again: 24h
@@ -65,6 +65,42 @@ export async function fetchPronouns(dataID, accountName, type) {
 	return PronounField;
 }
 
+export async function fetchProfile(dataID, accountName) {
+	//profile is account + relationship
+	const cacheResult = await getProfile();
+	debug(cacheResult);
+
+	if (accountName in cacheResult.hovercardCache) {
+		const { profile, timestamp } = cacheResult.hovercardCache[accountName];
+
+		// If we have a cached value and it's not outdated, use it.
+		if (profile && Date.now() - timestamp < cacheMaxAge) {
+			info(`${accountName} in cardCache with value: `, profile);
+			return profile;
+		} else {
+			info(`${accountName} cardCache entry is stale, refreshing`);
+		}
+	}
+
+	if (!dataID) {
+		warn(`Could not fetch pronouns for user ${accountName}, because no status ID was passed.`);
+		return null;
+	}
+
+	info(`${accountName} not in cardCache, fetching status`);
+
+	const status = await fetchStatus(dataID);
+	const account = status.account;
+
+	const relationship = await fetchRelationship(account.id);
+
+	const profile = { account: account, relationship: relationship };
+
+	cacheProfile(accountName, profile);
+
+	return profile;
+}
+
 /**
  * Fetches status by statusID from host_name with user's access token.
  *
@@ -128,6 +164,26 @@ async function fetchAccount(accountID) {
 	const account = await response.json();
 
 	return { account: account };
+}
+
+/**
+ * Fetches relationship by accountID from host_name with user's access token.
+ * @param {string} accountID ID of account being requested
+ * @returns {Promise<Array>} Array containing a relationship object
+ */
+export async function fetchRelationship(accountID) {
+	const accessToken = await getActiveAccessToken();
+	//fetch status from home server with access token
+	const response = await fetch(
+		`${location.protocol}//${location.host}/api/v1/accounts/relationships?id[]=${accountID}`,
+		{
+			headers: { Authorization: `Bearer ${accessToken}` },
+		},
+	);
+
+	const relationship = await response.json();
+
+	return relationship;
 }
 
 /**
@@ -203,19 +259,4 @@ export async function getActiveAccessToken() {
 	// Parse the JSON inside the script tag and extract the meta element from it.
 	const { meta } = JSON.parse(initialStateEl.innerText);
 	return meta.access_token;
-}
-
-export async function fetchRelationship(accountID) {
-	const accessToken = await getActiveAccessToken();
-	//fetch status from home server with access token
-	const response = await fetch(
-		`${location.protocol}//${location.host}/api/v1/accounts/relationships?id[]=${accountID}`,
-		{
-			headers: { Authorization: `Bearer ${accessToken}` },
-		},
-	);
-
-	const relationship = await response.json();
-
-	return relationship;
 }
