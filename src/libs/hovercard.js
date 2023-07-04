@@ -1,5 +1,6 @@
-import { fetchRelationship, fetchStatus } from "./fetchPronouns";
+import { fetchProfile, fetchRelationship, fetchStatus } from "./fetchPronouns";
 import { generateProfile } from "./hovercard/hovercard_generators";
+import { normaliseAccountName } from "./protootshelpers";
 import { hoverCardSettings } from "./settings";
 
 const listenerTimeout = 200;
@@ -63,10 +64,10 @@ export function addHoverCardListener(el) {
 /**
  *
  * @param {HTMLElement} el Element which will be hovered on
- * @param {*} id Status data-id
+ * @param {*} statusID Status data-id
  * @param {MouseEvent} mouseEvent
  */
-async function addHoverCard(el, id, mouseEvent) {
+async function addHoverCard(el, statusID, mouseEvent) {
 	if (hovercardExists) return;
 
 	hovercardExists = true;
@@ -79,15 +80,19 @@ async function addHoverCard(el, id, mouseEvent) {
 
 	const hovercard = document.createElement("div");
 
+	const accountName = normaliseAccountName(el.querySelector(".display-name__account").textContent);
+
 	//get account
-	const status = await fetchStatus(id);
-	const account = status.account;
+	const { account, relationship } = await fetchProfile(statusID, accountName);
+	// const status = await fetchStatus(statusID);
+	// const account = status.account;
 	if (!account) return;
 
 	//and corresponding relationship
-	const relationship = await fetchRelationship(account.id);
+	// const relationship = await fetchRelationship(account.id);
 
-	//TODO: get options/settings
+	//
+
 	const settings = hoverCardSettings();
 
 	//generate the profile and add it to the card
