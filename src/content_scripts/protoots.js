@@ -32,7 +32,7 @@ checkSite();
  * If so creates an 'readystatechange' EventListener, with callback to main()
  */
 async function checkSite() {
-	await getSettings();
+	getSettings();
 	const requestDest = location.protocol + "//" + hostName + "/api/v1/instance";
 	const response = await fetch(requestDest);
 
