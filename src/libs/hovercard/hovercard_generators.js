@@ -1,3 +1,4 @@
+import { insertAfter } from "../domhelpers";
 import { normaliseAccountName } from "../protootshelpers";
 import { followAccount, setPrivateNote, unfollowAccount } from "./hovercard_api";
 import { createElementWithClass, replaceEmoji } from "./hovercard_helpers";
@@ -7,7 +8,7 @@ import { createElementWithClass, replaceEmoji } from "./hovercard_helpers";
  * @param {Object} account Account object from Mastodon API
  * @param {Array} relationship Relationship array to account from Mastodon API
  * @param {Object} options Settings object from ProToots
- * @returns {Promise<HTMLElement>} Div containing the profile
+ * @returns {HTMLElement[]} Div containing the profile
  */
 export function generateProfile(
 	account,
@@ -25,9 +26,10 @@ export function generateProfile(
 
 	headerBar.appendChild(generateHeaderTabsName(account, options));
 
-	headerBar.appendChild(generateHeaderExtra(account, relationship, options));
+	const [headerExtra, bio] = generateHeaderExtra(account, relationship, options);
+	headerBar.appendChild(headerExtra);
 
-	return profileDiv;
+	return [profileDiv, bio];
 }
 
 /**
@@ -114,11 +116,15 @@ function generateHeaderTabs(account, relationship) {
 	function setFollow(button) {
 		button.textContent = "Follow";
 		button.classList.remove("button--destructive");
-		button.addEventListener("click", async () => {
-			const response = await followAccount(account.id);
-			if (response.ok) setUnfollow(button);
-			else button.textContent = "aww cute doggy";
-		});
+		button.addEventListener(
+			"click",
+			async () => {
+				const response = await followAccount(account.id);
+				if (response.ok) setUnfollow(button);
+				else button.textContent = "aww cute doggy";
+			},
+			{ once: true },
+		);
 	}
 
 	/**
@@ -128,10 +134,14 @@ function generateHeaderTabs(account, relationship) {
 	function setUnfollow(button) {
 		button.textContent = "Unfollow";
 		button.classList.add("button--destructive");
-		button.addEventListener("click", async () => {
-			await unfollowAccount(account.id);
-			setFollow(button);
-		});
+		button.addEventListener(
+			"click",
+			async () => {
+				await unfollowAccount(account.id);
+				setFollow(button);
+			},
+			{ once: true },
+		);
 	}
 }
 
@@ -145,7 +155,7 @@ function generateHeaderTabsName(account, options) {
 	const headerTabsName = createElementWithClass("div", "account__header__tabs__name");
 
 	headerTabsName.appendChild(generateDisplayName());
-	headerTabsName.appendChild(generateUsername());
+	// headerTabsName.appendChild(generateUsername());
 
 	if (options.stats) headerTabsName.appendChild(generateStats(account));
 
@@ -176,7 +186,7 @@ function generateHeaderTabsName(account, options) {
 }
 
 /**
- *
+ * Generates Note, Bio and Fields
  * @param {Object} account
  * @param {Array} relationship
  * @param {Object} options
@@ -190,12 +200,13 @@ function generateHeaderExtra(account, relationship, options) {
 	if (options.privateNote) headerExtra.appendChild(headerBio.appendChild(generateNote()));
 
 	//bio
-	headerExtra.appendChild(headerBio.appendChild(generateBio()));
+	const bio = generateBio();
+	headerExtra.appendChild(headerBio.appendChild(bio));
 
 	//fields
 	headerExtra.appendChild(generateFields());
 
-	return headerExtra;
+	return [headerExtra, bio];
 
 	function generateNote() {
 		const headerAccountNote = createElementWithClass("div", "account__header__account-note");
@@ -302,5 +313,49 @@ function generateStats(account) {
 		outerSpan.innerHTML += statString;
 		statA.appendChild(outerSpan);
 		return statA;
+	}
+}
+
+export function addShowMoreButton(bio) {
+	const showMoreDiv = createElementWithClass("div", "hovercard-showmore");
+	const showMore = createElementWithClass(
+		"button",
+		"status__content__spoiler-link",
+		"status__content__spoiler-link--show-more",
+	);
+	const span = document.createElement("span");
+	span.textContent = "Show more";
+	showMore.appendChild(span);
+	// showMore.style.backgroundColor = "transparent";
+	showMore.addEventListener("click", () => setLess());
+
+	showMoreDiv.appendChild(showMore);
+	insertAfter(showMoreDiv, bio);
+	const moredivBounds = showMoreDiv.getBoundingClientRect();
+	showMoreDiv.style.marginTop = (-moredivBounds.height).toString() + "px";
+	const accountHeader = document.querySelector(".icon-button");
+	const backgroundColor = getComputedStyle(accountHeader).getPropertyValue("color");
+	console.log(backgroundColor);
+	showMoreDiv.style.setProperty("--background-color", backgroundColor);
+
+	function setMore() {
+		bio.style.maxHeight = "25vh";
+		span.textContent = "Show more";
+		showMoreDiv.style.marginTop = (-showMoreDiv.getBoundingClientRect().height).toString() + "px";
+		showMoreDiv.style.backgroundImage =
+			"radial-gradient(farthest-side at bottom center, var(--background-color) 0%, var(--background-color) 75%, transparent)";
+		showMoreDiv.style.paddingTop = ".25em";
+		showMoreDiv.style.paddingBottom = "0px";
+		showMore.addEventListener("click", () => setLess(), { once: true });
+	}
+	function setLess() {
+		bio.style.maxHeight = "unset";
+		span.textContent = "Show less";
+		showMoreDiv.style.marginTop = "0px";
+		showMoreDiv.style.backgroundImage =
+			"radial-gradient(farthest-side at top center, var(--background-color) 0%, var(--background-color) 75%, transparent)";
+		showMoreDiv.style.paddingTop = "0px";
+		showMoreDiv.style.paddingBottom = ".25em";
+		showMore.addEventListener("click", () => setMore(), { once: true });
 	}
 }

@@ -4,10 +4,12 @@
     box-shadow: 0px 0px 5px 1px #FFFFFF;
     border-radius: .5em;
     z-index: 99;
-    position: absolute;
-    width: 300px !important;
+    position: fixed;
+    width: 23.076923076923077em;
     animation: hovercard-fadein 0.15s linear;
     overflow: hidden;
+    max-height: 100vh;
+    overflow: auto;
 }
 
 .protoots-hovercard .account__header{
@@ -37,10 +39,10 @@
 }
 
 .protoots-hovercard .account__header__image img {
-    top: -150%;
+    /* top: -150%;
     height: unset;
     position: absolute;
-    animation: image-scroll 1s cubic-bezier(0.19, 1, 0.22, 1);
+    animation: image-scroll 1s cubic-bezier(0.19, 1, 0.22, 1); */
 }
 
 .protoots-hovercard .account__header__bar {
@@ -70,9 +72,27 @@
 }
 
 .protoots-hovercard .account__header__content {
-    white-space: normal;
+    white-space: break-spaces;
     max-height: 25vh;
+    /* overflow: hidden; */
     overflow: auto;
+}
+
+.protoots-hovercard .hovercard-showmore {
+    /* margin-top: -2.5em; */
+    position: relative;
+    padding-top: .25em;
+    display: flex;
+    justify-content: center;
+    background-color: transparent;
+    /* background: rgb(255,255,255); */
+    --background-color: white;
+    background-image: radial-gradient(farthest-side at bottom center, var(--background-color) 0%, var(--background-color) 75%, transparent);
+}
+
+.protoots-hovercard .hovercard-showmore button {
+    background-color: transparent;
+    /* color: black; */
 }
 
 .protoots-hovercard .account__header__content p {
