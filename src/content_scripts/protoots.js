@@ -56,7 +56,6 @@ async function checkSite() {
  *
  */
 function main() {
-	document.removeEventListener("readystatechange", main);
 	// debug('selection for id mastodon', {'result': document.querySelector("#mastodon")})
 	if (!document.querySelector("#mastodon")) {
 		warn("Not a Mastodon instance");
