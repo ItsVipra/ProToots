@@ -158,5 +158,5 @@ function removeHoverCard(card) {
 let mousePos = { x: undefined, y: undefined };
 
 window.addEventListener("mousemove", (event) => {
-	mousePos = { x: event.pageX, y: event.pageY };
+	mousePos = { x: event.clientX, y: event.clientY };
 });
