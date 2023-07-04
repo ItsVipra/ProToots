@@ -15,7 +15,6 @@ function saveOptions(e) {
 
 function restoreOptions() {
 	function setCurrentChoice(result) {
-		console.log(result);
 		document.querySelector("#logging").checked = result.logging || false;
 		document.querySelector("#status").checked = result.statusVisibility || false;
 		document.querySelector("#notification").checked = result.notificationVisibility || false;
