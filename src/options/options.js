@@ -5,17 +5,21 @@ import { error } from "../libs/logging";
 function saveOptions(e) {
 	e.preventDefault();
 	storage.sync.set({
-		logging: document.querySelector("#logging").checked,
-		statusVisibility: document.querySelector("#status").checked,
-		notificationVisibility: document.querySelector("#notification").checked,
-		accountVisibility: document.querySelector("#account").checked,
-		conversationVisibility: document.querySelector("#conversation").checked,
+		proplate: {
+			enabled: document.querySelector("#proplates-enabled").checked,
+			logging: document.querySelector("#logging").checked,
+			statusVisibility: document.querySelector("#status").checked,
+			notificationVisibility: document.querySelector("#notification").checked,
+			accountVisibility: document.querySelector("#account").checked,
+			conversationVisibility: document.querySelector("#conversation").checked,
+		},
 		hoverCard: {
 			enabled: document.querySelector("#hovercards-enabled").checked,
 			stats: document.querySelector("#card-stats").checked,
 			privateNote: document.querySelector("#card-note").checked,
 			creationDate: document.querySelector("#card-creationDate").checked,
 			fields: document.querySelector("#card-fields").checked,
+			scrollableBio: document.querySelector("#card-scroll-bio").checked,
 		},
 	});
 }
@@ -25,17 +29,21 @@ function restoreOptions() {
 		if (!result.statusVisibility) {
 			await defaultOptions();
 		} else {
-			document.querySelector("#logging").checked = result.logging || false;
-			document.querySelector("#status").checked = result.statusVisibility || false;
-			document.querySelector("#notification").checked = result.notificationVisibility || false;
-			document.querySelector("#account").checked = result.accountVisibility || false;
-			document.querySelector("#conversation").checked = result.conversationVisibility || false;
+			document.querySelector("#proplates-enabled").checked = result.proplate.enabled || false;
+			document.querySelector("#logging").checked = result.proplate.logging || false;
+			document.querySelector("#status").checked = result.proplate.statusVisibility || false;
+			document.querySelector("#notification").checked =
+				result.proplate.notificationVisibility || false;
+			document.querySelector("#account").checked = result.proplate.accountVisibility || false;
+			document.querySelector("#conversation").checked =
+				result.proplate.conversationVisibility || false;
 
 			document.querySelector("#hovercards-enabled").checked = result.hoverCard.enabled || false;
 			document.querySelector("#card-stats").checked = result.hoverCard.stats || false;
 			document.querySelector("#card-note").checked = result.hoverCard.privateNote || false;
 			document.querySelector("#card-creationDate").checked = result.hoverCard.creationDate || false;
 			document.querySelector("#card-fields").checked = result.hoverCard.fields || false;
+			document.querySelector("#card-scroll-bio").checked = result.hoverCard.scrollableBio || false;
 
 			setDisabled();
 		}

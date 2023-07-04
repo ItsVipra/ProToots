@@ -1,5 +1,5 @@
-import { fetchProfile, fetchRelationship, fetchStatus } from "./fetchPronouns";
-import { generateProfile } from "./hovercard/hovercard_generators";
+import { fetchProfile } from "./fetchPronouns";
+import { addShowMoreButton, generateProfile } from "./hovercard/hovercard_generators";
 import { normaliseAccountName } from "./protootshelpers";
 import { hoverCardSettings } from "./settings";
 
@@ -96,20 +96,8 @@ async function addHoverCard(el, statusID, mouseEvent) {
 	const settings = hoverCardSettings();
 
 	//generate the profile and add it to the card
-	hovercard.appendChild(await generateProfile(account, relationship, settings));
-
-	// testdiv.appendChild(await generateHeaderimage(account, relationship));
-
-	// const header_bar = ;
-	// testdiv.appendChild(header_bar);
-
-	// const header_tabs = generateHeaderTabs(account, relationship);
-	// header_bar.appendChild(header_tabs);
-
-	// const header_tabs_name = generateHeaderTabsName(account);
-	// header_bar.appendChild(header_tabs_name);
-
-	// header_bar.appendChild(await generateHeaderExtra(account, relationship));
+	const [profileElement, bio] = generateProfile(account, relationship, settings);
+	hovercard.appendChild(profileElement);
 
 	hovercard.classList.add("protoots-hovercard");
 	hovercard.id = "protoots-hovercard";
@@ -119,6 +107,16 @@ async function addHoverCard(el, statusID, mouseEvent) {
 	hovercard.style.top = mousePos.y.toString() + "px";
 
 	layer.appendChild(hovercard);
+	//inserted into DOM here - how the heck do i find out whether the bio is too long now
+	//just hand the bio back up the chain?
+
+	// console.log(bio.scrollHeight, bio.clientHeight);
+
+	if (bio.scrollHeight > bio.clientHeight && !settings.scrollableBio) {
+		// console.log("bio is scrollable");
+		bio.style.overflow = "hidden";
+		addShowMoreButton(bio);
+	}
 
 	const boundingrect = hovercard.getBoundingClientRect();
 

@@ -17,19 +17,19 @@ export function isLogging() {
 }
 
 export function statusVisibility() {
-	return settings.statusVisibility;
+	return settings.proplate.statusVisibility;
 }
 
 export function notificationVisibility() {
-	return settings.notificationVisibility;
+	return settings.proplate.notificationVisibility;
 }
 
 export function accountVisibility() {
-	return settings.accountVisibility;
+	return settings.proplate.accountVisibility;
 }
 
 export function conversationVisibility() {
-	return settings.conversationVisibility;
+	return settings.proplate.conversationVisibility;
 }
 
 export function hoverCardSettings() {

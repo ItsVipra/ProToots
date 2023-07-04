@@ -1,3 +1,9 @@
+/**
+ *
+ * @param {string} tagname
+ * @param  {...string} classnames
+ * @returns {HTMLElement}
+ */
 export function createElementWithClass(tagname, ...classnames) {
 	const el = document.createElement(tagname);
 	for (const classname of classnames) {
