@@ -14,12 +14,18 @@ function saveOptions(e) {
 }
 
 function restoreOptions() {
-	function setCurrentChoice(result) {
-		document.querySelector("#logging").checked = result.logging || false;
-		document.querySelector("#status").checked = result.statusVisibility || false;
-		document.querySelector("#notification").checked = result.notificationVisibility || false;
-		document.querySelector("#account").checked = result.accountVisibility || false;
-		document.querySelector("#conversation").checked = result.conversationVisibility || false;
+	async function setCurrentChoice(result) {
+		console.log(result);
+		if (Object.keys(result).length == 0) {
+			console.log(result);
+			await defaultOptions();
+		} else {
+			document.querySelector("#logging").checked = result.logging || false;
+			document.querySelector("#status").checked = result.statusVisibility || false;
+			document.querySelector("#notification").checked = result.notificationVisibility || false;
+			document.querySelector("#account").checked = result.accountVisibility || false;
+			document.querySelector("#conversation").checked = result.conversationVisibility || false;
+		}
 	}
 
 	function onError(err) {
@@ -30,8 +36,22 @@ function restoreOptions() {
 	getting.then(setCurrentChoice, onError);
 }
 
+async function defaultOptions() {
+	await storage.sync.set({
+		logging: false,
+		statusVisibility: true,
+		notificationVisibility: true,
+		accountVisibility: true,
+		conversationVisibility: false,
+	});
+	restoreOptions();
+}
+
 document.addEventListener("DOMContentLoaded", restoreOptions);
 document.querySelector("form").addEventListener("submit", saveOptions);
 document.querySelector("#resetbutton").addEventListener("click", async () => {
 	await storage.local.clear();
+});
+document.querySelector("#defaultSettings").addEventListener("click", async () => {
+	await defaultOptions();
 });
