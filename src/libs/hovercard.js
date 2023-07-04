@@ -120,6 +120,22 @@ async function addHoverCard(el, statusID, mouseEvent) {
 
 	layer.appendChild(hovercard);
 
+	const boundingrect = hovercard.getBoundingClientRect();
+
+	const borderDistance = {
+		x: boundingrect.right - window.innerWidth,
+		y: boundingrect.bottom - window.innerHeight,
+	};
+
+	if (borderDistance.y > 0) {
+		hovercard.style.top =
+			(Number(hovercard.style.top.replace("px", "")) - borderDistance.y).toString() + "px";
+	}
+	if (borderDistance.x > 0) {
+		hovercard.style.left =
+			(Number(hovercard.style.left.replace("px", "")) - borderDistance.y).toString() + "px";
+	}
+
 	hovercard.addEventListener("mouseenter", () => (hovering = el));
 	hovercard.addEventListener("mouseleave", () => {
 		hovering = false;
