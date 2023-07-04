@@ -145,6 +145,13 @@ async function addHoverCard(el, statusID, mouseEvent) {
 			removeHoverCard(hovercard);
 		}, listenerTimeout);
 	});
+	addEventListener(
+		"scroll",
+		() => {
+			removeHoverCard(hovercard);
+		},
+		{ once: true },
+	);
 }
 
 function removeHoverCard(card) {
