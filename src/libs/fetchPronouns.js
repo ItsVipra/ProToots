@@ -4,6 +4,7 @@ import { normaliseAccountName } from "./protootshelpers";
 
 const cacheMaxAge = 24 * 60 * 60 * 1000; // time after which cached pronouns should be checked again: 24h
 let conversationsCache;
+const fieldNames = ["pronouns", "pronoun", "professional nouns", "pronomen"];
 
 /**
  * Fetches pronouns associated with account name.
@@ -172,10 +173,8 @@ function getPronounField(status, accountName) {
 	const fields = account.fields;
 
 	for (const field of fields) {
-		//match fields against "pronouns"
-		//TODO: multiple languages -> match against list
-		if (field.name.toLowerCase().includes("pronouns")) {
-			//TODO: see https://github.com/ItsVipra/ProToots/issues/28
+		//match fields against fieldNames
+		if (fieldNames.includes(field.name.toLowerCase())) {
 			debug(`${account.acct}: ${field.value}`);
 
 			cachePronouns(accountName, field.value);
