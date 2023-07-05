@@ -22,7 +22,6 @@ import {
 import { warn, log } from "../libs/logging";
 import {
 	findAllDescendants,
-	hasClasses,
 	insertAfter,
 	waitForElement,
 	waitForElementRemoved,
@@ -44,7 +43,13 @@ checkSite();
 async function checkSite() {
 	await getSettings();
 	await runtime.sendMessage({ source: "content-script", "is-supported-instance": true });
-	document.addEventListener("readystatechange", main, { once: true });
+
+	if (document.readyState === "loading") {
+		document.addEventListener("readystatechange", main, { once: true });
+	} else {
+		main();
+		document.querySelectorAll(pronounableElementSelector).forEach((el) => addtoTootObserver(el));
+	}
 }
 
 /**
@@ -77,28 +82,6 @@ function main() {
 			lastUrl = url;
 		}
 
-		/**
-		 * Checks whether the given n is eligible to have a proplate added
-		 * @param {Node} n
-		 * @returns {Boolean}
-		 */
-		function isPronounableElement(n) {
-			return (
-				n instanceof HTMLElement &&
-				((n.nodeName == "ARTICLE" && n.hasAttribute("data-id")) ||
-					hasClasses(
-						n,
-						"detailed-status",
-						"status",
-						"conversation",
-						"account-authorize",
-						"notification",
-						"notification__message",
-						"account",
-					))
-			);
-		}
-
 		mutations
 			.flatMap((m) => Array.from(m.addedNodes).map((m) => findAllDescendants(m)))
 			.flat()
@@ -115,6 +98,7 @@ const pronounableElementSelectors = [
 	".conversation",
 	".account-authorize",
 	".notification",
+	".notification__message",
 	".account",
 ];
 const pronounableElementSelector = pronounableElementSelectors.join(", ");

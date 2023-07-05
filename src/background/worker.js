@@ -1,4 +1,4 @@
-import { runtime, action, permissions, tabs } from "webextension-polyfill";
+import { scripting, runtime, action, permissions, tabs } from "webextension-polyfill";
 
 action.onClicked.addListener(async (tab) => {
 	/**
@@ -18,6 +18,10 @@ action.onClicked.addListener(async (tab) => {
 	action.setTitle({ title: "Configure ProToots" });
 
 	await permissions.request(perms);
+	await scripting.executeScript({
+		files: ["content_scripts/protoots.js"],
+		target: { tabId: tab.id },
+	});
 });
 
 /**
