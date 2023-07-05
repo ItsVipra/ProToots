@@ -22,6 +22,7 @@ export const defaultBuildOptions = {
 
 	// Use bundling. Especially useful because web extensions do not support it by default for some reason.
 	bundle: true,
+	format: "esm",
 
 	// Settings for the correct esbuild output.
 	outbase: "src",
