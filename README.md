@@ -26,9 +26,10 @@ Please also take a look at the FAQ below and the [issue list](https://github.com
 
 ## FAQ
 
-### Why does ProToots need permission for all websites?
+## How can I use ProToots?
 
-> The addon needs to determine whether or not the site you are currently browsing is a Mastodon server. For that to work, it requires access to all sites. Otherwise, each existing Mastodon server would have to be explicitly added.
+> In order to use ProToots, you need to click the button of the extension, once you are on your Mastodon page.
+> Once ProToots got the permissions to interact with the page, it's enabled and you can see the pronouns appearing within a second!
 
 ### Why can't I see any ProPlates?
 
