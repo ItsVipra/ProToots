@@ -1,21 +1,25 @@
 {
 	"name": "protoots",
 	"scripts": {
-		"build:scripts": "node scripts/build.mjs",
-		"build:webext": "web-ext build --overwrite-dest --filename protoots-firefox.zip",
-		"start": "run-p -l -r watch:scripts watch:webext-firefox",
-		"start:chrome": "run-p -l -r watch:scripts watch:webext-chrome",
-		"watch:scripts": "node scripts/watch.mjs",
-		"watch:webext-firefox": "web-ext run --keep-profile-changes --profile-create-if-missing --firefox-profile=.firefox-profile/",
-		"watch:webext-chrome": "web-ext run --target chromium  --keep-profile-changes --profile-create-if-missing --chromium-profile=.chromium-profile/",
+		"watch:firefox": "cross-env TARGET=firefox node scripts/watch.mjs",
+		"watch:chrome": "cross-env TARGET=chrome node scripts/watch.mjs",
+		"build:firefox": "cross-env TARGET=firefox node scripts/build.mjs",
+		"build:chrome": "cross-env TARGET=chrome node scripts/build.mjs",
+		"start": "run-p -r watch:firefox webext:firefox",
+		"start:chrome": "run-p -r watch:chrome webext:chrome",
 		"format": "prettier --write --ignore-path .gitignore .",
-		"package": "run-s -l build:**",
 		"archive": "git archive --format zip main -o protoots_source.zip",
+		"package": "run-s build:firefox package:firefox build:chrome package:chrome",
+		"package:firefox": "web-ext build --filename protoots-firefox.zip --overwrite-dest",
+		"package:chrome": "web-ext build --filename protoots-chrome.zip --overwrite-dest",
+		"webext:firefox": "web-ext run",
+		"webext:chrome": "web-ext run --target chromium",
 		"lint": "eslint src/",
 		"test": "uvu tests/"
 	},
 	"devDependencies": {
 		"@sprout2000/esbuild-copy-plugin": "1.1.8",
+		"cross-env": "^7.0.3",
 		"esbuild": "0.17.19",
 		"eslint": "^8.42.0",
 		"eslint-config-prettier": "^8.8.0",
@@ -31,11 +35,17 @@
 		"trailingComma": "all"
 	},
 	"type": "module",
-	"webExt": {
-		"sourceDir": "dist/"
-	},
 	"dependencies": {
 		"sanitize-html": "^2.11.0",
 		"webextension-polyfill": "^0.10.0"
+	},
+	"webExt": {
+		"sourceDir": "dist/",
+		"run": {
+			"firefoxProfile": ".firefox-profile/",
+			"chromiumProfile": ".chromium-profile/",
+			"keepProfileChanges": true,
+			"profileCreateIfMissing": true
+		}
 	}
 }
