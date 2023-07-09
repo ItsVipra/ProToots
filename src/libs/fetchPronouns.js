@@ -174,11 +174,13 @@ function getPronounField(status, accountName) {
 
 	for (const field of fields) {
 		//match fields against fieldNames
-		if (fieldNames.includes(field.name.toLowerCase())) {
-			debug(`${account.acct}: ${field.value}`);
+		for (const searchTerm of fieldNames) {
+			if (field.name.toLowerCase().includes(searchTerm)) {
+				debug(`${account.acct}: ${field.value}`);
 
-			cachePronouns(accountName, field.value);
-			return field.value;
+				cachePronouns(accountName, field.value);
+				return field.value;
+			}
 		}
 	}
 
