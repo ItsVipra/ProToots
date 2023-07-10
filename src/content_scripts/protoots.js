@@ -120,13 +120,14 @@ function onTootIntersection(observerentries) {
 			waitForElementRemoved(ArticleElement, ".protoots-proplate", () => {
 				ArticleElement.removeAttribute("protoots-checked");
 			});
-		}
-		if (ArticleElement.getAttribute("protoots-type") == "conversation") {
-			waitForElement(ArticleElement, ".conversation__content__names", () =>
-				addProplate(ArticleElement),
-			);
 		} else {
-			waitForElement(ArticleElement, ".display-name", () => addProplate(ArticleElement));
+			if (ArticleElement.getAttribute("protoots-type") == "conversation") {
+				waitForElement(ArticleElement, ".conversation__content__names", () =>
+					addProplate(ArticleElement),
+				);
+			} else {
+				waitForElement(ArticleElement, ".display-name", () => addProplate(ArticleElement));
+			}
 		}
 	}
 }
