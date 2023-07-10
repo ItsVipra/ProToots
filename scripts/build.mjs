@@ -3,5 +3,4 @@ import { defaultBuildOptions } from "./shared.mjs";
 
 await esbuild.build({
 	...defaultBuildOptions,
-	minify: true,
 });
