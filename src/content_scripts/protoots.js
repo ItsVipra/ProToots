@@ -39,7 +39,7 @@ async function checkSite() {
 	if (response) {
 		// debug('checksite response got', {'response' : response.json()})
 
-		document.addEventListener("readystatechange", main);
+		document.addEventListener("readystatechange", main, { once: true });
 	} else {
 		warn("Not a Mastodon instance");
 	}
