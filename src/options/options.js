@@ -15,7 +15,7 @@ function saveOptions(e) {
 
 function restoreOptions() {
 	async function setCurrentChoice(result) {
-		if (Object.keys(result).length == 0) {
+		if (!result.statusVisibility) {
 			await defaultOptions();
 		} else {
 			document.querySelector("#logging").checked = result.logging || false;
