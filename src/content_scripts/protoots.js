@@ -97,7 +97,6 @@ function main() {
 	}).observe(document, { subtree: true, childList: true });
 }
 
-
 /**
  * Callback for TootObserver
  *
@@ -128,6 +127,7 @@ function onTootIntersection(observerentries) {
 /**
  * Adds ActionElement to the tootObserver, if it has not been added before.
  * @param {HTMLElement} ActionElement
+ * @param {IntersectionObserver} tootObserver Observer to add the element to
  */
 function addtoTootObserver(ActionElement, tootObserver) {
 	// console.log(ActionElement);
