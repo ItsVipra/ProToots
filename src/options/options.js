@@ -17,7 +17,6 @@ function restoreOptions() {
 	async function setCurrentChoice(result) {
 		console.log(result);
 		if (Object.keys(result).length == 0) {
-			console.log(result);
 			await defaultOptions();
 		} else {
 			document.querySelector("#logging").checked = result.logging || false;
