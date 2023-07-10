@@ -1,6 +1,11 @@
 import sanitizeHtml from "sanitize-html";
 
 const fieldMatchers = [/pro.*nouns?/i, "pronomen"];
+const knownPronounUrls = [
+	/pronouns\.page\/([\w/]+)/,
+	/pronouns\.within\.lgbt\/([\w/]+)/,
+	/pronouns\.cc\/pronouns\/([\w/]+)/,
+];
 
 /**
  * Tries to extract the pronouns for the given status.
@@ -16,22 +21,27 @@ export function extractFromStatus(status) {
 	const account = status.account;
 	const fields = account.fields;
 
-	let pronouns;
+	let pronounsRaw;
 	for (const field of fields) {
 		// TODO: add ranking of fields
-		if (pronouns) break;
+		if (pronounsRaw) break;
 
 		for (const matcher of fieldMatchers) {
 			if (typeof matcher === "string" && field.name.toLowerCase().includes(matcher)) {
-				pronouns = field.value;
+				pronounsRaw = field.value;
 			} else if (field.name.match(matcher)) {
-				pronouns = field.value;
+				pronounsRaw = field.value;
 			}
 		}
 	}
-	if (!pronouns) return null;
-	pronouns = sanitizeHtml(pronouns, { allowedTags: [], allowedAttributes: {} });
+	if (!pronounsRaw) return null;
+	let text = sanitizeHtml(pronounsRaw, { allowedTags: [], allowedAttributes: {} });
+	// If one of pronoun URLs matches, overwrite the current known value.
+	for (const knownUrlRe of knownPronounUrls) {
+		if (!knownUrlRe.test(pronounsRaw)) continue;
+		text = pronounsRaw.match(knownUrlRe)[1];
+	}
 
-	if (!pronouns) return null;
-	return pronouns;
+	if (!text) return null;
+	return text;
 }
