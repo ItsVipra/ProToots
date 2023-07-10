@@ -69,5 +69,6 @@ Alternatively you can download an unsigned version from the [releases page](http
 - Clone the repository
 - Install the required dependencies using `npm install`
 - Start the development workflow with `npm start`
+- Build with `npm run package`
 - Mess around with with [protoots.js](/src/content_scripts/protoots.js)
 - Trans rights!
