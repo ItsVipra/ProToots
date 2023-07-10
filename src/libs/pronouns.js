@@ -19,21 +19,39 @@ const knownPronounUrls = [
 export async function extractFromStatus(status) {
 	// get account from status and pull out fields
 	const account = status.account;
-	const fields = account.fields;
+	const { fields, note } = account;
+	let pronouns;
 
-	let pronounsRaw;
-	for (const field of fields) {
-		// TODO: add ranking of fields
-		if (pronounsRaw) break;
-
-		for (const matcher of fieldMatchers) {
-			if (typeof matcher === "string" && field.name.toLowerCase().includes(matcher)) {
-				pronounsRaw = field.value;
-			} else if (field.name.match(matcher)) {
-				pronounsRaw = field.value;
-			}
+	if (fields) {
+		for (const f of fields) {
+			pronouns = await extractFromField(f);
+			if (pronouns) break;
 		}
 	}
+
+	if (!pronouns && note) {
+		pronouns = extractFromBio(note);
+	}
+
+	return pronouns;
+}
+
+/**
+ * @param {{name: string, value: string}} field The field value
+ * @returns {Promise<string|null>} The pronouns or null.
+ */
+async function extractFromField(field) {
+	let pronounsRaw;
+	for (const matcher of fieldMatchers) {
+		if (typeof matcher === "string" && field.name.toLowerCase().includes(matcher)) {
+			pronounsRaw = field.value;
+			break;
+		} else if (field.name.match(matcher)) {
+			pronounsRaw = field.value;
+			break;
+		}
+	}
+
 	if (!pronounsRaw) return null;
 	let text = sanitizeHtml(pronounsRaw, { allowedTags: [], allowedAttributes: {} });
 	// If one of pronoun URLs matches, overwrite the current known value.
@@ -100,4 +118,115 @@ function sanitizePronounPageValue(val) {
 
 	if (val === "no-pronouns") val = "no pronouns";
 	return val;
+}
+
+const knownPronouns = [
+	"ae",
+	"aer",
+	"aers",
+	"aerself",
+	"co",
+	"co's",
+	"cos",
+	"coself",
+	"e",
+	"eir",
+	"eirs",
+	"em",
+	"ems",
+	"emself",
+	"es",
+	"ey",
+	"fae",
+	"faer",
+	"faers",
+	"faerself",
+	"he",
+	"her",
+	"hers",
+	"herself",
+	"him",
+	"himself",
+	"hir",
+	"hirs",
+	"hirself",
+	"his",
+	"hu",
+	"hum",
+	"hus",
+	"huself",
+	"it",
+	"its",
+	"itself",
+	"ne",
+	"nem",
+	"nemself",
+	"nir",
+	"nirs",
+	"nirself",
+	"one",
+	"one's",
+	"oneself",
+	"per",
+	"pers",
+	"perself",
+	"s/he",
+	"she",
+	"their",
+	"theirs",
+	"them",
+	"themself",
+	"themselves",
+	"they",
+	"thon",
+	"thon's",
+	"thons",
+	"thonself",
+	"ve",
+	"ver",
+	"vers",
+	"verself",
+	"vi",
+	"vim",
+	"vims",
+	"vimself",
+	"vir",
+	"virs",
+	"virself",
+	"vis",
+	"xe",
+	"xem",
+	"xemself",
+	"xyr",
+	"xyrs",
+	"ze",
+	"zhe",
+	"zher",
+	"zhers",
+	"zherself",
+	"zir",
+	"zirs",
+	"zirself",
+];
+
+/**
+ * Tries to extract pronouns from the bio/note. Only "known" pronouns are returned, which is
+ * a compromise for the pattern matching. At no point we want to limit the pronouns used by persons.
+ * @param {string} bio The bio
+ * @returns {string|null} The result or null
+ */
+function extractFromBio(bio) {
+	const exactMatches = bio.matchAll(/(\w+)\/(\w+)/gi);
+	for (const [match, subjective, objective] of exactMatches) {
+		if (knownPronouns.includes(subjective) && knownPronouns.includes(objective)) {
+			return match;
+		}
+	}
+
+	const followedByColon = bio.matchAll(/pronouns?:\W+([\w/+]+)/gi);
+	for (const match of followedByColon) {
+		return match.pop(); // first group is last entry in array
+	}
+
+	return null;
 }

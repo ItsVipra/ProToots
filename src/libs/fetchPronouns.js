@@ -63,7 +63,6 @@ export async function fetchPronouns(dataID, accountName, type) {
 	let pronouns = await extractFromStatus(status);
 	if (!pronouns) {
 		pronouns = "null";
-		//TODO: if no field check bio
 		info(`no pronouns found for ${accountName}, cached null`);
 	}
 	await cachePronouns(accountName, pronouns);
