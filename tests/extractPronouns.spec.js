@@ -13,8 +13,8 @@ const validFields = [
 ];
 
 for (const field of validFields) {
-	extract(`${field} is extracted`, () => {
-		const result = pronouns.extractFromStatus({
+	extract(`${field} is extracted`, async () => {
+		const result = await pronouns.extractFromStatus({
 			account: {
 				fields: [{ name: field, value: "pro/nouns" }],
 			},
@@ -30,12 +30,19 @@ valueExtractionSuite.before(() => {
 	global.window = {
 		// @ts-ignore
 		navigator: {
-			language: "en",
+			languages: ["en"],
+		},
+	};
+	global.document = {
+		// @ts-ignore
+		documentElement: {
+			lang: "de",
 		},
 	};
 });
 valueExtractionSuite.after(() => {
 	global.window = undefined;
+	global.document = undefined;
 });
 const valueExtractionTests = [
 	["she/her", "she/her"], // exact match
@@ -44,7 +51,13 @@ const valueExtractionTests = [
 	["https://en.pronouns.page/they/them", "they/them"], // plain-text "URLs"
 	["pronouns.page/they/them", "they/them"], // plain-text "URLs" without scheme
 	[`<a href="https://en.pronouns.page/they/them"></a>`, "they/them"], // HTML-formatted URLs
-	[`<a href="https://en.pronouns.page/@Vipra"></a>`, null], // pronoun pages with usernames
+	[`<a href="https://en.pronouns.page/@Vipra"></a>`, "she/her"], // pronoun pages with usernames
+	[
+		`<a href="https://en.pronouns.page/@definitely_not_existing_username_on_pronouns_page"></a>`,
+		null,
+	], // 404 errors
+	[`<a href="https://de.pronouns.page/:Katze"></a>`, "Katze"], // custom pronouns
+	[`<a href="https://de.pronouns.page/@benaryorg"></a>`, "Katze"], // custom pronouns in profile
 ];
 for (const [input, expects] of valueExtractionTests) {
 	valueExtractionSuite(input, async () => {

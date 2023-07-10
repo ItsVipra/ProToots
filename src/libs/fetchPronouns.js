@@ -60,7 +60,7 @@ export async function fetchPronouns(dataID, accountName, type) {
 		status = await fetchStatus(dataID);
 	}
 
-	let pronouns = extractFromStatus(status);
+	let pronouns = await extractFromStatus(status);
 	if (!pronouns) {
 		pronouns = "null";
 		//TODO: if no field check bio
