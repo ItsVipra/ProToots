@@ -1,3 +1,5 @@
+import sanitizeHtml from "sanitize-html";
+
 const fieldMatchers = [/pro.*nouns?/i, "pronomen"];
 
 /**
@@ -27,6 +29,9 @@ export function extractFromStatus(status) {
 			}
 		}
 	}
+	if (!pronouns) return null;
+	pronouns = sanitizeHtml(pronouns, { allowedTags: [], allowedAttributes: {} });
+
 	if (!pronouns) return null;
 	return pronouns;
 }
