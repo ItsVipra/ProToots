@@ -1,10 +1,10 @@
 import { debug, error, info, warn } from "./logging";
 import { cachePronouns, getPronouns } from "./caching";
 import { normaliseAccountName } from "./protootshelpers";
+import { extractFromStatus } from "./pronouns";
 
 const cacheMaxAge = 24 * 60 * 60 * 1000; // time after which cached pronouns should be checked again: 24h
 let conversationsCache;
-const fieldNames = ["pronouns", "pronoun", "professional nouns", "pronomen"];
 
 /**
  * Fetches pronouns associated with account name.
@@ -60,12 +60,14 @@ export async function fetchPronouns(dataID, accountName, type) {
 		status = await fetchStatus(dataID);
 	}
 
-	const PronounField = getPronounField(status, accountName);
-	if (PronounField == "null") {
+	let pronouns = extractFromStatus(status);
+	if (!pronouns) {
+		pronouns = "null";
 		//TODO: if no field check bio
 		info(`no pronouns found for ${accountName}, cached null`);
 	}
-	return PronounField;
+	await cachePronouns(accountName, pronouns);
+	return pronouns;
 }
 
 /**
@@ -157,37 +159,6 @@ async function fetchConversations() {
 	conversationsCache = conversations;
 
 	return conversations;
-}
-
-/**
- * Searches for fields labelled "pronouns" in the statuses' author.
- * If found returns the value of said field.
- *
- * @param {any} status
- * @param {string} accountName
- * @returns {string} Author pronouns if found. Otherwise returns "null"
- */
-function getPronounField(status, accountName) {
-	// get account from status and pull out fields
-	const account = status.account;
-	const fields = account.fields;
-
-	for (const field of fields) {
-		//match fields against fieldNames
-		for (const searchTerm of fieldNames) {
-			if (field.name.toLowerCase().includes(searchTerm)) {
-				debug(`${account.acct}: ${field.value}`);
-
-				cachePronouns(accountName, field.value);
-				return field.value;
-			}
-		}
-	}
-
-	//if not returned by this point no field with pronouns was found
-
-	cachePronouns(accountName, "null");
-	return "null";
 }
 
 /**
