@@ -15,7 +15,6 @@ function saveOptions(e) {
 
 function restoreOptions() {
 	async function setCurrentChoice(result) {
-		console.log(result);
 		if (Object.keys(result).length == 0) {
 			await defaultOptions();
 		} else {

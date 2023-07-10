@@ -21,8 +21,6 @@ import {
 } from "../libs/domhelpers";
 import { addTypeAttribute, normaliseAccountName, sanitizePronouns } from "../libs/protootshelpers";
 
-const hostName = location.host;
-
 //before anything else, check whether we're on a Mastodon page
 checkSite();
 // log("hey vippy, du bist cute <3")
@@ -217,7 +215,7 @@ async function addProplate(element) {
 	 * @returns {string}
 	 */
 	function getID(element) {
-		let id = element.dataset.id;
+		const id = element.dataset.id;
 		if (!id) {
 			// We don't have a status ID, pronouns might not be in cache
 			warn(
