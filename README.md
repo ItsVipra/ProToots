@@ -1,13 +1,13 @@
-﻿# ProToots (v1.0.2)
+﻿# ProToots (v1.1.0)
 
-A Firefox extension which displays an author's pronouns next to their name on Mastodon.
+A Firefox extension which displays an author's pronouns next to their name on Mastodon. (Now in even more places!)
 ![A Mastodon screenshot showing off pronouns next to a person's name](documentation/example_screenshot.png)
 
 ---
 
 ## Download/Installation
 
-The extension is available on the firefox store!
+The extension is available on the firefox store! (we're working on chrome)
 
 [<img src="documentation/get-the-addon-178x60px.png">](https://addons.mozilla.org/en-US/firefox/addon/protoots/)
 
@@ -17,10 +17,7 @@ Alternatively you can download an unsigned version from the [releases page](http
 
 ## Known issues
 
-- Pronouns are not displayed on all notifications. See [#25](https://github.com/ItsVipra/ProToots/issues/25)
-- Pronouns are not displayed in the direct messages tab. See [#26](https://github.com/ItsVipra/ProToots/issues/26)
-- Pronouns on expanded posts are only shown if they have been cached before.
-- Pronouns are not displayed on replies of an expanded post. See [#27](https://github.com/ItsVipra/ProToots/issues/)
+- None! It's perfect!
 
 ---
 
@@ -30,7 +27,7 @@ Alternatively you can download an unsigned version from the [releases page](http
 
 > The addon needs to determine whether or not the site you are currently browsing is a Mastodon server. For that to work, it requires access to all sites. Otherwise, each existing Mastodon server would have to be explicitly added.
 
-### Why can't i see any ProPlates?
+### Why can't I see any ProPlates?
 
 > It is likely your instance is not supported. This is because forks of Mastodon all work slightly differently and we cannot account for every version out there.  
 > If ProToots isn't working on your instance please tell your admins to contact us here on Github.
