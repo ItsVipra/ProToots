@@ -33,16 +33,8 @@ checkSite();
  */
 async function checkSite() {
 	getSettings();
-	const requestDest = location.protocol + "//" + hostName + "/api/v1/instance";
-	const response = await fetch(requestDest);
 
-	if (response) {
-		// debug('checksite response got', {'response' : response.json()})
-
-		document.addEventListener("readystatechange", main, { once: true });
-	} else {
-		warn("Not a Mastodon instance");
-	}
+	document.addEventListener("readystatechange", main, { once: true });
 }
 
 /**
