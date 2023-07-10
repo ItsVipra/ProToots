@@ -61,6 +61,11 @@ function main() {
 	//All of this is Mastodon specific - factor out into mastodon.js?
 	log("Mastodon instance, activating Protoots");
 
+	//create a global tootObserver to handle all article objects
+	const tootObserver = new IntersectionObserver((entries) => {
+		onTootIntersection(entries);
+	});
+
 	// We are tracking navigation changes with the location and a MutationObserver on `document`,
 	// because the popstate event from the History API is only triggered with the back/forward buttons.
 	let lastUrl = location.href;
@@ -96,14 +101,10 @@ function main() {
 			.flat()
 			// .map((n) => console.log("found node: ", n));
 			.filter(isPronounableElement)
-			.forEach((a) => addtoTootObserver(a));
+			.forEach((a) => addtoTootObserver(a, tootObserver));
 	}).observe(document, { subtree: true, childList: true });
 }
 
-//create a global tootObserver to handle all article objects
-const tootObserver = new IntersectionObserver((entries) => {
-	onTootIntersection(entries);
-});
 
 /**
  * Callback for TootObserver
@@ -136,7 +137,7 @@ function onTootIntersection(observerentries) {
  * Adds ActionElement to the tootObserver, if it has not been added before.
  * @param {HTMLElement} ActionElement
  */
-function addtoTootObserver(ActionElement) {
+function addtoTootObserver(ActionElement, tootObserver) {
 	// console.log(ActionElement);
 	if (ActionElement.hasAttribute("protoots-tracked")) return;
 
