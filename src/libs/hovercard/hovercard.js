@@ -1,13 +1,15 @@
-import { fetchProfile } from "./fetchPronouns";
-import { addShowMoreButton, generateProfile } from "./hovercard/hovercard_generators";
-import { normaliseAccountName } from "./protootshelpers";
-import { hoverCardSettings } from "./settings";
+import { fetchProfile } from "../fetchPronouns";
+import { addShowMoreButton, generateProfile } from "./hovercard_generators";
+import { normaliseAccountName } from "../protootshelpers";
+import { hoverCardSettings } from "../settings";
 
 const listenerTimeout = 200;
 
 let layer;
 let hovering = null;
 let hovercardExists = false;
+
+let mousePos = { x: undefined, y: undefined };
 
 /**
  * Adds hovercard layer div to document body
@@ -22,6 +24,10 @@ export function addHoverCardLayer() {
 	layer.style.left = "0";
 
 	document.body.appendChild(layer);
+
+	window.addEventListener("mousemove", (event) => {
+		mousePos = { x: event.clientX, y: event.clientY };
+	});
 }
 
 /**
@@ -32,7 +38,7 @@ export function addHoverCardLayer() {
  */
 export function addHoverCardListener(el) {
 	// console.log("adding hovercard listener to", el);
-	if (el.nodeName != "DIV") return;
+	if (el.nodeName != "ARTICLE") return;
 
 	const nametag = /** @type {HTMLElement|null} */ (el.querySelector(".display-name"));
 	const id = el.dataset.id;
@@ -72,6 +78,8 @@ async function addHoverCard(el, statusID, mouseEvent) {
 
 	hovercardExists = true;
 
+	const type = el.getAttribute("type");
+
 	//remove all other hovercards
 	document.querySelectorAll("#protoots-hovercard").forEach((element) => element.remove());
 
@@ -103,8 +111,8 @@ async function addHoverCard(el, statusID, mouseEvent) {
 	hovercard.id = "protoots-hovercard";
 
 	//set position from mouse cursor
-	hovercard.style.left = mousePos.x.toString() + "px";
-	hovercard.style.top = mousePos.y.toString() + "px";
+	hovercard.style.left = (mousePos.x + 10).toString() + "px";
+	hovercard.style.top = (mousePos.y + 10).toString() + "px";
 
 	layer.appendChild(hovercard);
 	//inserted into DOM here - how the heck do i find out whether the bio is too long now
@@ -152,16 +160,15 @@ async function addHoverCard(el, statusID, mouseEvent) {
 	);
 }
 
+/**
+ *
+ * @param {HTMLElement} card Element which to remove after timeout
+ */
 function removeHoverCard(card) {
-	card.classList.add("hidden");
+	if (layer.getAttribute("noremove")) return; //debug settings
+	card.classList.add("hidden"); //TODO: interrupt removal by hovering again
 	card.addEventListener("transitioned", () => card.remove());
 	setTimeout(() => {
 		card.remove();
 	}, listenerTimeout);
 }
-
-let mousePos = { x: undefined, y: undefined };
-
-window.addEventListener("mousemove", (event) => {
-	mousePos = { x: event.clientX, y: event.clientY };
-});

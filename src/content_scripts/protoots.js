@@ -32,7 +32,7 @@ import {
 	addTypeAttribute,
 	normaliseAccountName,
 } from "../libs/protootshelpers.js";
-import { addHoverCardLayer, addHoverCardListener } from "../libs/hovercard";
+import { addHoverCardLayer, addHoverCardListener } from "../libs/hovercard/hovercard";
 import { debug } from "../libs/logging.js";
 
 //before anything else, check whether we're on a Mastodon page
@@ -44,7 +44,7 @@ checkSite();
  * If so creates an 'readystatechange' EventListener, with callback to main()
  */
 async function checkSite() {
-	getSettings();
+	await getSettings();
 
 	document.addEventListener("readystatechange", main, { once: true });
 }
