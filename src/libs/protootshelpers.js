@@ -17,6 +17,14 @@ export function normaliseAccountName(name) {
 	return name;
 }
 
+export function accountNameFromURL(url) {
+	const splitURL = url.split("/");
+
+	const username = [splitURL.pop(), splitURL.pop()].join("@");
+
+	return username;
+}
+
 /**
  * Sanitizes the pronoun field by removing various long information parts.
  * As of today, this just removes custom emojis from the field.
