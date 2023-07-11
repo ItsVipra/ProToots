@@ -23,8 +23,6 @@ import {
 import { addTypeAttribute, normaliseAccountName, sanitizePronouns } from "../libs/protootshelpers";
 import { addHoverCardLayer, addHoverCardListener } from "../libs/hovercard";
 
-const hostName = location.host;
-
 //before anything else, check whether we're on a Mastodon page
 checkSite();
 // log("hey vippy, du bist cute <3")
@@ -34,18 +32,9 @@ checkSite();
  * If so creates an 'readystatechange' EventListener, with callback to main()
  */
 async function checkSite() {
-	await getSettings();
-	const requestDest = location.protocol + "//" + hostName + "/api/v1/instance";
-	const response = await fetch(requestDest);
+	getSettings();
 
-	if (response) {
-		// debug('checksite response got', {'response' : response.json()})
-		// console.log("adding event listener");
-
-		document.addEventListener("readystatechange", main, { once: true });
-	} else {
-		warn("Not a Mastodon instance");
-	}
+	document.addEventListener("readystatechange", main, { once: true });
 }
 
 /**
@@ -64,6 +53,12 @@ function main() {
 	//All of this is Mastodon specific - factor out into mastodon.js?
 	log("Mastodon instance, activating Protoots");
 	if (hoverCardEnabled()) addHoverCardLayer();
+
+	//create a global tootObserver to handle all article objects
+	const tootObserver = new IntersectionObserver((entries) => {
+		onTootIntersection(entries);
+	});
+
 	// We are tracking navigation changes with the location and a MutationObserver on `document`,
 	// because the popstate event from the History API is only triggered with the back/forward buttons.
 	let lastUrl = location.href;
@@ -99,14 +94,9 @@ function main() {
 			.flat()
 			// .map((n) => console.log("found node: ", n));
 			.filter(isPronounableElement)
-			.forEach((a) => addtoTootObserver(a));
+			.forEach((a) => addtoTootObserver(a, tootObserver));
 	}).observe(document, { subtree: true, childList: true });
 }
-
-//create a global tootObserver to handle all article objects
-const tootObserver = new IntersectionObserver((entries) => {
-	onTootIntersection(entries);
-});
 
 /**
  * Callback for TootObserver
@@ -123,16 +113,17 @@ function onTootIntersection(observerentries) {
 			waitForElementRemoved(ArticleElement, ".protoots-proplate", () => {
 				ArticleElement.removeAttribute("protoots-checked");
 			});
-		}
-		if (ArticleElement.getAttribute("protoots-type") == "conversation") {
-			waitForElement(ArticleElement, ".conversation__content__names", () =>
-				addProplate(ArticleElement),
-			);
 		} else {
-			waitForElement(ArticleElement, ".display-name", () => {
-				if (hoverCardEnabled) addHoverCardListener(ArticleElement);
-				addProplate(ArticleElement);
-			});
+			if (ArticleElement.getAttribute("protoots-type") == "conversation") {
+				waitForElement(ArticleElement, ".conversation__content__names", () =>
+					addProplate(ArticleElement),
+				);
+			} else {
+				waitForElement(ArticleElement, ".display-name", () => {
+					if (hoverCardEnabled) addHoverCardListener(ArticleElement);
+					addProplate(ArticleElement);
+				});
+			}
 		}
 	}
 }
@@ -140,8 +131,9 @@ function onTootIntersection(observerentries) {
 /**
  * Adds ActionElement to the tootObserver, if it has not been added before.
  * @param {HTMLElement} ActionElement
+ * @param {IntersectionObserver} tootObserver Observer to add the element to
  */
-function addtoTootObserver(ActionElement) {
+function addtoTootObserver(ActionElement, tootObserver) {
 	// console.log(ActionElement);
 	if (ActionElement.hasAttribute("protoots-tracked")) return;
 
@@ -230,16 +222,13 @@ async function addProplate(element) {
 	 * @returns {string}
 	 */
 	function getID(element) {
-		let id = element.dataset.id;
+		const id = element.dataset.id;
 		if (!id) {
 			// We don't have a status ID, pronouns might not be in cache
 			warn(
 				"The element passed to addProplate does not have a data-id attribute, although it should have one.",
 				element,
 			);
-
-			log("Attempting to retrieve id from url - this may have unforseen consequences.");
-			id = location.pathname.split("/").pop();
 		}
 		return id;
 	}
@@ -299,7 +288,18 @@ async function addProplate(element) {
 	}
 
 	async function addToStatus(element) {
-		const statusId = getID(element);
+		let statusId = getID(element);
+		if (!statusId) {
+			//if we couldn't get an id from the div try the closest article
+			const ArticleElement = element.closest("article");
+			if (ArticleElement) {
+				statusId = getID(ArticleElement);
+			} else if (type === "detailed-status") {
+				//if we still don't have an ID try the domain as a last resort
+				warn("Attempting to retrieve id from url - this may have unforseen consequences.");
+				statusId = location.pathname.split("/").pop();
+			}
+		}
 
 		const accountNameEl = getAccountNameEl(element, ".display-name__account");
 		const accountName = getAccountName(accountNameEl);

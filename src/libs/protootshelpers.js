@@ -46,15 +46,15 @@ export function addTypeAttribute(ActionElement) {
 		ActionElement.setAttribute("protoots-type", "detailed-status");
 	} else if (hasClasses(ActionElement, "conversation")) {
 		ActionElement.setAttribute("protoots-type", "conversation");
-		ActionElement.parentElement?.parentElement?.setAttribute("protoots-type", "conversation");
+		ActionElement.closest("article").setAttribute("protoots-type", "conversation");
 	} else if (hasClasses(ActionElement, "account-authorize")) {
 		ActionElement.setAttribute("protoots-type", "account-authorize");
-		ActionElement.parentElement?.parentElement?.setAttribute("protoots-type", "account-authorize");
+		ActionElement.closest("article").setAttribute("protoots-type", "account-authorize");
 	} else if (hasClasses(ActionElement, "notification")) {
 		ActionElement.setAttribute("protoots-type", "notification");
-		ActionElement.parentElement?.parentElement?.setAttribute("protoots-type", "notification");
+		ActionElement.closest("article").setAttribute("protoots-type", "notification");
 	} else if (hasClasses(ActionElement, "account")) {
 		ActionElement.setAttribute("protoots-type", "account");
-		ActionElement.parentElement?.setAttribute("protoots-type", "account");
+		ActionElement.closest("article").setAttribute("protoots-type", "account");
 	}
 }

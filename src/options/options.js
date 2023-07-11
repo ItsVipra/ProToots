@@ -25,24 +25,28 @@ function saveOptions(e) {
 }
 
 function restoreOptions() {
-	function setCurrentChoice(result) {
-		document.querySelector("#proplates-enabled").checked = result.proplate.enabled || false;
-		document.querySelector("#logging").checked = result.proplate.logging || false;
-		document.querySelector("#status").checked = result.proplate.statusVisibility || false;
-		document.querySelector("#notification").checked =
-			result.proplate.notificationVisibility || false;
-		document.querySelector("#account").checked = result.proplate.accountVisibility || false;
-		document.querySelector("#conversation").checked =
-			result.proplate.conversationVisibility || false;
+	async function setCurrentChoice(result) {
+		if (!result.statusVisibility) {
+			await defaultOptions();
+		} else {
+			document.querySelector("#proplates-enabled").checked = result.proplate.enabled || false;
+			document.querySelector("#logging").checked = result.proplate.logging || false;
+			document.querySelector("#status").checked = result.proplate.statusVisibility || false;
+			document.querySelector("#notification").checked =
+				result.proplate.notificationVisibility || false;
+			document.querySelector("#account").checked = result.proplate.accountVisibility || false;
+			document.querySelector("#conversation").checked =
+				result.proplate.conversationVisibility || false;
 
-		document.querySelector("#hovercards-enabled").checked = result.hoverCard.enabled || false;
-		document.querySelector("#card-stats").checked = result.hoverCard.stats || false;
-		document.querySelector("#card-note").checked = result.hoverCard.privateNote || false;
-		document.querySelector("#card-creationDate").checked = result.hoverCard.creationDate || false;
-		document.querySelector("#card-fields").checked = result.hoverCard.fields || false;
-		document.querySelector("#card-scroll-bio").checked = result.hoverCard.scrollableBio || false;
+			document.querySelector("#hovercards-enabled").checked = result.hoverCard.enabled || false;
+			document.querySelector("#card-stats").checked = result.hoverCard.stats || false;
+			document.querySelector("#card-note").checked = result.hoverCard.privateNote || false;
+			document.querySelector("#card-creationDate").checked = result.hoverCard.creationDate || false;
+			document.querySelector("#card-fields").checked = result.hoverCard.fields || false;
+			document.querySelector("#card-scroll-bio").checked = result.hoverCard.scrollableBio || false;
 
-		setDisabled();
+			setDisabled();
+		}
 	}
 
 	function onError(err) {
@@ -51,6 +55,17 @@ function restoreOptions() {
 
 	const getting = storage.sync.get();
 	getting.then(setCurrentChoice, onError);
+}
+
+async function defaultOptions() {
+	await storage.sync.set({
+		logging: false,
+		statusVisibility: true,
+		notificationVisibility: true,
+		accountVisibility: true,
+		conversationVisibility: false,
+	});
+	restoreOptions();
 }
 
 function setDisabled() {
@@ -90,4 +105,7 @@ document.querySelector("form").addEventListener("change", () => {
 });
 document.querySelector("#resetbutton").addEventListener("click", async () => {
 	await storage.local.clear();
+});
+document.querySelector("#defaultSettings").addEventListener("click", async () => {
+	await defaultOptions();
 });
