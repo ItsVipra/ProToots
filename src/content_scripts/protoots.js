@@ -288,11 +288,7 @@ async function addProplate(element) {
 	async function addToStatus(element) {
 		let statusId = getID(element);
 		if (!statusId) {
-			//if we couldn't get an id from the div try the closest article
-			const ArticleElement = element.closest("article");
-			if (ArticleElement) {
-				statusId = getID(ArticleElement);
-			} else if (type === "detailed-status") {
+			if (type === "detailed-status") {
 				//if we still don't have an ID try the domain as a last resort
 				warn("Attempting to retrieve id from url - this may have unforseen consequences.");
 				statusId = location.pathname.split("/").pop();
