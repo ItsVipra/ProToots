@@ -48,7 +48,7 @@ export function sanitizePronouns(str) {
  * @param {HTMLElement} ActionElement
  */
 export function addTypeAttribute(ActionElement) {
-	if (hasClasses(ActionElement, "status")) {
+	if (hasClasses(ActionElement, "status") && !hasClasses(ActionElement, "notification__message")) {
 		ActionElement.setAttribute("protoots-type", "status");
 	} else if (hasClasses(ActionElement, "detailed-status")) {
 		ActionElement.setAttribute("protoots-type", "detailed-status");
@@ -58,7 +58,7 @@ export function addTypeAttribute(ActionElement) {
 	} else if (hasClasses(ActionElement, "account-authorize")) {
 		ActionElement.setAttribute("protoots-type", "account-authorize");
 		ActionElement.closest("article").setAttribute("protoots-type", "account-authorize");
-	} else if (hasClasses(ActionElement, "notification")) {
+	} else if (hasClasses(ActionElement, "notification", "notification__message")) {
 		ActionElement.setAttribute("protoots-type", "notification");
 		ActionElement.closest("article").setAttribute("protoots-type", "notification");
 	} else if (hasClasses(ActionElement, "account")) {
