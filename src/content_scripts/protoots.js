@@ -19,7 +19,12 @@ import {
 	waitForElement,
 	waitForElementRemoved,
 } from "../libs/domhelpers";
-import { addTypeAttribute, normaliseAccountName, sanitizePronouns } from "../libs/protootshelpers";
+import {
+	accountNameFromURL,
+	addTypeAttribute,
+	normaliseAccountName,
+	sanitizePronouns,
+} from "../libs/protootshelpers";
 
 //before anything else, check whether we're on a Mastodon page
 checkSite();
@@ -81,6 +86,7 @@ function main() {
 						"conversation",
 						"account-authorize",
 						"notification",
+						"notification__message",
 						"account",
 					))
 			);
@@ -115,6 +121,11 @@ function onTootIntersection(observerentries) {
 				waitForElement(ArticleElement, ".conversation__content__names", () =>
 					addProplate(ArticleElement),
 				);
+			} else if (ArticleElement.nodeName == "ASIDE") {
+				//glitch-soc notifications
+				waitForElement(ArticleElement, ".status__display-name", () => {
+					addProplate(ArticleElement);
+				});
 			} else {
 				waitForElement(ArticleElement, ".display-name", () => addProplate(ArticleElement));
 			}
@@ -307,22 +318,30 @@ async function addProplate(element) {
 		// This allows us to pass incomplete nodes into this method, because
 		// we only process them after we have all required information.
 
-		generateProPlate(statusId, accountName, nametagEl, "status");
+		let tempType = "status";
+
+		if (location.href.endsWith("notifications")) tempType = "notification";
+
+		generateProPlate(statusId, accountName, nametagEl, tempType);
 	}
 
 	async function addToNotification(element) {
+		//debug("adding to notification");
 		const statusId = getID(element);
 
-		const accountNameEl = getAccountNameEl(element, ".notification__display-name");
-		const accountName = getAccountName(accountNameEl, "title");
+		let accountNameEl = getAccountNameEl(element, ".notification__display-name");
+		if (!accountNameEl) accountNameEl = getAccountNameEl(element, ".status__display-name");
+		let accountName = getAccountName(accountNameEl, "href");
+		accountName = accountNameFromURL(accountName);
 
-		const nametagEl = getNametagEl(element, ".notification__display-name");
+		let nametagEl = accountNameEl;
 
 		element.setAttribute("protoots-checked", "true");
-		generateProPlate(statusId, accountName, nametagEl, "notification");
+		generateProPlate(statusId, accountName, nametagEl, "notification"); //FIXME: change back to notification when done testing
 	}
 
 	async function addToAccount(element) {
+		//debug("adding to account");
 		const statusId = getID(element);
 		const nametagEl = element.querySelector(".display-name__html");
 		const accountName = getAccountName(element.querySelector(".display-name__account"));
@@ -330,7 +349,12 @@ async function addProplate(element) {
 		nametagEl.parentElement.style.display = "flex";
 
 		element.setAttribute("protoots-checked", "true");
-		generateProPlate(statusId, accountName, nametagEl, "account");
+
+		let tempType = "account";
+
+		if (location.href.endsWith("notifications")) tempType = "notification";
+
+		generateProPlate(statusId, accountName, nametagEl, tempType);
 	}
 
 	async function addToConversation(element) {
