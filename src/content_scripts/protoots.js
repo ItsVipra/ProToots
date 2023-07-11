@@ -215,13 +215,18 @@ async function addProplate(element) {
 	 * @returns {string}
 	 */
 	function getID(element) {
-		const id = element.dataset.id;
+		let id = element.dataset.id;
 		if (!id) {
 			// We don't have a status ID, pronouns might not be in cache
 			warn(
-				"The element passed to addProplate does not have a data-id attribute, although it should have one.",
+				"The element passed to addProplate does not have a data-id attribute, searching for article.",
 				element,
 			);
+			//if we couldn't get an id from the div try the closest article
+			const ArticleElement = element.closest("article");
+			if (ArticleElement) {
+				id = getID(ArticleElement);
+			}
 		}
 		return id;
 	}
