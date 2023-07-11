@@ -7,7 +7,6 @@ function saveOptions(e) {
 	storage.sync.set({
 		proplate: {
 			enabled: document.querySelector("#proplates-enabled").checked,
-			logging: document.querySelector("#logging").checked,
 			statusVisibility: document.querySelector("#status").checked,
 			notificationVisibility: document.querySelector("#notification").checked,
 			accountVisibility: document.querySelector("#account").checked,
@@ -21,16 +20,17 @@ function saveOptions(e) {
 			fields: document.querySelector("#card-fields").checked,
 			scrollableBio: document.querySelector("#card-scroll-bio").checked,
 		},
+		logging: document.querySelector("#logging").checked,
 	});
 }
 
 function restoreOptions() {
 	async function setCurrentChoice(result) {
-		if (!result.statusVisibility) {
+		if (!result.proplate || !result.hoverCard) {
 			await defaultOptions();
 		} else {
 			document.querySelector("#proplates-enabled").checked = result.proplate.enabled || false;
-			document.querySelector("#logging").checked = result.proplate.logging || false;
+			document.querySelector("#logging").checked = result.logging || false;
 			document.querySelector("#status").checked = result.proplate.statusVisibility || false;
 			document.querySelector("#notification").checked =
 				result.proplate.notificationVisibility || false;
@@ -59,11 +59,22 @@ function restoreOptions() {
 
 async function defaultOptions() {
 	await storage.sync.set({
+		proplate: {
+			enabled: true,
+			statusVisibility: true,
+			notificationVisibility: true,
+			accountVisibility: true,
+			conversationVisibility: false,
+		},
+		hoverCard: {
+			enabled: true,
+			stats: false,
+			privateNote: false,
+			creationDate: true,
+			fields: true,
+			scrollableBio: true,
+		},
 		logging: false,
-		statusVisibility: true,
-		notificationVisibility: true,
-		accountVisibility: true,
-		conversationVisibility: false,
 	});
 	restoreOptions();
 }
