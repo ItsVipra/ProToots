@@ -20,6 +20,14 @@
 .protoots-hovercard .account__avatar {
     width: 5.625em;
     height: 5.635em;
+    overflow: hidden;
+}
+
+.protoots-hovercard .account__avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .protoots-hovercard .account__header__info {
@@ -52,11 +60,14 @@
 
 .protoots-hovercard .account__header__tabs {
     padding-bottom: .33em;
+    /* padding: unset;
+    background:unset; */
 }
 
 .protoots-hovercard .account__header__tabs__name {
     margin-top: unset;
     margin-bottom: unset;
+    padding-left: unset;
 }
 
 .protoots-hovercard .account__header__extra {
