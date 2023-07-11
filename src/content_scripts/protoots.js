@@ -241,7 +241,7 @@ async function addProplate(element) {
 		const accountNameEl = /** @type {HTMLElement|null} */ (element.querySelector(accountNameClass));
 		if (!accountNameEl) {
 			warn(
-				"The element passed to addProplate does not have a .display-name__account, although it should have one.",
+				`The element passed to addProplate does not have a ${accountNameClass}, although it should have one.`,
 				element,
 			);
 		}
