@@ -216,10 +216,10 @@ const knownPronouns = [
  * @returns {string|null} The result or null
  */
 function extractFromBio(bio) {
-	const exactMatches = bio.matchAll(/(\w+)\/(\w+)/gi);
+	const exactMatches = bio.matchAll(/(\w+) ?\/ ?(\w+)/gi);
 	for (const [match, subjective, objective] of exactMatches) {
 		if (knownPronouns.includes(subjective) && knownPronouns.includes(objective)) {
-			return match;
+			return match.replaceAll(" ", "");
 		}
 	}
 

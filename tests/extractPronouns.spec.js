@@ -77,7 +77,8 @@ const bioExtractTests = [
 	["I'm cute and my pronouns are she/her", "she/her"], // exact match
 	["my pronouns are helicopter/joke", null], // not on allowlist
 	["pronouns: uwu/owo", "uwu/owo"], // followed by pronoun pattern
-	["pronouns: any", "any"], // followed by pronoun pattern,
+	["pronouns: any", "any"], // followed by pronoun pattern
+	["I'm cute af (she / they)", "she/they"], // with whitespace between pronouns
 ];
 for (const [input, expects] of bioExtractTests) {
 	bioExtractSuite(input, async () => {
