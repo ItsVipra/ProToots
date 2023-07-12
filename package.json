@@ -1,21 +1,18 @@
 {
 	"name": "protoots",
 	"scripts": {
-		"build:scripts": "node scripts/build.mjs",
-		"build:webext": "web-ext build --overwrite-dest",
-		"start": "run-p -l -r watch:**",
-		"watch:scripts": "node scripts/watch.mjs",
-		"watch:webext": "web-ext run --keep-profile-changes --profile-create-if-missing --firefox-profile=.firefox-profile/",
-		"format": "prettier --write --ignore-path .gitignore .",
-		"package": "run-s -l build:**",
-		"lint": "eslint src/"
+		"start": "just start-firefox",
+		"start:chrome": "just start-chrome",
+		"format": "just format",
+		"package": "just package",
+		"lint": "just lint"
 	},
 	"devDependencies": {
 		"@sprout2000/esbuild-copy-plugin": "1.1.8",
 		"esbuild": "0.17.19",
 		"eslint": "^8.42.0",
 		"eslint-config-prettier": "^8.8.0",
-		"npm-run-all": "^4.1.5",
+		"just-install": "^1.1.0-beta.0",
 		"prettier": "^2.8.8",
 		"web-ext": "^7.6.2"
 	},
@@ -25,10 +22,16 @@
 		"useTabs": true,
 		"trailingComma": "all"
 	},
-	"webExt": {
-		"sourceDir": "dist/"
-	},
 	"dependencies": {
 		"webextension-polyfill": "^0.10.0"
+	},
+	"webExt": {
+		"sourceDir": "dist/",
+		"run": {
+			"firefoxProfile": ".firefox-profile/",
+			"chromiumProfile": ".chromium-profile/",
+			"keepProfileChanges": true,
+			"profileCreateIfMissing": true
+		}
 	}
 }
