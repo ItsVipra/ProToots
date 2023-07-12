@@ -6,6 +6,7 @@
 	display: inline-flex;
 	text-transform: lowercase;
 	animation: proplate-fadein 0.15s linear;
+	font-weight: 500;
 }
 
 /* dark theme */
@@ -89,4 +90,8 @@
 	.protoots-proplate {
 		animation: none;
 	}
+}
+
+bdi.has-proplate {
+	display: flex;
 }
