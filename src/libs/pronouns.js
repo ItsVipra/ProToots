@@ -227,6 +227,10 @@ function extractFromBio(bio) {
 	for (const match of followedByColon) {
 		return match.pop(); // first group is last entry in array
 	}
+	const anyAllPronouns = bio.match(/(any|all) +pronouns/gi);
+	if (anyAllPronouns) {
+		return anyAllPronouns[0];
+	}
 
 	return null;
 }
