@@ -234,10 +234,7 @@ async function addProplate(element) {
 				element,
 			);
 			//if we couldn't get an id from the div try the closest article
-			const ArticleElement = element.closest("article");
-			if (ArticleElement) {
-				id = getID(ArticleElement);
-			}
+			id = element.closest("article[data-id]")?.dataset.id;
 		}
 		return id;
 	}
