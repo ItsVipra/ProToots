@@ -324,8 +324,9 @@ async function addProplate(element) {
 
 		let accountNameEl = getAccountNameEl(element, ".notification__display-name");
 		if (!accountNameEl) accountNameEl = getAccountNameEl(element, ".status__display-name");
-		let accountName = getAccountName(accountNameEl, "href");
-		accountName = accountNameFromURL(accountName);
+
+		let accountName = getAccountName(accountNameEl, "title");
+		if (!accountName) accountName = accountNameFromURL(getAccountName(accountNameEl, "href"));
 
 		let nametagEl = accountNameEl;
 
