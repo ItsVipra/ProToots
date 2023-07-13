@@ -2,7 +2,7 @@
 	"name": "protoots",
 	"scripts": {
 		"build:scripts": "node scripts/build.mjs",
-		"build:webext": "web-ext build --overwrite-dest",
+		"build:webext": "web-ext build --overwrite-dest --filename protoots-firefox.zip",
 		"start": "run-p -l -r watch:**",
 		"watch:scripts": "node scripts/watch.mjs",
 		"watch:webext": "web-ext run --keep-profile-changes --profile-create-if-missing --firefox-profile=.firefox-profile/",
