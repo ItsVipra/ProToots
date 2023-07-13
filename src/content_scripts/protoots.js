@@ -318,11 +318,7 @@ async function addProplate(element) {
 		// This allows us to pass incomplete nodes into this method, because
 		// we only process them after we have all required information.
 
-		let tempType = "status";
-
-		if (location.href.endsWith("notifications")) tempType = "notification";
-
-		generateProPlate(statusId, accountName, nametagEl, tempType);
+		generateProPlate(statusId, accountName, nametagEl, "status");
 	}
 
 	async function addToNotification(element) {
@@ -337,7 +333,7 @@ async function addProplate(element) {
 		let nametagEl = accountNameEl;
 
 		element.setAttribute("protoots-checked", "true");
-		generateProPlate(statusId, accountName, nametagEl, "notification"); //FIXME: change back to notification when done testing
+		generateProPlate(statusId, accountName, nametagEl, "notification");
 	}
 
 	async function addToAccount(element) {
@@ -350,11 +346,7 @@ async function addProplate(element) {
 
 		element.setAttribute("protoots-checked", "true");
 
-		let tempType = "account";
-
-		if (location.href.endsWith("notifications")) tempType = "notification";
-
-		generateProPlate(statusId, accountName, nametagEl, tempType);
+		generateProPlate(statusId, accountName, nametagEl, "account");
 	}
 
 	async function addToConversation(element) {

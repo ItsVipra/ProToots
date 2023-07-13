@@ -1,4 +1,4 @@
-import { debug, error, info, warn } from "./logging";
+import { debug, error, info, log, warn } from "./logging";
 import { cachePronouns, getPronouns } from "./caching";
 import { normaliseAccountName } from "./protootshelpers";
 
@@ -60,6 +60,9 @@ export async function fetchPronouns(dataID, accountName, type) {
 		status = await fetchStatus(dataID);
 	}
 
+	log(`Fetching ${type} failed, trying notification instead.`);
+	if (!status) status = await fetchNotification(dataID); //fallback for glitch-soc notifications
+
 	const PronounField = getPronounField(status, accountName);
 	if (PronounField == "null") {
 		//TODO: if no field check bio
@@ -85,6 +88,8 @@ async function fetchStatus(statusID) {
 	);
 
 	let status = await response.json();
+
+	if (!response.ok) return null;
 
 	//if status contains a reblog get that for further processing - we want the embedded post's author
 	if (status.reblog) status = status.reblog;
@@ -127,6 +132,8 @@ async function fetchAccount(accountID) {
 			headers: { Authorization: `Bearer ${accessToken}` },
 		},
 	);
+
+	if (!response.ok) return null;
 
 	const account = await response.json();
 
