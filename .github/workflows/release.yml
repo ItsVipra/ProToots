@@ -12,6 +12,15 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v3
+
+      - name: Update package version
+        run: npm version from-git --no-git-tag-version
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        name: Commit package version update
+        with:
+          commit_message: "Update to ${{ github.ref }}"
+          file_pattern: "package*.json"
+
       - name: Install dependencies
         run: npm ci
       - name: Build packages
