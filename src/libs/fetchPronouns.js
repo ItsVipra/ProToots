@@ -87,9 +87,9 @@ async function fetchStatus(statusID) {
 		},
 	);
 
-	let status = await response.json();
-
 	if (!response.ok) return null;
+
+	let status = await response.json();
 
 	//if status contains a reblog get that for further processing - we want the embedded post's author
 	if (status.reblog) status = status.reblog;
