@@ -32,13 +32,13 @@ jobs:
     steps:
       - name: Download assets for release
         run: >
-          gh release download ${{ github.ref }} --archive zip --dir assets
+          gh release download ${{ github.ref }} --archive zip --dir assets --output source.zip
           gh release download ${{ github.ref }} --pattern "*firefox*" --dir assets
       - uses: browser-actions/release-firefox-addon@v0.1.3
         with:
           addon-id: "protoots"
           addon-path: "assets/protoots-firefox.zip"
-          source-path: "assets/ProToots-${{ github.ref }}.zip"
+          source-path: "assets/source.zip"
           approval-note: |
             The source code requires Node.js 18 or newer. To generate the source code, run:
 
