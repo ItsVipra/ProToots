@@ -56,14 +56,15 @@ const valueExtractionTests = [
 		`<a href="https://en.pronouns.page/@definitely_not_existing_username_on_pronouns_page"></a>`,
 		null,
 	], // 404 errors
-	[`<a href="https://de.pronouns.page/:Katze"></a>`, "Katze"], // custom pronouns
-	[`<a href="https://de.pronouns.page/@benaryorg"></a>`, "Katze"], // custom pronouns in profile
+	[`<a href="https://de.pronouns.page/:Katze"></a>`, "Katze/Katze's"], // custom pronouns
+	[`<a href="https://de.pronouns.page/@benaryorg"></a>`, "Katze/Katze's"], // custom pronouns in profile
 	[`:theythem:`, null], // emojis shortcodes used for pronouns
 	[
 		// This is an actual example from a Mastodon field, with example.com redirecting to pronouns.page.
 		`dey/denen, es/ihm - <a href="https://example.com" rel="nofollow noopener noreferrer" target="_blank"><span class="invisible">https://</span><span class="">example.com</span><span class="invisible"></span></a>`,
 		"dey/denen, es/ihm",
 	],
+	["https://en.pronouns.page/it", "it/its"], // single-word pronoun pages
 ];
 for (const [input, expects] of valueExtractionTests) {
 	valueExtractionSuite(input, async () => {

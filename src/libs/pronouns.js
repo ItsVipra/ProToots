@@ -2,7 +2,7 @@ import sanitizeHtml from "sanitize-html";
 
 const fieldMatchers = [/pro.*nouns?/i, "pronomen"];
 const knownPronounUrls = [
-	/pronouns\.page\/:?([\w/@]+)/,
+	/pronouns\.page\/([\w/@:]+)/,
 	/pronouns\.within\.lgbt\/([\w/]+)/,
 	/pronouns\.cc\/pronouns\/([\w/]+)/,
 ];
@@ -59,6 +59,10 @@ async function extractFromField(field) {
 	for (const knownUrlRe of knownPronounUrls) {
 		if (!knownUrlRe.test(pronounsRaw)) continue;
 		text = pronounsRaw.match(knownUrlRe)[1];
+
+		if (pronounsRaw.includes("pronouns.page") && text.charAt(0) !== "@") {
+			return await fetchFromPronounsPage(text);
+		}
 	}
 
 	// Right now, only the pronoun.page regex matches the @usernames.
@@ -105,20 +109,26 @@ async function queryPronounsFromPronounsPage(username) {
 	if (!pronouns) pronouns = profiles[0].pronouns;
 
 	let val = pronouns.find((x) => x.opinion === "yes" || x.opinion === "meh").value;
-	val = sanitizePronounPageValue(val);
+	val = await fetchFromPronounsPage(val);
 	return val;
 }
 
 /**
  * @param {string} val
+ * @returns {Promise<string>}
  */
-function sanitizePronounPageValue(val) {
-	if (!val.startsWith("https://")) return val;
+async function fetchFromPronounsPage(val) {
+	const match = val.match(/pronouns\.page\/(.+)/);
+	if (match) val = match[1];
 
-	val = val.replace(/https?:\/\/.+\.pronouns\.page\/:?/, "");
+	if (val.includes("/")) return val;
 
-	if (val === "no-pronouns") val = "no pronouns";
-	return val;
+	if (val === "no-pronouns") return "no pronouns";
+
+	const pronounNameResp = await fetch("https://en.pronouns.page/api/pronouns/" + val);
+	const { name: pronounName } = await pronounNameResp.json();
+
+	return pronounName;
 }
 
 /**
