@@ -19,7 +19,12 @@ import {
 	waitForElement,
 	waitForElementRemoved,
 } from "../libs/domhelpers";
-import { addTypeAttribute, normaliseAccountName, sanitizePronouns } from "../libs/protootshelpers";
+import {
+	accountNameFromURL,
+	addTypeAttribute,
+	normaliseAccountName,
+	sanitizePronouns,
+} from "../libs/protootshelpers";
 
 //before anything else, check whether we're on a Mastodon page
 checkSite();
@@ -81,6 +86,7 @@ function main() {
 						"conversation",
 						"account-authorize",
 						"notification",
+						"notification__message",
 						"account",
 					))
 			);
@@ -115,6 +121,11 @@ function onTootIntersection(observerentries) {
 				waitForElement(ArticleElement, ".conversation__content__names", () =>
 					addProplate(ArticleElement),
 				);
+			} else if (ArticleElement.nodeName == "ASIDE") {
+				//glitch-soc notifications
+				waitForElement(ArticleElement, ".status__display-name", () => {
+					addProplate(ArticleElement);
+				});
 			} else {
 				waitForElement(ArticleElement, ".display-name", () => addProplate(ArticleElement));
 			}
@@ -215,13 +226,15 @@ async function addProplate(element) {
 	 * @returns {string}
 	 */
 	function getID(element) {
-		const id = element.dataset.id;
+		let id = element.dataset.id;
 		if (!id) {
 			// We don't have a status ID, pronouns might not be in cache
 			warn(
-				"The element passed to addProplate does not have a data-id attribute, although it should have one.",
+				"The element passed to addProplate does not have a data-id attribute, searching for article.",
 				element,
 			);
+			//if we couldn't get an id from the div try the closest article
+			id = element.closest("article[data-id]")?.dataset.id;
 		}
 		return id;
 	}
@@ -236,7 +249,7 @@ async function addProplate(element) {
 		const accountNameEl = /** @type {HTMLElement|null} */ (element.querySelector(accountNameClass));
 		if (!accountNameEl) {
 			warn(
-				"The element passed to addProplate does not have a .display-name__account, although it should have one.",
+				`The element passed to addProplate does not have a ${accountNameClass}, although it should have one.`,
 				element,
 			);
 		}
@@ -283,11 +296,7 @@ async function addProplate(element) {
 	async function addToStatus(element) {
 		let statusId = getID(element);
 		if (!statusId) {
-			//if we couldn't get an id from the div try the closest article
-			const ArticleElement = element.closest("article");
-			if (ArticleElement) {
-				statusId = getID(ArticleElement);
-			} else if (type === "detailed-status") {
+			if (type === "detailed-status") {
 				//if we still don't have an ID try the domain as a last resort
 				warn("Attempting to retrieve id from url - this may have unforseen consequences.");
 				statusId = location.pathname.split("/").pop();
@@ -310,18 +319,23 @@ async function addProplate(element) {
 	}
 
 	async function addToNotification(element) {
+		//debug("adding to notification");
 		const statusId = getID(element);
 
-		const accountNameEl = getAccountNameEl(element, ".notification__display-name");
-		const accountName = getAccountName(accountNameEl, "title");
+		let accountNameEl = getAccountNameEl(element, ".notification__display-name");
+		if (!accountNameEl) accountNameEl = getAccountNameEl(element, ".status__display-name");
 
-		const nametagEl = getNametagEl(element, ".notification__display-name");
+		let accountName = getAccountName(accountNameEl, "title");
+		if (!accountName) accountName = accountNameFromURL(getAccountName(accountNameEl, "href"));
+
+		let nametagEl = accountNameEl;
 
 		element.setAttribute("protoots-checked", "true");
 		generateProPlate(statusId, accountName, nametagEl, "notification");
 	}
 
 	async function addToAccount(element) {
+		//debug("adding to account");
 		const statusId = getID(element);
 		const nametagEl = element.querySelector(".display-name__html");
 		const accountName = getAccountName(element.querySelector(".display-name__account"));
@@ -329,6 +343,7 @@ async function addProplate(element) {
 		nametagEl.parentElement.style.display = "flex";
 
 		element.setAttribute("protoots-checked", "true");
+
 		generateProPlate(statusId, accountName, nametagEl, "account");
 	}
 
