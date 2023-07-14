@@ -214,7 +214,6 @@ async function addProplate(element) {
 			//i think you can figure out what this does on your own
 			proplate.classList.add("proplate-pog");
 		}
-		proplate.style.fontWeight = "500";
 		//add plate to nametag
 		insertAfter(proplate, nametagEl);
 	}
@@ -306,9 +305,7 @@ async function addProplate(element) {
 		const accountName = getAccountName(accountNameEl);
 
 		const nametagEl = getNametagEl(element, ".display-name__html");
-
-		nametagEl.parentElement.style.display = "flex";
-
+		nametagEl.parentElement.classList.add("has-proplate");
 		element.setAttribute("protoots-checked", "true");
 		// Add the checked attribute only _after_ we've passed the basic checks.
 		// This allows us to pass incomplete nodes into this method, because
@@ -339,7 +336,7 @@ async function addProplate(element) {
 		const nametagEl = element.querySelector(".display-name__html");
 		const accountName = getAccountName(element.querySelector(".display-name__account"));
 
-		nametagEl.parentElement.style.display = "flex";
+		nametagEl.parentElement.classList.add("has-proplate");
 
 		element.setAttribute("protoots-checked", "true");
 
