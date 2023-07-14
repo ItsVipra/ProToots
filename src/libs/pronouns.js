@@ -33,6 +33,7 @@ export async function extractFromStatus(status) {
 		pronouns = extractFromBio(note);
 	}
 
+	pronouns = sanitizePronouns(pronouns)
 	return pronouns;
 }
 
@@ -118,6 +119,24 @@ function sanitizePronounPageValue(val) {
 
 	if (val === "no-pronouns") val = "no pronouns";
 	return val;
+}
+
+/**
+ * Sanitizes the pronoun field by removing various long information parts.
+ * As of today, this just removes custom emojis from the field.
+ * If the passed string is not defined, null is returned.
+ *
+ * @param {string} str The input string.
+ * @returns {string|null} The sanitized string.
+ */
+function sanitizePronouns(str) {
+	if (!str) return null;
+
+	// Remove all custom emojis with the :shortcode: format.
+	str = str.replace(/:[\w_]+:/gi, "");
+
+	// Finally, remove leading and trailing whitespace.
+	return str.trim();
 }
 
 const knownPronouns = [

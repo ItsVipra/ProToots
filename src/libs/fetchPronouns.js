@@ -13,6 +13,7 @@ let conversationsCache;
  * @param {string | undefined} dataID ID of the object being requested, in case cache misses.
  * @param {string} accountName The account name, used for caching. Should have the "@" prefix.
  * @param {string} type Type of data-id
+ * @returns {string} The pronouns if we have any, otherwise "null".
  */
 export async function fetchPronouns(dataID, accountName, type) {
 	// log(`searching for ${account_name}`);

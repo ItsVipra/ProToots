@@ -19,7 +19,7 @@ import {
 	waitForElement,
 	waitForElementRemoved,
 } from "../libs/domhelpers";
-import { addTypeAttribute, normaliseAccountName, sanitizePronouns } from "../libs/protootshelpers";
+import { addTypeAttribute, normaliseAccountName } from "../libs/protootshelpers";
 
 //before anything else, check whether we're on a Mastodon page
 checkSite();
@@ -197,7 +197,7 @@ async function addProplate(element) {
 		if (pronouns == "null" && !isLogging()) {
 			return;
 		}
-		proplate.innerHTML = sanitizePronouns(pronouns);
+		proplate.innerText = pronouns;
 		//TODO?: alt text
 		proplate.classList.add("protoots-proplate");
 		if (accountName == "jasmin@queer.group" || accountName == "vivien@queer.group") {
