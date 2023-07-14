@@ -136,7 +136,10 @@ function sanitizePronouns(str) {
 	str = str.replace(/:[\w_]+:/gi, "");
 
 	// Finally, remove leading and trailing whitespace.
-	return str.trim();
+	str= str.trim();
+
+	// If the result is empty, return null, otherwise the empty string.
+	return str==="" ? null : str;
 }
 
 const knownPronouns = [
