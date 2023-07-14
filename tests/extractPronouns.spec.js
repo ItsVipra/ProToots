@@ -58,7 +58,7 @@ const valueExtractionTests = [
 	], // 404 errors
 	[`<a href="https://de.pronouns.page/:Katze"></a>`, "Katze"], // custom pronouns
 	[`<a href="https://de.pronouns.page/@benaryorg"></a>`, "Katze"], // custom pronouns in profile
-	[`:theythem:`, null] // emojis shortcodes used for pronouns
+	[`:theythem:`, null], // emojis shortcodes used for pronouns
 ];
 for (const [input, expects] of valueExtractionTests) {
 	valueExtractionSuite(input, async () => {
