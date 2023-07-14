@@ -104,7 +104,7 @@ async function queryPronounsFromPronounsPage(username) {
 	// If we don't have a value yet, just take the first profile.
 	if (!pronouns) pronouns = profiles[0].pronouns;
 
-	let val = pronouns.find((x) => x.opinion === "yes").value;
+	let val = pronouns.find((x) => x.opinion === "yes" || x.opinion === "meh").value;
 	val = sanitizePronounPageValue(val);
 	return val;
 }
