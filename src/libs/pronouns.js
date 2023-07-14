@@ -135,6 +135,24 @@ function sanitizePronouns(str) {
 	// Remove all custom emojis with the :shortcode: format.
 	str = str.replace(/:[\w_]+:/gi, "");
 
+	// We still might have URLs in our text, for example, if people redirect some domain to pronouns.page.
+	// We filter them out, because they would not be clickable anyways and provide no benefit.
+	str = str
+		.split(" ")
+		.filter((x) => {
+			// Let's try to build an URL and if it looks like one, filter it out.
+			try {
+				const u = new URL(x);
+				return !u.protocol.startsWith("http");
+			} catch {
+				return true;
+			}
+		})
+		.join(" ");
+
+	// Remove trailing characters that are used as separators.
+	str = str.replace(/[-| /]+$/, "");
+
 	// Finally, remove leading and trailing whitespace.
 	str = str.trim();
 
