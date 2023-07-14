@@ -33,7 +33,7 @@ export async function extractFromStatus(status) {
 		pronouns = extractFromBio(note);
 	}
 
-	pronouns = sanitizePronouns(pronouns)
+	pronouns = sanitizePronouns(pronouns);
 	return pronouns;
 }
 
