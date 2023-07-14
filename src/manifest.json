@@ -10,7 +10,7 @@
 
 	"description": "puts pronouns next to usernames on mastodon",
 	"homepage_url": "https://github.com/ItsVipra/ProToots",
-	"permissions": ["storage"],
+	"permissions": ["storage", "https://en.pronouns.page/api/profile/get/*"],
 
 	"browser_action": {
 		"default_icon": "icons/icon small_size/icon small_size.png",

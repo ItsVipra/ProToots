@@ -2,7 +2,8 @@
 	"compilerOptions": {
 		"module": "ESNext",
 		"target": "ESNext",
-		"checkJs": true
+		"checkJs": true,
+		"moduleResolution": "nodenext"
 	},
-	"include": ["src/**/*.js"]
+	"include": ["src/**/*.js", "tests/**/*.js"]
 }

@@ -33,24 +33,6 @@ export function accountNameFromURL(url) {
 }
 
 /**
- * Sanitizes the pronoun field by removing various long information parts.
- * As of today, this just removes custom emojis from the field.
- * If the passed string is not defined, an empty string is returned.
- *
- * @param {string} str The input string.
- * @returns The sanitized string.
- */
-export function sanitizePronouns(str) {
-	if (!str) return "";
-
-	// Remove all custom emojis with the :shortcode: format.
-	str = str.replace(/:[\w_]+:/gi, "");
-
-	// Finally, remove leading and trailing whitespace.
-	return str.trim();
-}
-
-/**
  * Checks which type an element is and adds the according protoots-type attribute
  * @param {HTMLElement} ActionElement
  */
