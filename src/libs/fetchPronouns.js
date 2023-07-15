@@ -61,8 +61,10 @@ export async function fetchPronouns(dataID, accountName, type) {
 		status = await fetchStatus(dataID);
 	}
 
-	log(`Fetching ${type} failed, trying notification instead.`);
-	if (!status) status = await fetchNotification(dataID); //fallback for glitch-soc notifications
+	if (!status) {
+		log(`Fetching ${type} failed, trying notification instead.`);
+		status = await fetchNotification(dataID);
+	} //fallback for glitch-soc notifications
 
 	let pronouns = await extractFromStatus(status);
 	if (!pronouns) {
