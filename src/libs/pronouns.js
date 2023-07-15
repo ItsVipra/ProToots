@@ -1,6 +1,6 @@
 import sanitizeHtml from "sanitize-html";
 
-const fieldMatchers = [/pro.*nouns?/i, "pronomen"];
+const fieldMatchers = [/\bpro.*nouns?\b/i, "pronomen"];
 const knownPronounUrls = [
 	/pronouns\.page\/:?([\w/@]+)/,
 	/pronouns\.within\.lgbt\/([\w/]+)/,
