@@ -1,6 +1,7 @@
 ﻿# ProToots (v1.1.2)
 
 A Firefox extension which displays an author's pronouns next to their name on Mastodon. (Now in even more places!)
+
 ![A Mastodon screenshot showing off pronouns next to a person's name](documentation/example_screenshot.png)
 
 ---
@@ -18,6 +19,8 @@ Alternatively you can download an unsigned version from the [releases page](http
 ## Known issues
 
 - None! It's perfect!
+
+Please also take a look at the FAQ below and the [issue list](https://github.com/ItsVipra/ProToots/issues).
 
 ---
 
@@ -43,7 +46,7 @@ Alternatively you can download an unsigned version from the [releases page](http
 
 ### Why does the ProPlate just show a link?
 
-> When an author only provides their pronouns as a pronouns.page link we display that instead. In the future we'll be able to extract pronouns from the given link. (See [#7](https://github.com/ItsVipra/ProToots/issues/))
+> When an author only provides their pronouns as a pronouns.page link we display that instead. In the future we'll be able to extract pronouns from the given link. (See [#7](https://github.com/ItsVipra/ProToots/issues/7))
 
 ---
 
