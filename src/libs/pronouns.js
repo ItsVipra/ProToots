@@ -2,9 +2,9 @@ import sanitizeHtml from "sanitize-html";
 
 const fieldMatchers = [/pro.*nouns?/i, "pronomen"];
 const knownPronounUrls = [
-	/pronouns\.page\/:?([\w/@]+)/,
-	/pronouns\.within\.lgbt\/([\w/]+)/,
-	/pronouns\.cc\/pronouns\/([\w/]+)/,
+	/pronouns\.page\/(@(?<username>\w+))?:?(?<pronouns>[\w/:]+)?/,
+	/pronouns\.within\.lgbt\/(?<pronouns>[\w/]+)/,
+	/pronouns\.cc\/pronouns\/(?<pronouns>[\w/]+)/,
 ];
 
 /**
@@ -58,12 +58,14 @@ async function extractFromField(field) {
 	// If one of pronoun URLs matches, overwrite the current known value.
 	for (const knownUrlRe of knownPronounUrls) {
 		if (!knownUrlRe.test(pronounsRaw)) continue;
-		text = pronounsRaw.match(knownUrlRe)[1];
-	}
+		const { pronouns, username } = pronounsRaw.match(knownUrlRe).groups;
 
-	// Right now, only the pronoun.page regex matches the @usernames.
-	if (text.charAt(0) === "@") {
-		text = await queryPronounsFromPronounsPage(text.substring(1));
+		// For now, only the pronouns.page regexp has a username value, so we can be sure
+		// that we don't query the wrong API.
+		if (username) {
+			return await queryUserFromPronounsPage(username);
+		}
+
 	}
 
 	if (!text) return null;
@@ -71,11 +73,11 @@ async function extractFromField(field) {
 }
 
 /**
- * Queries the pronouns from the pronouns.page API.
- * @param {string} username The username of the person.
- * @returns {Promise<string|null>} The pronouns that have set the "yes" opinion.
+ * Queries the pronouns for a given user from the pronouns.page API.
+ * @param {string} username The username of the person, without the leading "@".
+ * @returns {Promise<string|null>} The pronouns that have set the "yes" or "meh" opinion.
  */
-async function queryPronounsFromPronounsPage(username) {
+async function queryUserFromPronounsPage(username) {
 	// Example page: https://en.pronouns.page/api/profile/get/andrea?version=2
 	const resp = await fetch(`https://en.pronouns.page/api/profile/get/${username}?version=2`);
 	if (resp.status >= 400) {
