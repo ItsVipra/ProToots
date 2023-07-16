@@ -11,6 +11,7 @@ const validFields = [
 	"pronomen",
 	"Pronouns / Pronomen",
 ];
+const invalidFields = ["pronounciation"];
 
 for (const field of validFields) {
 	extract(`${field} is extracted`, async () => {
@@ -20,6 +21,17 @@ for (const field of validFields) {
 			},
 		});
 		assert.equal("pro/nouns", result);
+	});
+}
+
+for (const field of invalidFields) {
+	extract(`${field} is not extracted`, async () => {
+		const result = await pronouns.extractFromStatus({
+			account: {
+				fields: [{ name: field, value: "pro/nouns" }],
+			},
+		});
+		assert.equal(result, null);
 	});
 }
 
