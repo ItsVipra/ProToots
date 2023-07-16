@@ -66,6 +66,13 @@ async function extractFromField(field) {
 			return await queryUserFromPronounsPage(username);
 		}
 
+		// In case that we have single-word pronoun.page values, like "https://en.pronouns.page/it",
+		// we want to normalize that to include the possessive pronoun as well.
+		if (pronounsRaw.includes("pronouns.page") && !pronouns.includes("/")) {
+			return await normalizePronounPagePronouns(pronouns)
+		}
+
+		text = pronouns;
 	}
 
 	if (!text) return null;
@@ -107,20 +114,40 @@ async function queryUserFromPronounsPage(username) {
 	if (!pronouns) pronouns = profiles[0].pronouns;
 
 	let val = pronouns.find((x) => x.opinion === "yes" || x.opinion === "meh").value;
-	val = sanitizePronounPageValue(val);
+	val = await normalizePronounPagePronouns(val);
 	return val;
 }
 
 /**
  * @param {string} val
+ * @returns {Promise<string>}
  */
-function sanitizePronounPageValue(val) {
-	if (!val.startsWith("https://")) return val;
+async function normalizePronounPagePronouns(val) {
+	const match = val.match(/pronouns\.page\/(.+)/);
+	if (match) val = match[1];
 
-	val = val.replace(/https?:\/\/.+\.pronouns\.page\/:?/, "");
+	if (val.includes("/")) return val;
 
-	if (val === "no-pronouns") val = "no pronouns";
-	return val;
+	if (val === "no-pronouns") return "no pronouns";
+
+	const pronounNameResp = await fetch("https://en.pronouns.page/api/pronouns/" + val);
+	if (!pronounNameResp.ok) {
+		// In case the request fails, better show the likely pronouns than nothing at all.
+		return val;
+	}
+
+	// If we query the pronouns.page API with invalid values, an empty body is returned, still with status code 200.
+	// Therefore, we just try to parse the JSON and if it does not work, we return the "val" from earlier and don't
+	// do further processing.
+	try {
+		const {
+			morphemes: { pronoun_subject, possessive_pronoun },
+		} = await pronounNameResp.json();
+
+		return [pronoun_subject, possessive_pronoun].join("/");
+	} catch {
+		return val;
+	}
 }
 
 /**
@@ -153,7 +180,7 @@ function sanitizePronouns(str) {
 		.join(" ");
 
 	// Remove trailing characters that are used as separators.
-	str = str.replace(/[-| /]+$/, "");
+	str = str.replace(/[-| :/]+$/, "");
 
 	// Finally, remove leading and trailing whitespace.
 	str = str.trim();
