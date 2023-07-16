@@ -69,7 +69,7 @@ async function extractFromField(field) {
 		// In case that we have single-word pronoun.page values, like "https://en.pronouns.page/it",
 		// we want to normalize that to include the possessive pronoun as well.
 		if (pronounsRaw.includes("pronouns.page") && !pronouns.includes("/")) {
-			return await normalizePronounPagePronouns(pronouns)
+			return await normalizePronounPagePronouns(pronouns);
 		}
 
 		text = pronouns;
