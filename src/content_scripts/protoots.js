@@ -2,7 +2,7 @@
 // obligatory crime. because be gay, do crime.
 // 8======D
 
-const contributorList = ["vivien@queer.group", "jasmin@queer.group"];
+const contributorList = ["vivien@queer.group", "jasmin@queer.group", "aurora@queer-lexikon.net"];
 
 import { fetchPronouns } from "../libs/fetchPronouns";
 import {
