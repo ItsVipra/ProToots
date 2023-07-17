@@ -1,6 +1,6 @@
 import sanitizeHtml from "sanitize-html";
 
-const fieldMatchers = [/\bpro.*nouns?\b/i, "pronomen"];
+const fieldMatchers = [/\bpro.*nouns?\b/i, /\bpronomen\b/i, /(i )?go(es)? by/i];
 const knownPronounUrls = [
 	/pronouns\.page\/(@(?<username>\w+))?:?(?<pronouns>[\w/:]+)?/,
 	/pronouns\.within\.lgbt\/(?<pronouns>[\w/]+)/,
@@ -44,10 +44,7 @@ export async function extractFromStatus(status) {
 async function extractFromField(field) {
 	let pronounsRaw;
 	for (const matcher of fieldMatchers) {
-		if (typeof matcher === "string" && field.name.toLowerCase().includes(matcher)) {
-			pronounsRaw = field.value;
-			break;
-		} else if (field.name.match(matcher)) {
+		if (field.name.match(matcher)) {
 			pronounsRaw = field.value;
 			break;
 		}

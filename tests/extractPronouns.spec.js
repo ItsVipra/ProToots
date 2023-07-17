@@ -10,8 +10,12 @@ const validFields = [
 	"professional nouns",
 	"pronomen",
 	"Pronouns / Pronomen",
+	"Pronomen (DE)",
+	"Pronouns (EN)",
+	"i go by",
+	"go by",
 ];
-const invalidFields = ["pronounciation"];
+const invalidFields = ["pronounciation", "pronomenverwaltung"];
 
 for (const field of validFields) {
 	extract(`${field} is extracted`, async () => {
