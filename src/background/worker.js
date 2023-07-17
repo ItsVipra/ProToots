@@ -11,7 +11,6 @@ action.onClicked.addListener(async (tab) => {
 	const hasPermissions = await permissions.contains(perms);
 	if (!hasPermissions) {
 		await permissions.request(perms);
-		await tabs.reload(tab.id);
 	}
 
 	action.setPopup({ popup: "options/options.html" });
