@@ -28,3 +28,16 @@ jobs:
           license: OSL-3.0
           auth-api-issuer: ${{ secrets.FIREFOX_AUTH_API_ISSUER }}
           auth-api-secret: ${{ secrets.FIREFOX_AUTH_API_SECRET }}
+
+  chrome:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download assets for release
+        run: gh release download ${{ github.ref }} --pattern "*chrome*" --dir assets
+      - uses: browser-actions/release-chrome-extension@v0.1.2
+        with:
+          extension-id: "oocninmajklnpkmenhbfakbjcgahnidk"
+          extension-path: "assets/protoots-chrome.zip"
+          oauth-client-id: ${{ secrets.CHROME_OAUTH_CLIENT_ID }}
+          oauth-client-secret: ${{ secrets.CHROME_OAUTH_CLIENT_SECRET }}
+          oauth-refresh-token: ${{ secrets.CHROME_OAUTH_REFRESH_TOKEN }}
