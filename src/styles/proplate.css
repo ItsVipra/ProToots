@@ -7,6 +7,14 @@
 	text-transform: lowercase;
 	animation: proplate-fadein 0.15s linear;
 	font-weight: 500;
+
+	/*
+		For users of the advanced view, the proplate shouldn't take all available space.
+		Most of the times this was working fine, by setting it explicitly it definitely works
+		across all places of Mastodon.
+	*/
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 /* dark theme */
