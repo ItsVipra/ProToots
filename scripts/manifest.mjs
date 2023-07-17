@@ -11,7 +11,8 @@ const manifest = {
 
 	description: "puts pronouns next to usernames on mastodon",
 	homepage_url: "https://github.com/ItsVipra/ProToots",
-	permissions: ["storage", "activeTab", "https://en.pronouns.page/api/*"],
+	permissions: ["storage", "activeTab"],
+	host_permissions: ["https://en.pronouns.page/api/*"],
 
 	action: {
 		default_icon: "icons/icon small_size/icon small_size.png",
