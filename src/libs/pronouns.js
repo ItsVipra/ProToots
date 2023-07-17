@@ -2,9 +2,9 @@ import sanitizeHtml from "sanitize-html";
 
 const fieldMatchers = [/\bpro.*nouns?\b/i, "pronomen"];
 const knownPronounUrls = [
-	/pronouns\.page\/:?([\w/@]+)/,
-	/pronouns\.within\.lgbt\/([\w/]+)/,
-	/pronouns\.cc\/pronouns\/([\w/]+)/,
+	/pronouns\.page\/(@(?<username>\w+))?:?(?<pronouns>[\w/:]+)?/,
+	/pronouns\.within\.lgbt\/(?<pronouns>[\w/]+)/,
+	/pronouns\.cc\/pronouns\/(?<pronouns>[\w/]+)/,
 ];
 
 /**
@@ -58,12 +58,21 @@ async function extractFromField(field) {
 	// If one of pronoun URLs matches, overwrite the current known value.
 	for (const knownUrlRe of knownPronounUrls) {
 		if (!knownUrlRe.test(pronounsRaw)) continue;
-		text = pronounsRaw.match(knownUrlRe)[1];
-	}
+		const { pronouns, username } = pronounsRaw.match(knownUrlRe).groups;
 
-	// Right now, only the pronoun.page regex matches the @usernames.
-	if (text.charAt(0) === "@") {
-		text = await queryPronounsFromPronounsPage(text.substring(1));
+		// For now, only the pronouns.page regexp has a username value, so we can be sure
+		// that we don't query the wrong API.
+		if (username) {
+			return await queryUserFromPronounsPage(username);
+		}
+
+		// In case that we have single-word pronoun.page values, like "https://en.pronouns.page/it",
+		// we want to normalize that to include the possessive pronoun as well.
+		if (pronounsRaw.includes("pronouns.page") && !pronouns.includes("/")) {
+			return await normalizePronounPagePronouns(pronouns);
+		}
+
+		text = pronouns;
 	}
 
 	if (!text) return null;
@@ -71,11 +80,11 @@ async function extractFromField(field) {
 }
 
 /**
- * Queries the pronouns from the pronouns.page API.
- * @param {string} username The username of the person.
- * @returns {Promise<string|null>} The pronouns that have set the "yes" opinion.
+ * Queries the pronouns for a given user from the pronouns.page API.
+ * @param {string} username The username of the person, without the leading "@".
+ * @returns {Promise<string|null>} The pronouns that have set the "yes" or "meh" opinion.
  */
-async function queryPronounsFromPronounsPage(username) {
+async function queryUserFromPronounsPage(username) {
 	// Example page: https://en.pronouns.page/api/profile/get/andrea?version=2
 	const resp = await fetch(`https://en.pronouns.page/api/profile/get/${username}?version=2`);
 	if (resp.status >= 400) {
@@ -105,20 +114,40 @@ async function queryPronounsFromPronounsPage(username) {
 	if (!pronouns) pronouns = profiles[0].pronouns;
 
 	let val = pronouns.find((x) => x.opinion === "yes" || x.opinion === "meh").value;
-	val = sanitizePronounPageValue(val);
+	val = await normalizePronounPagePronouns(val);
 	return val;
 }
 
 /**
  * @param {string} val
+ * @returns {Promise<string>}
  */
-function sanitizePronounPageValue(val) {
-	if (!val.startsWith("https://")) return val;
+async function normalizePronounPagePronouns(val) {
+	const match = val.match(/pronouns\.page\/(.+)/);
+	if (match) val = match[1];
 
-	val = val.replace(/https?:\/\/.+\.pronouns\.page\/:?/, "");
+	if (val.includes("/")) return val;
 
-	if (val === "no-pronouns") val = "no pronouns";
-	return val;
+	if (val === "no-pronouns") return "no pronouns";
+
+	const pronounNameResp = await fetch("https://en.pronouns.page/api/pronouns/" + val);
+	if (!pronounNameResp.ok) {
+		// In case the request fails, better show the likely pronouns than nothing at all.
+		return val;
+	}
+
+	// If we query the pronouns.page API with invalid values, an empty body is returned, still with status code 200.
+	// Therefore, we just try to parse the JSON and if it does not work, we return the "val" from earlier and don't
+	// do further processing.
+	try {
+		const {
+			morphemes: { pronoun_subject, possessive_pronoun },
+		} = await pronounNameResp.json();
+
+		return [pronoun_subject, possessive_pronoun].join("/");
+	} catch {
+		return val;
+	}
 }
 
 /**
@@ -151,7 +180,7 @@ function sanitizePronouns(str) {
 		.join(" ");
 
 	// Remove trailing characters that are used as separators.
-	str = str.replace(/[-| /]+$/, "");
+	str = str.replace(/[-| :/]+$/, "");
 
 	// Finally, remove leading and trailing whitespace.
 	str = str.trim();
