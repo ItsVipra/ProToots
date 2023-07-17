@@ -72,7 +72,9 @@ function main() {
 		onTootIntersection(entries);
 	});
 
-	document.querySelectorAll(pronounableElementSelector).forEach((el) => addtoTootObserver(el, tootObserver));
+	document
+		.querySelectorAll(pronounableElementSelector)
+		.forEach((el) => addtoTootObserver(el, tootObserver));
 
 	// We are tracking navigation changes with the location and a MutationObserver on `document`,
 	// because the popstate event from the History API is only triggered with the back/forward buttons.
