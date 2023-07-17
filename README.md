@@ -1,6 +1,6 @@
 ﻿# ProToots (v1.1.2)
 
-A Firefox extension which displays an author's pronouns next to their name on Mastodon. (Now in even more places!)
+A web extension which displays an author's pronouns next to their name on Mastodon. (Now in even more places!)
 
 ![A Mastodon screenshot showing off pronouns next to a person's name](documentation/example_screenshot.png)
 
@@ -11,6 +11,7 @@ A Firefox extension which displays an author's pronouns next to their name on Ma
 The extension is available on the firefox store! (we're working on chrome)
 
 [<img src="documentation/get-the-addon-178x60px.png">](https://addons.mozilla.org/en-US/firefox/addon/protoots/)
+[<img src="documentation/chrome-web-store.png">](https://chrome.google.com/webstore/detail/protoots/oocninmajklnpkmenhbfakbjcgahnidk/)
 
 Alternatively you can download an unsigned version from the [releases page](https://github.com/ItsVipra/Protoots/releases).
 
