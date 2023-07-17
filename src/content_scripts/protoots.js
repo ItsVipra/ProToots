@@ -2,6 +2,13 @@
 // obligatory crime. because be gay, do crime.
 // 8======D
 
+const contributorList = [
+	"vivien@queer.group",
+	"jasmin@queer.group",
+	"aurora@queer-lexikon.net",
+	"LenaEine@chaos.social",
+];
+
 import { fetchPronouns } from "../libs/fetchPronouns";
 import {
 	accountVisibility,
@@ -210,7 +217,7 @@ async function addProplate(element) {
 		proplate.innerText = pronouns;
 		//TODO?: alt text
 		proplate.classList.add("protoots-proplate");
-		if (accountName == "jasmin@queer.group" || accountName == "vivien@queer.group") {
+		if (contributorList.includes(accountName)) {
 			//i think you can figure out what this does on your own
 			proplate.classList.add("proplate-pog");
 		}
