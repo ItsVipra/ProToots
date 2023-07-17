@@ -12,6 +12,8 @@ const validFields = [
 	"Pronouns / Pronomen",
 	"Pronomen (DE)",
 	"Pronouns (EN)",
+	"i go by",
+	"go by",
 ];
 const invalidFields = ["pronounciation", "pronomenverwaltung"];
 
