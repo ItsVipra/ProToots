@@ -8,6 +8,7 @@
 		"watch:webext": "web-ext run --keep-profile-changes --profile-create-if-missing --firefox-profile=.firefox-profile/",
 		"format": "prettier --write --ignore-path .gitignore .",
 		"package": "run-s -l build:**",
+		"archive": "git archive --format zip main -o protoots_source.zip",
 		"lint": "eslint src/",
 		"test": "uvu tests/"
 	},
