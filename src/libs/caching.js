@@ -1,5 +1,7 @@
 import { debug, error } from "./logging";
-import { storage } from "webextension-polyfill";
+import Browser, { storage } from "webextension-polyfill";
+
+const currentVersion = Browser.runtime.getManifest().version;
 /**
  * Appends an entry to the "pronounsCache" object in local storage.
  *
@@ -15,7 +17,12 @@ export async function cachePronouns(account, pronouns) {
 		cache = { pronounsCache: {} };
 	}
 
-	cache.pronounsCache[account] = { acct: account, timestamp: Date.now(), value: pronouns };
+	cache.pronounsCache[account] = {
+		acct: account,
+		timestamp: Date.now(),
+		value: pronouns,
+		version: currentVersion,
+	};
 	try {
 		await storage.local.set(cache);
 		debug(`${account} cached`);
