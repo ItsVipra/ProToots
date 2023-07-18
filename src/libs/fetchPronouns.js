@@ -2,9 +2,11 @@ import { debug, error, info, log, warn } from "./logging";
 import { cachePronouns, getPronouns } from "./caching";
 import { normaliseAccountName } from "./protootshelpers";
 import { extractFromStatus } from "./pronouns";
+import Browser from "webextension-polyfill";
 
 const cacheMaxAge = 24 * 60 * 60 * 1000; // time after which cached pronouns should be checked again: 24h
 let conversationsCache;
+const currentVersion = Browser.runtime.getManifest().version;
 
 /**
  * Fetches pronouns associated with account name.
@@ -21,10 +23,10 @@ export async function fetchPronouns(dataID, accountName, type) {
 	debug(cacheResult);
 	// Extract the current cache by using object destructuring.
 	if (accountName in cacheResult.pronounsCache) {
-		const { value, timestamp } = cacheResult.pronounsCache[accountName];
+		const { value, timestamp, version } = cacheResult.pronounsCache[accountName];
 
 		// If we have a cached value and it's not outdated, use it.
-		if (value && Date.now() - timestamp < cacheMaxAge) {
+		if (value && Date.now() - timestamp < cacheMaxAge && version == currentVersion) {
 			info(`${accountName} in cache with value: ${value}`);
 			return value;
 		} else {
