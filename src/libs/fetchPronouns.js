@@ -32,16 +32,14 @@ export async function fetchPronouns(dataID, accountName, type) {
 		} else {
 			info(`${accountName} cache entry is stale, refreshing`);
 		}
+	} else {
+		info(`${accountName} not in cache, fetching status`);
 	}
-
-	info(`${accountName} cache entry is stale, refreshing`);
 
 	if (!dataID) {
 		warn(`Could not fetch pronouns for user ${accountName}, because no status ID was passed.`);
 		return null;
 	}
-
-	info(`${accountName} not in cache, fetching status`);
 
 	let status;
 	if (type === "notification") {
