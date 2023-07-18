@@ -114,6 +114,15 @@ a {
 	font-size: small;
 }
 
+.legal {
+	color: grey;
+	font-size: small;
+	display: flex;
+	margin: 0.25em;
+	margin-left: 1.5em;
+	margin-top: -0.5em;
+}
+
 @media (prefers-color-scheme: dark) {
 	body {
 		background-color: #1c1b22;
