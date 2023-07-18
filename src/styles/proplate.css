@@ -17,6 +17,15 @@
 	text-overflow: ellipsis;
 }
 
+.protoots-proplate img {
+	height: 1.5em;
+	/* width: inherit; */
+	margin-top: -0.5em;
+	margin-bottom: -0.5em;
+	margin-left: 0.5em;
+	align-self: center;
+}
+
 /* dark theme */
 .theme-default .protoots-proplate {
 	/* header background */

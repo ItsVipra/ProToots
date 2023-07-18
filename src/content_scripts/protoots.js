@@ -214,7 +214,16 @@ async function addProplate(element) {
 		if (pronouns == "null" && !isLogging()) {
 			return;
 		}
+
 		proplate.innerText = pronouns;
+		if (proplate.innerText.replace("$PronounPage", "") != pronouns) {
+			proplate.innerText = proplate.innerText.replace("$PronounPage", "");
+			const PronounPageLogo = document.createElement("img");
+			PronounPageLogo.src = "https://en.pronouns.page/logo/logo-primary.svg";
+			PronounPageLogo.title = "pronouns fetched from pronouns.page";
+			proplate.appendChild(PronounPageLogo);
+		}
+
 		//TODO?: alt text
 		proplate.classList.add("protoots-proplate");
 		if (contributorList.includes(accountName)) {
