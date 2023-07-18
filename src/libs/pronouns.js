@@ -141,9 +141,9 @@ async function normalizePronounPagePronouns(val) {
 			morphemes: { pronoun_subject, possessive_pronoun },
 		} = await pronounNameResp.json();
 
-		return [pronoun_subject, possessive_pronoun].join("/");
+		return [pronoun_subject, possessive_pronoun].join("/") + "$PronounPage";
 	} catch {
-		return val;
+		return val + "$PronounPage";
 	}
 }
 
