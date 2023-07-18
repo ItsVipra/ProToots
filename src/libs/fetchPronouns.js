@@ -3,7 +3,6 @@ import { cachePronouns, getPronouns } from "./caching";
 import { normaliseAccountName } from "./protootshelpers";
 import { extractFromStatus } from "./pronouns";
 
-const cacheMaxAge = 24 * 60 * 60 * 1000; // time after which cached pronouns should be checked again: 24h
 let conversationsCache;
 
 /**
@@ -17,29 +16,14 @@ let conversationsCache;
  */
 export async function fetchPronouns(dataID, accountName, type) {
 	// log(`searching for ${account_name}`);
-	const cacheResult = await getPronouns();
+	const cacheResult = await getPronouns(accountName);
 	debug(cacheResult);
-	// Extract the current cache by using object destructuring.
-	if (accountName in cacheResult.pronounsCache) {
-		const { value, timestamp } = cacheResult.pronounsCache[accountName];
-
-		// If we have a cached value and it's not outdated, use it.
-		if (value && Date.now() - timestamp < cacheMaxAge) {
-			info(`${accountName} in cache with value: ${value}`);
-			return value;
-		} else {
-			info(`${accountName} cache entry is stale, refreshing`);
-		}
-	}
-
-	info(`${accountName} cache entry is stale, refreshing`);
+	if (cacheResult) return cacheResult;
 
 	if (!dataID) {
 		warn(`Could not fetch pronouns for user ${accountName}, because no status ID was passed.`);
 		return null;
 	}
-
-	info(`${accountName} not in cache, fetching status`);
 
 	let status;
 	if (type === "notification") {
