@@ -104,6 +104,7 @@ const bioExtractTests = [
 	["I'm cute af (she / they)", "she/they"], // with whitespace between pronouns
 	["pronouns: any/all", "any/all"], // any pronouns
 	["any pronouns", "any pronouns"], // any pronouns
+	["He/Him", "He/Him"], //capitalised pronouns
 ];
 for (const [input, expects] of bioExtractTests) {
 	bioExtractSuite(input, async () => {
