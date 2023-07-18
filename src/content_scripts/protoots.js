@@ -241,7 +241,7 @@ async function addProplate(element) {
 			//if we couldn't get an id from the div try the closest article
 			id = element.closest("article[data-id]")?.dataset.id;
 		}
-		return id;
+		return id.replace("f-", "");
 	}
 
 	/**
