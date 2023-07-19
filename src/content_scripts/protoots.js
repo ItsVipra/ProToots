@@ -30,7 +30,7 @@ import {
 	accountNameFromURL,
 	addTypeAttribute,
 	normaliseAccountName,
-} from "../libs/protootshelpers";
+} from "../libs/protootshelpers.js";
 
 //before anything else, check whether we're on a Mastodon page
 checkSite();
@@ -330,7 +330,9 @@ async function addProplate(element) {
 		if (!accountNameEl) accountNameEl = getAccountNameEl(element, ".status__display-name");
 
 		let accountName = getAccountName(accountNameEl, "title");
-		if (!accountName) accountName = accountNameFromURL(getAccountName(accountNameEl, "href"));
+		if (accountName == "null")
+			accountName = accountNameFromURL(getAccountName(accountNameEl, "href"));
+		if (accountName == "null") return;
 
 		let nametagEl = getNametagEl(element, ".notification__display-name");
 		if (!nametagEl) return;
