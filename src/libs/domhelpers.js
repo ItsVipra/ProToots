@@ -85,3 +85,13 @@ export function insertAfter(insertion, target) {
 	//docs: https://developer.mozilla.org/en-US/docs/Web/API/Node/insertBefore#example_2
 	target.parentElement.insertBefore(insertion, target.nextSibling);
 }
+
+/**
+ * Turns HTML text into human-readable text
+ * @param {string} input HTML Text
+ * @returns {string}
+ */
+export function htmlDecode(input) {
+	const doc = new DOMParser().parseFromString(input, "text/html");
+	return doc.documentElement.textContent;
+}
