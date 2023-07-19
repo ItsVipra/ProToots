@@ -1,4 +1,5 @@
 import sanitizeHtml from "sanitize-html";
+import { htmlDecode } from "./domhelpers.js";
 
 const fieldMatchers = [/\bpro.*nouns?\b/i, /\bpronomen\b/i, /(i )?go(es)? by/i];
 const knownPronounUrls = [
@@ -179,8 +180,11 @@ function sanitizePronouns(str) {
 	// Remove trailing characters that are used as separators.
 	str = str.replace(/[-| :/]+$/, "");
 
-	// Finally, remove leading and trailing whitespace.
+	// Remove leading and trailing whitespace.
 	str = str.trim();
+
+	//Finally, turn escaped characters (e.g. &,>) back into their original form
+	str = htmlDecode(str);
 
 	// If the result is empty, return null, otherwise the empty string.
 	return str === "" ? null : str;
