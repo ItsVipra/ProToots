@@ -300,6 +300,10 @@ function extractFromBio(bio) {
 	if (anyAllPronouns) {
 		return anyAllPronouns[0];
 	}
+	const noPronouns = bio.match(/(no|none) +pronouns/);
+	if (noPronouns) {
+		return noPronouns[0];
+	}
 
 	return null;
 }
