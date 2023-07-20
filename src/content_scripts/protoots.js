@@ -331,7 +331,8 @@ async function addProplate(element) {
 		let accountName = getAccountName(accountNameEl, "title");
 		if (!accountName) accountName = accountNameFromURL(getAccountName(accountNameEl, "href"));
 
-		let nametagEl = accountNameEl;
+		let nametagEl = getNametagEl(element, ".notification__display-name");
+		if (!nametagEl) return;
 
 		element.setAttribute("protoots-checked", "true");
 		generateProPlate(statusId, accountName, nametagEl, "notification");
