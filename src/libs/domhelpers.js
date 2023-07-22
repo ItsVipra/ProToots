@@ -92,6 +92,19 @@ export function insertAfter(insertion, target) {
  * @returns {string}
  */
 export function htmlDecode(input) {
+	if (typeof window === "undefined" || !window.DOMParser) {
+		const replacements = {
+			"&amp;": "&",
+			"&quot;": '"',
+			"&lt;": "<",
+			"&gt;": ">",
+			"&nbsp;": "",
+		};
+		for (const [html, text] of Object.entries(replacements)) input = input.replaceAll(html, text);
+
+		return input;
+	}
+
 	const doc = new DOMParser().parseFromString(input, "text/html");
 	return doc.documentElement.textContent;
 }
