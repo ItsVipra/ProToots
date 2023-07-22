@@ -31,6 +31,7 @@ import {
 	addTypeAttribute,
 	normaliseAccountName,
 } from "../libs/protootshelpers.js";
+import { debug } from "../libs/logging.js";
 
 //before anything else, check whether we're on a Mastodon page
 checkSite();
@@ -207,6 +208,11 @@ async function addProplate(element) {
 	 * @returns
 	 */
 	async function generateProPlate(statusId, accountName, nametagEl, type) {
+		debug("generateProPlate called with params", { statusId, accountName, nametagEl, type });
+		if (!statusId) throw new Error("empty statusId passed to proplate generation, aborting.");
+		if (!accountName) throw new Error("empty accountName passed to proplate generation, aborting.");
+		if (!nametagEl) throw new Error("empty nametagEl passed to proplate generation, aborting.");
+
 		//create plate
 		const proplate = document.createElement("span");
 		const pronouns = await fetchPronouns(statusId, accountName, type);
@@ -266,15 +272,20 @@ async function addProplate(element) {
 	 * Gets the given element's textcontent or given attribute
 	 * @param {HTMLElement} element Element which textcontent is the account name
 	 * @param {string} attribute Attribute from which to pull the account name
-	 * @returns {string} Normalised account name
+	 * @returns {string|null} Normalised account name or null if it can't be found.
 	 */
 	function getAccountName(element, attribute = "textContent") {
 		let accountName = element.textContent;
 		if (attribute != "textContent") {
 			accountName = element.getAttribute(attribute);
 		}
+
 		if (!accountName) {
-			warn("Could not extract the account name from the element.");
+			warn(
+				"Could not extract the account name from the element, aborting pronoun extraction:",
+				element,
+			);
+			return null;
 		}
 
 		accountName = normaliseAccountName(accountName);
