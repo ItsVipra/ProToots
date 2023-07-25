@@ -95,8 +95,8 @@ for (const [input, expects] of valueExtractionTests) {
 
 valueExtractionSuite.run();
 
-const bioExtractSuite = suite("bio extraction");
-const bioExtractTests = [
+const textExtractSuite = suite("text extraction");
+const textExtractTests = [
 	["I'm cute and my pronouns are she/her", "she/her"], // exact match
 	["my pronouns are helicopter/joke", null], // not on allowlist
 	["pronouns: uwu/owo", "uwu/owo"], // followed by pronoun pattern
@@ -106,8 +106,8 @@ const bioExtractTests = [
 	["any pronouns", "any pronouns"], // any pronouns
 	["He/Him", "He/Him"], //capitalised pronouns
 ];
-for (const [input, expects] of bioExtractTests) {
-	bioExtractSuite(input, async () => {
+for (const [input, expects] of textExtractTests) {
+	textExtractSuite(input, async () => {
 		const result = await pronouns.extractFromStatus({
 			account: { note: input },
 		});
@@ -115,4 +115,40 @@ for (const [input, expects] of bioExtractTests) {
 	});
 }
 
-bioExtractSuite.run();
+textExtractSuite.run();
+
+const endToEndTests = [
+	{
+		name: "find pronouns in field name",
+		fields: [{ name: "they/them", value: "gender: not found" }],
+		expect: "they/them",
+	},
+	{
+		name: "find pronouns in field name",
+		fields: [{ name: "they/them", value: "gender: not found" }],
+		expect: "they/them",
+	},
+	{
+		name: "find pronouns.page link in bio",
+		fields: [{ name: "age", value: "42" }],
+		note: "https://en.pronouns.page/they/them",
+		expect: "they/them",
+	},
+
+	{
+		name: "find pronouns.page link in unknown field name",
+		fields: [{ name: "gender: not found", value: "https://en.pronouns.page/they/them" }],
+		expect: "they/them",
+	},
+];
+const endToEndTestSuite = suite("end to end tests");
+for (const { name, fields, expect, note } of endToEndTests) {
+	endToEndTestSuite(name, async () => {
+		const result = await pronouns.extractFromStatus({
+			account: { note, fields },
+		});
+		assert.equal(result, expect);
+	});
+}
+
+endToEndTestSuite.run();
