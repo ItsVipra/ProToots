@@ -62,6 +62,7 @@ valueExtractionSuite.after(() => {
 });
 const valueExtractionTests = [
 	["she/her", "she/her"], // exact match
+	["es,ihr / they, them", "es,ihr / they, them"], // exact match with multiple values, comma-separated
 	["they and them", "they and them"], // exact match with multiple words
 	["they/them (https://pronouns.page/they/them)", "they/them"], // plain-text "URL" with additional text
 	["https://en.pronouns.page/they/them", "they/them"], // plain-text "URLs"
@@ -134,11 +135,30 @@ const endToEndTests = [
 		note: "https://en.pronouns.page/they/them",
 		expect: "they/them",
 	},
-
 	{
 		name: "find pronouns.page link in unknown field name",
 		fields: [{ name: "gender: not found", value: "https://en.pronouns.page/they/them" }],
 		expect: "they/them",
+	},
+	{
+		name: "multiple languages and one emoji",
+		fields: [{ name: "Pronomina/Pronouns", value: ":hehim: er, ihm / he, him" }],
+		expect: "er, ihm / he, him",
+	},
+	{
+		name: "not just pronouns in field",
+		fields: [{ name: "RL stats :loading_indicator:", value: "30 | :heart: | She/her" }],
+		expect: "She/her",
+	},
+	{
+		name: "multiple subjects in field name",
+		fields: [{ name: "She/sie/zij/elle", value: "etc" }],
+		expect: "She/sie/zij/elle",
+	},
+	{
+		name: "more complete pronoun definition in bio",
+		note: ":speech_bubble: e/em/eir",
+		expect: "e/em/eir",
 	},
 ];
 const endToEndTestSuite = suite("end to end tests");

@@ -319,13 +319,30 @@ const knownPronouns = [
 function searchForKnownPronouns(text) {
 	if (!text) return null;
 
-	const exactMatches = text.matchAll(/(\w+) ?\/ ?(\w+)/gi);
-	for (const [match, subjective, objective] of exactMatches) {
-		if (
-			knownPronouns.includes(subjective.toLowerCase()) &&
-			knownPronouns.includes(objective.toLowerCase())
-		) {
-			return match.replaceAll(" ", "");
+	// This is a rather complex regular expression to search for pronouns. Therefore, here's the explanation
+	// in plain English: We search for all words that are followed by a slash (/) or comma (,),
+	// which are followed by at least one another word that matches this pattern.
+	//
+	// Why not just two of them? Well, for combinations of multiple subjective pronouns, like "sie/she/elle",
+	// we wanna display the whole set of pronouns if possible.
+	const exactMatches = text.matchAll(/(\w+) ?[/,] ?((\w+)[ /,]{0,2}){1,}/gi);
+	for (const [match] of exactMatches) {
+		// Once we have our match, split it by the known separators and check sequentially
+		// whether we know one of the pronouns. If that's the case, return everything in the match
+		// that's followed by this pronoun.
+		//
+		// Unfortunately, in the above case ("sie/she/elle"), it would return just "she/elle", because
+		// we don't know about common localized pronouns yet. And we can't return the whole set,
+		// because pronoun URLs like pronoun.page/they/them would return something like "page/they/them",
+		// which obviously is wrong.
+		const parts = match.split(/[/,]/).map((x) => x.trim());
+		for (const p of parts) {
+			if (knownPronouns.includes(p.toLowerCase())) {
+				let res = match.substring(match.indexOf(p));
+				res = res.replaceAll(" ", "");
+				res = res.trim();
+				return res;
+			}
 		}
 	}
 
