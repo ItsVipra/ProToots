@@ -3,7 +3,7 @@
  * @param {Node} node
  * @return {Node[]} Array containing the root node and all its descendants
  */
-export function findAllDescendants(node) {
+export function findAllDescendants(node: Node): Node[] {
 	return [node, ...node.childNodes, ...[...node.childNodes].flatMap((n) => findAllDescendants(n))];
 }
 
@@ -14,7 +14,7 @@ export function findAllDescendants(node) {
  * @param {string[]} cl The class(es) to check for.
  * @returns Whether the classList contains the class.
  */
-export function hasClasses(element, ...cl) {
+export function hasClasses(element: HTMLElement, ...cl: string[]) {
 	const classList = element.classList;
 	if (!classList || !cl) return false;
 
@@ -35,7 +35,7 @@ export function hasClasses(element, ...cl) {
  * @param {(el: Element) => void} callback
  * @copyright CC-BY-SA 4.0 wOxxoM https://stackoverflow.com/a/71488320
  */
-export function waitForElement(node, selector, callback) {
+export function waitForElement(node: Element, selector: string, callback: (el: Element) => void) {
 	let el = node.querySelector(selector);
 	if (el) {
 		callback(el);
@@ -60,7 +60,11 @@ export function waitForElement(node, selector, callback) {
  * @param {(el: Element) => void} callback
  * @copyright CC-BY-SA 4.0 wOxxoM https://stackoverflow.com/a/71488320
  */
-export function waitForElementRemoved(node, selector, callback) {
+export function waitForElementRemoved(
+	node: Element,
+	selector: string,
+	callback: (el: Element) => void,
+) {
 	let el = node.querySelector(selector);
 	if (!el) {
 		callback(el);
@@ -81,7 +85,7 @@ export function waitForElementRemoved(node, selector, callback) {
  * @param {HTMLElement} insertion Element to insert
  * @param {HTMLElement} target Element, which insertion is placed after
  */
-export function insertAfter(insertion, target) {
+export function insertAfter(insertion: HTMLElement, target: HTMLElement) {
 	//docs: https://developer.mozilla.org/en-US/docs/Web/API/Node/insertBefore#example_2
 	target.parentElement.insertBefore(insertion, target.nextSibling);
 }

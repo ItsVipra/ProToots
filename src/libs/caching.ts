@@ -10,7 +10,7 @@ const cacheMaxAge = 24 * 60 * 60 * 1000; // time after which cached pronouns sho
  * @param {string} account The account ID
  * @param {string} pronouns The pronouns to cache.
  */
-export async function cachePronouns(account, pronouns) {
+export async function cachePronouns(account: string, pronouns: string) {
 	let cache = {};
 	try {
 		cache = await storage.local.get();
@@ -38,7 +38,7 @@ export async function cachePronouns(account, pronouns) {
  * @param {string} accountName
  * @returns {Promise<string>} Account's cached pronouns, or null if not saved or stale
  */
-export async function getPronouns(accountName) {
+export async function getPronouns(accountName: string): Promise<string> {
 	const fallback = { pronounsCache: {} };
 	let cacheResult;
 	try {
