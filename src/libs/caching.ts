@@ -1,4 +1,4 @@
-import { debug, info, error } from "./logging.js";
+import { debug, info, error } from "./logging";
 import { runtime, storage } from "webextension-polyfill";
 
 const currentVersion = runtime.getManifest().version;

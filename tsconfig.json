@@ -3,7 +3,7 @@
 		"module": "ESNext",
 		"target": "ESNext",
 		"checkJs": true,
-		"moduleResolution": "nodenext"
+		"moduleResolution": "bundler"
 	},
 	"include": ["src/", "tests/"]
 }
