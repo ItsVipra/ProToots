@@ -14,6 +14,8 @@
 	},
 	"devDependencies": {
 		"@sprout2000/esbuild-copy-plugin": "1.1.8",
+		"@types/sanitize-html": "^2.9.0",
+		"@types/webextension-polyfill": "^0.10.1",
 		"esbuild": "0.17.19",
 		"eslint": "^8.42.0",
 		"eslint-config-prettier": "^8.8.0",
