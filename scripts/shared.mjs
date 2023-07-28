@@ -9,8 +9,8 @@ const { copyPlugin } = copyPluginPkg; // js and your fucking mess of imports, si
  * @type {string[]}
  */
 const files = [
-	path.join("src", "content_scripts", "protoots.js"),
-	path.join("src", "options", "options.js"),
+	path.join("src", "content_scripts", "protoots.ts"),
+	path.join("src", "options", "options.ts"),
 ];
 
 /**

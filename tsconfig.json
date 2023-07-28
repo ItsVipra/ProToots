@@ -5,5 +5,5 @@
 		"checkJs": true,
 		"moduleResolution": "nodenext"
 	},
-	"include": ["src/**/*.js", "tests/**/*.js"]
+	"include": ["src/", "tests/"]
 }
