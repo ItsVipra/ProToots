@@ -34,6 +34,15 @@ jobs:
       - name: Run eslint
         run: npm run lint
 
+  tsc:
+    name: TypeScript compilation check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: npm ci
+      - run: npx tsc --noEmit
+
   test:
     runs-on: ubuntu-latest
     steps:
