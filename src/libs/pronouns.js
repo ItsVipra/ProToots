@@ -1,5 +1,6 @@
 import sanitizeHtml from "sanitize-html";
 import { htmlDecode } from "./domhelpers.js";
+import { allKnownPronouns } from "./generated/pronouns/index.js";
 
 const fieldMatchers = [/\bpro.*nouns?\b/i, /\bpronomen\b/i, /(i )?go(es)? by/i];
 const knownPronounUrls = [
@@ -221,95 +222,6 @@ function sanitizePronouns(str) {
 	return str === "" ? null : str;
 }
 
-const knownPronouns = [
-	"ae",
-	"aer",
-	"aers",
-	"aerself",
-	"co",
-	"co's",
-	"cos",
-	"coself",
-	"e",
-	"eir",
-	"eirs",
-	"em",
-	"ems",
-	"emself",
-	"es",
-	"ey",
-	"fae",
-	"faer",
-	"faers",
-	"faerself",
-	"he",
-	"her",
-	"hers",
-	"herself",
-	"him",
-	"himself",
-	"hir",
-	"hirs",
-	"hirself",
-	"his",
-	"hu",
-	"hum",
-	"hus",
-	"huself",
-	"it",
-	"its",
-	"itself",
-	"ne",
-	"nem",
-	"nemself",
-	"nir",
-	"nirs",
-	"nirself",
-	"one",
-	"one's",
-	"oneself",
-	"per",
-	"pers",
-	"perself",
-	"s/he",
-	"she",
-	"their",
-	"theirs",
-	"them",
-	"themself",
-	"themselves",
-	"they",
-	"thon",
-	"thon's",
-	"thons",
-	"thonself",
-	"ve",
-	"ver",
-	"vers",
-	"verself",
-	"vi",
-	"vim",
-	"vims",
-	"vimself",
-	"vir",
-	"virs",
-	"virself",
-	"vis",
-	"xe",
-	"xem",
-	"xemself",
-	"xyr",
-	"xyrs",
-	"ze",
-	"zhe",
-	"zher",
-	"zhers",
-	"zherself",
-	"zir",
-	"zirs",
-	"zirself",
-];
-
 /**
  * Tries to extract pronouns from the given text. Only "known" pronouns are returned, which is
  * a compromise for the pattern matching. At no point we want to limit the pronouns used by persons.
@@ -325,7 +237,7 @@ function searchForKnownPronouns(text) {
 	//
 	// Why not just two of them? Well, for combinations of multiple subjective pronouns, like "sie/she/elle",
 	// we wanna display the whole set of pronouns if possible.
-	const exactMatches = text.matchAll(/(\w+) ?[/,] ?((\w+)[ /,]{0,2}){1,}/gi);
+	const exactMatches = text.matchAll(/(\w+)( ?[/,] ?(\w+)){1,}/gi);
 	for (const [match] of exactMatches) {
 		// Once we have our match, split it by the known separators and check sequentially
 		// whether we know one of the pronouns. If that's the case, return everything in the match
@@ -336,19 +248,21 @@ function searchForKnownPronouns(text) {
 		// because pronoun URLs like pronoun.page/they/them would return something like "page/they/them",
 		// which obviously is wrong.
 		const parts = match.split(/[/,]/).map((x) => x.trim());
+		const known = [];
 		for (const p of parts) {
-			if (knownPronouns.includes(p.toLowerCase())) {
-				let res = match.substring(match.indexOf(p));
-				res = res.replaceAll(" ", "");
-				res = res.trim();
-				return res;
+			if (allKnownPronouns.includes(p.toLowerCase())) {
+				known.push(p);
 			}
+		}
+
+		if (known.length) {
+			return known.join("/");
 		}
 	}
 
 	const followedByColon = text.matchAll(/pronouns?:\W+([\w/+]+)/gi);
 	for (const match of followedByColon) {
-		return match.pop(); // first group is last entry in array
+		return match.pop() ?? null; // first group is last entry in array
 	}
 	const anyAllPronouns = text.match(/(any|all) +pronouns/gi);
 	if (anyAllPronouns) {

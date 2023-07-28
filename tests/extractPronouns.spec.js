@@ -160,6 +160,11 @@ const endToEndTests = [
 		note: ":speech_bubble: e/em/eir",
 		expect: "e/em/eir",
 	},
+	{
+		name: "comma-separated pronouns in bio",
+		note: "test er, he, him, more test",
+		expect: "er/he/him",
+	},
 ];
 const endToEndTestSuite = suite("end to end tests");
 for (const { name, fields, expect, note } of endToEndTests) {
