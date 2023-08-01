@@ -4,7 +4,6 @@
 	border-radius: 0.25rem;
 	margin-left: 0.5rem;
 	display: inline-flex;
-	text-transform: lowercase;
 	animation: proplate-fadein 0.15s linear;
 	font-weight: 500;
 

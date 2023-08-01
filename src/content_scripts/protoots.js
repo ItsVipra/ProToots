@@ -215,7 +215,7 @@ async function addProplate(element) {
 			return;
 		}
 		proplate.innerText = pronouns;
-		//TODO?: alt text
+		proplate.title = pronouns;
 		proplate.classList.add("protoots-proplate");
 		if (contributorList.includes(accountName)) {
 			//i think you can figure out what this does on your own
