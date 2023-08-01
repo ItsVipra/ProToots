@@ -21,10 +21,11 @@ export function normaliseAccountName(name) {
  * Turns a link to an account on a remote instance into a username.
  *
  *  e.g. `https://example.com/@test` -> `@test@example.com`
- * @param {string} url URL to an account on their own instance
+ * @param {string|null} url URL to an account on their own instance
  * @returns {string} username (not normalised)
  */
 export function accountNameFromURL(url) {
+	if (!url) return null;
 	const splitURL = url.split("/");
 
 	const username = [splitURL.pop(), splitURL.pop()].join("@");

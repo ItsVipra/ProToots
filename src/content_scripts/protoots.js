@@ -201,9 +201,9 @@ async function addProplate(element) {
 
 	/**
 	 * Generates a proplate and adds it as a sibling of the given nameTagEl
-	 * @param {string} statusId Id of the target object
-	 * @param {string} accountName Name of the account the plate is for
-	 * @param {HTMLElement} nametagEl Element to add the proplate next to
+	 * @param {string|undefined} statusId Id of the target object
+	 * @param {string|null} accountName Name of the account the plate is for
+	 * @param {HTMLElement|null} nametagEl Element to add the proplate next to
 	 * @param {string} type type of the target object
 	 * @returns
 	 */
@@ -234,7 +234,7 @@ async function addProplate(element) {
 	/**
 	 * Gets the data-id from the given element
 	 * @param {HTMLElement} element Element with data-id attribute
-	 * @returns {string}
+	 * @returns {string|undefined}
 	 */
 	function getID(element) {
 		let id = element.dataset.id;
@@ -270,11 +270,12 @@ async function addProplate(element) {
 
 	/**
 	 * Gets the given element's textcontent or given attribute
-	 * @param {HTMLElement} element Element which textcontent is the account name
+	 * @param {HTMLElement|null} element Element which textcontent is the account name
 	 * @param {string} attribute Attribute from which to pull the account name
 	 * @returns {string|null} Normalised account name or null if it can't be found.
 	 */
 	function getAccountName(element, attribute = "textContent") {
+		if (!element) return null;
 		let accountName = element.textContent;
 		if (attribute != "textContent") {
 			accountName = element.getAttribute(attribute);
@@ -282,7 +283,7 @@ async function addProplate(element) {
 
 		if (!accountName) {
 			warn(
-				"Could not extract the account name from the element, aborting pronoun extraction:",
+				`Could not extract the account name from the element, using attribute ${attribute} aborting pronoun extraction:`,
 				element,
 			);
 			return null;
