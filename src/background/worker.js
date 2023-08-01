@@ -8,15 +8,10 @@ action.onClicked.addListener(async (tab) => {
 	 */
 	const u = new URL(tab.url);
 	const perms = { origins: [`${u.origin}/*`] };
-	const hasPermissions = await permissions.contains(perms);
-	if (!hasPermissions) {
-		await permissions.request(perms);
-	}
+	await permissions.request(perms);
 
-	action.setPopup({ popup: "options/options.html" });
 	action.setTitle({ title: "Configure ProToots" });
 
-	await permissions.request(perms);
 	await scripting.executeScript({
 		files: ["content_scripts/protoots.js"],
 		target: { tabId: tab.id },
