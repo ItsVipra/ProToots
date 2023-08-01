@@ -9,6 +9,7 @@ const contributorList = [
 	"LenaEine@chaos.social",
 ];
 
+import { mastodon } from "../libs/mastodon.js";
 import { fetchPronouns } from "../libs/fetchPronouns";
 import {
 	accountVisibility,
@@ -18,19 +19,9 @@ import {
 	notificationVisibility,
 	statusVisibility,
 } from "../libs/settings";
-import { warn, log } from "../libs/logging";
-import {
-	findAllDescendants,
-	hasClasses,
-	insertAfter,
-	waitForElement,
-	waitForElementRemoved,
-} from "../libs/domhelpers";
-import {
-	accountNameFromURL,
-	addTypeAttribute,
-	normaliseAccountName,
-} from "../libs/protootshelpers";
+import { warn } from "../libs/logging";
+import { insertAfter, waitForElement, waitForElementRemoved } from "../libs/domhelpers";
+import { accountNameFromURL, addTypeAttribute, normaliseAccountName } from "../libs/protootshelpers";
 
 //before anything else, check whether we're on a Mastodon page
 checkSite();
@@ -54,57 +45,12 @@ async function checkSite() {
  */
 function main() {
 	// debug('selection for id mastodon', {'result': document.querySelector("#mastodon")})
-	if (!document.querySelector("#mastodon")) {
-		warn("Not a Mastodon instance");
-		return;
+	if (document.querySelector("#mastodon")) {
+		mastodon();
+	} else {
+
+		warn("Not a Supported site");
 	}
-
-	//All of this is Mastodon specific - factor out into mastodon.js?
-	log("Mastodon instance, activating Protoots");
-
-	//create a global tootObserver to handle all article objects
-	const tootObserver = new IntersectionObserver((entries) => {
-		onTootIntersection(entries);
-	});
-
-	// We are tracking navigation changes with the location and a MutationObserver on `document`,
-	// because the popstate event from the History API is only triggered with the back/forward buttons.
-	let lastUrl = location.href;
-	new MutationObserver((mutations) => {
-		const url = location.href;
-		if (url !== lastUrl) {
-			lastUrl = url;
-		}
-
-		/**
-		 * Checks whether the given n is eligible to have a proplate added
-		 * @param {Node} n
-		 * @returns {Boolean}
-		 */
-		function isPronounableElement(n) {
-			return (
-				n instanceof HTMLElement &&
-				((n.nodeName == "ARTICLE" && n.hasAttribute("data-id")) ||
-					hasClasses(
-						n,
-						"detailed-status",
-						"status",
-						"conversation",
-						"account-authorize",
-						"notification",
-						"notification__message",
-						"account",
-					))
-			);
-		}
-
-		mutations
-			.flatMap((m) => Array.from(m.addedNodes).map((m) => findAllDescendants(m)))
-			.flat()
-			// .map((n) => console.log("found node: ", n));
-			.filter(isPronounableElement)
-			.forEach((a) => addtoTootObserver(a, tootObserver));
-	}).observe(document, { subtree: true, childList: true });
 }
 
 /**
@@ -115,7 +61,7 @@ function main() {
  * Once a toot has left the viewport its "protoots-checked" attribute will be removed.
  * @param {IntersectionObserverEntry[]} observerentries
  */
-function onTootIntersection(observerentries) {
+export function onTootIntersection(observerentries) {
 	for (const observation of observerentries) {
 		const ArticleElement = observation.target;
 		if (!observation.isIntersecting) {
@@ -144,7 +90,7 @@ function onTootIntersection(observerentries) {
  * @param {HTMLElement} ActionElement
  * @param {IntersectionObserver} tootObserver Observer to add the element to
  */
-function addtoTootObserver(ActionElement, tootObserver) {
+export function addtoTootObserver(ActionElement, tootObserver) {
 	// console.log(ActionElement);
 	if (ActionElement.hasAttribute("protoots-tracked")) return;
 
