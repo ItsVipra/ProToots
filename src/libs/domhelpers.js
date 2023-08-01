@@ -85,3 +85,26 @@ export function insertAfter(insertion, target) {
 	//docs: https://developer.mozilla.org/en-US/docs/Web/API/Node/insertBefore#example_2
 	target.parentElement.insertBefore(insertion, target.nextSibling);
 }
+
+/**
+ * Turns HTML text into human-readable text
+ * @param {string} input HTML Text
+ * @returns {string}
+ */
+export function htmlDecode(input) {
+	if (typeof window === "undefined" || !window.DOMParser) {
+		const replacements = {
+			"&amp;": "&",
+			"&quot;": '"',
+			"&lt;": "<",
+			"&gt;": ">",
+			"&nbsp;": "",
+		};
+		for (const [html, text] of Object.entries(replacements)) input = input.replaceAll(html, text);
+
+		return input;
+	}
+
+	const doc = new DOMParser().parseFromString(input, "text/html");
+	return doc.documentElement.textContent;
+}
