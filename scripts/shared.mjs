@@ -41,7 +41,7 @@ export const defaultBuildOptions = {
 			recursive: true,
 
 			// Return true if the file should be copied and false otherwise.
-			filter: (src) => !src.endsWith(".js"),
+			filter: (src) => !src.endsWith(/\.[jt]s/),
 		}),
 	],
 };
