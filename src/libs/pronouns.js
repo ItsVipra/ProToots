@@ -232,12 +232,12 @@ function searchForKnownPronouns(text) {
 	if (!text) return null;
 
 	// This is a rather complex regular expression to search for pronouns. Therefore, here's the explanation
-	// in plain English: We search for all words that are followed by a slash (/) or comma (,),
+	// in plain English: We search for all words that are followed by a slash (/),
 	// which are followed by at least one another word that matches this pattern.
 	//
 	// Why not just two of them? Well, for combinations of multiple subjective pronouns, like "sie/she/elle",
 	// we wanna display the whole set of pronouns if possible.
-	const exactMatches = text.matchAll(/(\w+)( ?[/,] ?(\w+)){1,}/gi);
+	const exactMatches = text.matchAll(/(\w+)( ?[/] ?(\w+)){1,}/gi);
 	for (const [match] of exactMatches) {
 		// Once we have our match, split it by the known separators and check sequentially
 		// whether we know one of the pronouns. If that's the case, return everything in the match
