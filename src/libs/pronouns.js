@@ -1,7 +1,7 @@
 import sanitizeHtml from "sanitize-html";
 import { htmlDecode } from "./domhelpers.js";
 import { allKnownPronouns } from "./generated/pronouns/index.js";
-import {debug} from "../libs/logging.js";
+import { debug } from "./logging.js";
 
 const fieldMatchers = [/\bpro.*nouns?\b/i, /\bpronomen\b/i, /(i )?go(es)? by/i];
 const knownPronounUrls = [
@@ -58,10 +58,12 @@ export async function extractFromStatus(status) {
 async function findPronouns(fields) {
 	for (const { name, value } of fields) {
 		// Either search for a known field name.
+		debug("Searching for known field names");
 		const hasMatch = fieldMatchers.find((m) => name.match(m)) !== undefined;
 		if (hasMatch) return { value: value, exactMatch: false };
 
 		// Or check whether the either the name or the value contains a set of known pronouns.
+		debug("Searching for pronouns in text");
 		const textualValues = [value, name];
 		const fromKnownPronouns = textualValues.map(searchForKnownPronouns).find((x) => x);
 		if (fromKnownPronouns) return { value: fromKnownPronouns, exactMatch: true };
@@ -102,6 +104,7 @@ async function extractPronounsPagePronouns(text) {
 	const match = text.match(pattern);
 	if (!match) return null;
 
+	debug("found pronouns.page link", match);
 	const { username, pronouns } = match.groups;
 	const res = pronouns ?? (await queryUserFromPronounsPage(username));
 
@@ -114,6 +117,7 @@ async function extractPronounsPagePronouns(text) {
  * @returns {Promise<string|null>} The pronouns that have set the "yes" or "meh" opinion.
  */
 async function queryUserFromPronounsPage(username) {
+	debug("pronouns not in link, fetching profile");
 	// Example page: https://en.pronouns.page/api/profile/get/andrea?version=2
 	const resp = await fetch(`https://en.pronouns.page/api/profile/get/${username}?version=2`);
 	if (resp.status >= 400) {
@@ -264,15 +268,18 @@ function searchForKnownPronouns(text) {
 		// we don't know about common localized pronouns yet. And we can't return the whole set,
 		// because pronoun URLs like pronoun.page/they/them would return something like "page/they/them",
 		// which obviously is wrong.
+		debug("pronoun candidate:", match);
 		const parts = match.split(/[/,]/).map((x) => x.trim());
 		const known = [];
 		for (const p of parts) {
 			if (allKnownPronouns.includes(p.toLowerCase())) {
+				// debug("Found known pronoun", p);
 				known.push(p);
 			}
 		}
 
 		if (known.length) {
+			debug("Known pronouns found:", known);
 			return known.join("/");
 		}
 	}
