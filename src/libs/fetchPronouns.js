@@ -61,23 +61,13 @@ export async function fetchPronouns(dataID, accountName, type) {
 
 export async function fetchProfile(dataID, accountName) {
 	//profile is account + relationship
-	const cacheResult = await getProfile();
+	const cacheResult = await getProfile(accountName);
 	debug(cacheResult);
 
-	if (accountName in cacheResult.hovercardCache) {
-		const { profile, timestamp } = cacheResult.hovercardCache[accountName];
-
-		// If we have a cached value and it's not outdated, use it.
-		if (profile && Date.now() - timestamp < cacheMaxAge) {
-			info(`${accountName} in cardCache with value: `, profile);
-			return profile;
-		} else {
-			info(`${accountName} cardCache entry is stale, refreshing`);
-		}
-	}
+	if (cacheResult) return cacheResult;
 
 	if (!dataID) {
-		warn(`Could not fetch pronouns for user ${accountName}, because no status ID was passed.`);
+		warn(`Could not fetch profile for user ${accountName}, because no status ID was passed.`);
 		return null;
 	}
 

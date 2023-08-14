@@ -102,7 +102,7 @@ export async function getPronouns(accountName) {
  *
  * @returns {Promise<object>} Profile object, containing account and relationship
  */
-export async function getProfile() {
+export async function getProfile(accountName) {
 	const fallback = { hovercardCache: {} };
 	let cacheResult;
 	try {
@@ -116,26 +116,19 @@ export async function getProfile() {
 		cacheResult = fallback;
 		// ignore errors, we have an empty object as fallback.
 	}
-	return cacheResult;
-}
 
-/**
- *
- * @returns {Promise<object>} Profile object, containing account and relationship
- */
-export async function getProfile() {
-	const fallback = { hovercardCache: {} };
-	let cacheResult;
-	try {
-		cacheResult = await storage.local.get();
-		if (!cacheResult.hovercardCache) {
-			//if result doesn't have "pronounsCache" create it
-			await storage.local.set(fallback);
-			cacheResult = fallback;
+	if (accountName in cacheResult.hovercardCache) {
+		const { profile, timestamp } = cacheResult.hovercardCache[accountName];
+
+		// If we have a cached value and it's not outdated, use it.
+		if (profile && Date.now() - timestamp < cacheMaxAge) {
+			info(`${accountName} in cardCache with value: `, profile);
+			return profile;
+		} else {
+			info(`${accountName} cardCache entry is stale, refreshing`);
+			return null;
 		}
-	} catch {
-		cacheResult = fallback;
-		// ignore errors, we have an empty object as fallback.
 	}
-	return cacheResult;
+
+	return null;
 }
