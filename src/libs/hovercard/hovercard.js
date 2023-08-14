@@ -2,6 +2,8 @@ import { fetchProfile } from "../fetchPronouns";
 import { addShowMoreButton, generateProfile } from "./hovercard_generators";
 import { normaliseAccountName } from "../protootshelpers";
 import { hoverCardSettings } from "../settings";
+import { createElementWithClass } from "./hovercard_helpers";
+import { runtime } from "webextension-polyfill";
 
 const listenerTimeout = 200;
 
@@ -90,16 +92,27 @@ async function addHoverCard(el, statusID, mouseEvent) {
 
 	const accountName = normaliseAccountName(el.querySelector(".display-name__account").textContent);
 
+	//show placeholder
+	let placeholder = document.createElement("img");
+	placeholder.src = runtime.getURL("icons/fennecspin.gif");
+
+	let tempHeader = createElementWithClass("div", "account__header");
+
+	tempHeader.appendChild(placeholder);
+	hovercard.appendChild(tempHeader);
+
+	//set position from mouse cursor
+	hovercard.style.left = (mousePos.x + 10).toString() + "px";
+	hovercard.style.top = (mousePos.y + 10).toString() + "px";
+
+	hovercard.classList.add("protoots-hovercard");
+	hovercard.id = "protoots-hovercard";
+
+	layer.appendChild(hovercard);
+
 	//get account
 	const { account, relationship } = await fetchProfile(statusID, accountName);
-	// const status = await fetchStatus(statusID);
-	// const account = status.account;
 	if (!account) return;
-
-	//and corresponding relationship
-	// const relationship = await fetchRelationship(account.id);
-
-	//
 
 	const settings = hoverCardSettings();
 
@@ -107,18 +120,8 @@ async function addHoverCard(el, statusID, mouseEvent) {
 	const [profileElement, bio] = generateProfile(account, relationship, settings);
 	hovercard.appendChild(profileElement);
 
-	hovercard.classList.add("protoots-hovercard");
-	hovercard.id = "protoots-hovercard";
-
-	//set position from mouse cursor
-	hovercard.style.left = (mousePos.x + 10).toString() + "px";
-	hovercard.style.top = (mousePos.y + 10).toString() + "px";
-
-	layer.appendChild(hovercard);
-	//inserted into DOM here - how the heck do i find out whether the bio is too long now
-	//just hand the bio back up the chain?
-
-	// console.log(bio.scrollHeight, bio.clientHeight);
+	//delete placeholder
+	hovercard.removeChild(tempHeader);
 
 	if (bio.scrollHeight > bio.clientHeight && !settings.scrollableBio) {
 		// console.log("bio is scrollable");

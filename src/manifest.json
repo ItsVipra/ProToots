@@ -31,6 +31,8 @@
 		"page": "options/options.html"
 	},
 
+	"web_accesible_resources": ["icons/fennecspin.gif"],
+
 	"browser_specific_settings": {
 		"gecko": {
 			"id": "protoots@trans.rights"
