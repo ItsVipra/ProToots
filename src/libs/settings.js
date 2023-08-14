@@ -1,4 +1,5 @@
-import { storage } from "webextension-polyfill";
+import browser from "webextension-polyfill";
+const { storage } = browser;
 
 let settings;
 

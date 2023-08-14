@@ -1,6 +1,7 @@
 import sanitizeHtml from "sanitize-html";
 import { htmlDecode } from "./domhelpers.js";
 import { allKnownPronouns } from "./generated/pronouns/index.js";
+import {debug} from "../libs/logging.js";
 
 const fieldMatchers = [/\bpro.*nouns?\b/i, /\bpronomen\b/i, /(i )?go(es)? by/i];
 const knownPronounUrls = [
@@ -231,6 +232,22 @@ function sanitizePronouns(str) {
 function searchForKnownPronouns(text) {
 	if (!text) return null;
 
+	debug("Searching for explicit naming, any/no pronouns");
+	//search for explicitly mentioned pronouns first, lower likelyhood of false positives
+	const followedByColon = text.matchAll(/pronouns?:\W+([\w/+]+)/gi);
+	for (const match of followedByColon) {
+		return match.pop() ?? null; // first group is last entry in array
+	}
+	const anyAllPronouns = text.match(/(any|all) +pronouns/gi);
+	if (anyAllPronouns) {
+		return anyAllPronouns[0];
+	}
+	const noPronouns = text.match(/(no|none) +pronouns/);
+	if (noPronouns) {
+		return noPronouns[0];
+	}
+
+	debug("Searching for known pronouns");
 	// This is a rather complex regular expression to search for pronouns. Therefore, here's the explanation
 	// in plain English: We search for all words that are followed by a slash (/),
 	// which are followed by at least one another word that matches this pattern.
@@ -260,18 +277,6 @@ function searchForKnownPronouns(text) {
 		}
 	}
 
-	const followedByColon = text.matchAll(/pronouns?:\W+([\w/+]+)/gi);
-	for (const match of followedByColon) {
-		return match.pop() ?? null; // first group is last entry in array
-	}
-	const anyAllPronouns = text.match(/(any|all) +pronouns/gi);
-	if (anyAllPronouns) {
-		return anyAllPronouns[0];
-	}
-	const noPronouns = text.match(/(no|none) +pronouns/);
-	if (noPronouns) {
-		return noPronouns[0];
-	}
-
+	debug("No known pronouns found");
 	return null;
 }
