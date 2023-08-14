@@ -13,18 +13,18 @@ body {
 
 .section {
 	background-color: var(--background);
-	border-radius: .5em;
+	border-radius: 0.5em;
 	margin: 0.5em;
 	overflow: hidden;
 }
 
 .section .row {
 	margin: unset;
-	margin-bottom: .25em;
+	margin-bottom: 0.25em;
 	background-color: var(--background);
 	border-radius: unset;
-	border-bottom-left-radius: .5em;
-	border-bottom-right-radius: .5em;
+	border-bottom-left-radius: 0.5em;
+	border-bottom-right-radius: 0.5em;
 	padding-right: 0.5em;
 	display: flex;
 	justify-content: space-between;
@@ -32,13 +32,13 @@ body {
 
 .row2 {
 	background-color: hsl(249, 11%, 20%);
-	padding-top: .5em;
-	border-bottom-left-radius: .5em;
-	border-bottom-right-radius: .5em;
-	transition: color .1s linear;
+	padding-top: 0.5em;
+	border-bottom-left-radius: 0.5em;
+	border-bottom-right-radius: 0.5em;
+	transition: color 0.1s linear;
 }
 
-.row2.disabled{
+.row2.disabled {
 	color: grey;
 }
 
@@ -51,7 +51,7 @@ body {
 	/* margin-bottom: 0.5em; */
 	font-weight: bold;
 	font-size: 1.1em;
-	padding-left: .75em;
+	padding-left: 0.75em;
 	user-select: none;
 }
 
@@ -115,7 +115,7 @@ input {
 }
 
 .description.toggle {
-	padding-left: .5em;
+	padding-left: 0.5em;
 	user-select: none;
 }
 
