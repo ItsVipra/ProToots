@@ -91,7 +91,7 @@ export async function fetchProfile(dataID, accountName) {
  * @param {string} statusID ID of status being requested.
  * @returns {Promise<object>} Contents of the status in json form.
  */
-export async function fetchStatus(statusID) {
+async function fetchStatus(statusID) {
 	const accessToken = await getActiveAccessToken();
 	//fetch status from home server with access token
 	const response = await fetch(
@@ -159,7 +159,7 @@ async function fetchAccount(accountID) {
  * @param {string} accountID ID of account being requested
  * @returns {Promise<Array>} Array containing a relationship object
  */
-export async function fetchRelationship(accountID) {
+async function fetchRelationship(accountID) {
 	const accessToken = await getActiveAccessToken();
 	//fetch status from home server with access token
 	const response = await fetch(
