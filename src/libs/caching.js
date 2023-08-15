@@ -51,6 +51,8 @@ export async function cacheProfile(account, profile) {
 		acct: account,
 		timestamp: Date.now(),
 		profile: profile,
+		hostname: location.host,
+		version: currentVersion,
 	};
 	try {
 		await storage.local.set(cache);
@@ -118,10 +120,15 @@ export async function getProfile(accountName) {
 	}
 
 	if (accountName in cacheResult.hovercardCache) {
-		const { profile, timestamp } = cacheResult.hovercardCache[accountName];
+		const { profile, timestamp, hostname, version } = cacheResult.hovercardCache[accountName];
 
 		// If we have a cached value and it's not outdated, use it.
-		if (profile && Date.now() - timestamp < cacheMaxAge) {
+		if (
+			profile &&
+			Date.now() - timestamp < cacheMaxAge &&
+			hostname == location.host &&
+			version == currentVersion
+		) {
 			info(`${accountName} in cardCache with value: `, profile);
 			return profile;
 		} else {
