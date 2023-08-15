@@ -23,6 +23,10 @@
 	overflow: hidden;
 }
 
+.protoots-hovercard .avatar {
+    z-index: 2;
+}
+
 .protoots-hovercard .account__avatar img {
 	display: block;
 	width: 100%;
@@ -43,6 +47,7 @@
 
 .protoots-hovercard .account__header__image {
 	height: 4.375em !important;
+    z-index: 1;
 }
 
 .protoots-hovercard .account__header__image img {
