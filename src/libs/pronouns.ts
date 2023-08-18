@@ -17,7 +17,7 @@ const knownPronounUrls = [
  * @param {any} status
  * @returns {Promise<string|null>} Author pronouns if found. Otherwise returns null.
  */
-export async function extractFromStatus(status) {
+export async function extractFromStatus(status: any): Promise<string | null> {
 	// get account from status and pull out fields
 	const account = status.account;
 	const { fields, note } = account;
@@ -42,7 +42,7 @@ export async function extractFromStatus(status) {
  * @param {{name: string, value: string}} field The field value
  * @returns {Promise<string|null>} The pronouns or null.
  */
-async function extractFromField(field) {
+async function extractFromField(field: { name: string; value: string }): Promise<string | null> {
 	let pronounsRaw;
 	for (const matcher of fieldMatchers) {
 		if (field.name.match(matcher)) {
@@ -82,7 +82,7 @@ async function extractFromField(field) {
  * @param {string} username The username of the person, without the leading "@".
  * @returns {Promise<string|null>} The pronouns that have set the "yes" or "meh" opinion.
  */
-async function queryUserFromPronounsPage(username) {
+async function queryUserFromPronounsPage(username: string): Promise<string | null> {
 	// Example page: https://en.pronouns.page/api/profile/get/andrea?version=2
 	const resp = await fetch(`https://en.pronouns.page/api/profile/get/${username}?version=2`);
 	if (resp.status >= 400) {
@@ -120,7 +120,7 @@ async function queryUserFromPronounsPage(username) {
  * @param {string} val
  * @returns {Promise<string>}
  */
-async function normalizePronounPagePronouns(val) {
+async function normalizePronounPagePronouns(val: string): Promise<string> {
 	const match = val.match(/pronouns\.page\/(.+)/);
 	if (match) val = match[1];
 
@@ -156,7 +156,7 @@ async function normalizePronounPagePronouns(val) {
  * @param {string} str The input string.
  * @returns {string|null} The sanitized string.
  */
-function sanitizePronouns(str) {
+function sanitizePronouns(str: string): string | null {
 	if (!str) return null;
 
 	// Remove all custom emojis with the :shortcode: format.
@@ -285,7 +285,7 @@ const knownPronouns = [
  * @param {string} bio The bio
  * @returns {string|null} The result or null
  */
-function extractFromBio(bio) {
+function extractFromBio(bio: string): string | null {
 	const exactMatches = bio.matchAll(/(\w+) ?\/ ?(\w+)/gi);
 	for (const [match, subjective, objective] of exactMatches) {
 		if (

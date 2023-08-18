@@ -1,9 +1,0 @@
-{
-	"compilerOptions": {
-		"module": "ESNext",
-		"target": "ESNext",
-		"checkJs": true,
-		"moduleResolution": "nodenext"
-	},
-	"include": ["src/**/*.js", "tests/**/*.js"]
-}

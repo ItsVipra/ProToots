@@ -24,8 +24,14 @@ export function normaliseAccountName(name) {
  * @param {string|null} url URL to an account on their own instance
  * @returns {string} username (not normalised)
  */
+<<<<<<< HEAD
 export function accountNameFromURL(url) {
 	if (!url) return null;
+||||||| parent of 7061ebc (Add type definitions based on JSDoc types)
+export function accountNameFromURL(url) {
+=======
+export function accountNameFromURL(url: string): string {
+>>>>>>> 7061ebc (Add type definitions based on JSDoc types)
 	const splitURL = url.split("/");
 
 	const username = [splitURL.pop(), splitURL.pop()].join("@");
@@ -37,7 +43,7 @@ export function accountNameFromURL(url) {
  * Checks which type an element is and adds the according protoots-type attribute
  * @param {HTMLElement} ActionElement
  */
-export function addTypeAttribute(ActionElement) {
+export function addTypeAttribute(ActionElement: HTMLElement) {
 	if (hasClasses(ActionElement, "status") && !hasClasses(ActionElement, "notification__message")) {
 		ActionElement.setAttribute("protoots-type", "status");
 	} else if (hasClasses(ActionElement, "detailed-status")) {

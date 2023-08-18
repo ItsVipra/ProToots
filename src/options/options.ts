@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { storage } from "webextension-polyfill";
 import { error } from "../libs/logging";
 

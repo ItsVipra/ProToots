@@ -14,7 +14,11 @@ let conversationsCache;
  * @param {string} type Type of data-id
  * @returns {string} The pronouns if we have any, otherwise "null".
  */
-export async function fetchPronouns(dataID, accountName, type) {
+export async function fetchPronouns(
+	dataID: string | undefined,
+	accountName: string,
+	type: string,
+): Promise<string> {
 	// log(`searching for ${account_name}`);
 	const cacheResult = await getPronouns(accountName);
 	debug(cacheResult);
@@ -65,7 +69,7 @@ export async function fetchPronouns(dataID, accountName, type) {
  * @param {string} statusID ID of status being requested.
  * @returns {Promise<object>} Contents of the status in json form.
  */
-async function fetchStatus(statusID) {
+async function fetchStatus(statusID: string): Promise<object> {
 	const accessToken = await getActiveAccessToken();
 	//fetch status from home server with access token
 	const response = await fetch(
@@ -90,7 +94,7 @@ async function fetchStatus(statusID) {
  * @param {string} notificationID ID of notification being requested.
  * @returns {Promise<object>} Contents of notification in json form.
  */
-async function fetchNotification(notificationID) {
+async function fetchNotification(notificationID: string): Promise<object> {
 	const accessToken = await getActiveAccessToken();
 
 	const response = await fetch(
@@ -111,7 +115,7 @@ async function fetchNotification(notificationID) {
  * @param {string} accountID ID of account being requested.
  * @returns {Promise<object>} Contents of account in json form.
  */
-async function fetchAccount(accountID) {
+async function fetchAccount(accountID: string): Promise<object> {
 	const accessToken = await getActiveAccessToken();
 
 	const response = await fetch(
@@ -134,7 +138,7 @@ async function fetchAccount(accountID) {
  *
  * DOCS: https://docs.joinmastodon.org/methods/conversations/#response
  */
-async function fetchConversations() {
+async function fetchConversations(): Promise<Array<any>> {
 	if (conversationsCache) return conversationsCache;
 	//the api wants status IDs, not conversation IDs
 	//as a result we can only get pronouns for the first 40 conversations max
@@ -158,7 +162,7 @@ async function fetchConversations() {
  * Fetches the current access token for the user.
  * @returns {Promise<string>} The accessToken for the current user if we are logged in.
  */
-async function getActiveAccessToken() {
+async function getActiveAccessToken(): Promise<string> {
 	// Fortunately, Mastodon provides the initial state in a <script> element at the beginning of the page.
 	// Besides a lot of other information, it contains the access token for the current user.
 	const initialStateEl = document.getElementById("initial-state");
