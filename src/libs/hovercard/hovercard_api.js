@@ -41,7 +41,7 @@ export async function unfollowAccount(accountID) {
 /**
  * Set's the private note for the given account, with the value of the given element
  * @param {String} accountID
- * @param {HTMLElement} element Note textfield element
+ * @param {HTMLInputElement} element Note textfield element
  * @returns {Promise<Response>}
  */
 export async function setPrivateNote(accountID, element) {

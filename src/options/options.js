@@ -96,17 +96,8 @@ function setDisabled() {
 		button.disabled = !proplatesToggle.checked;
 	});
 
-	if (!hovercardToggle.checked) {
-		hovercardRow2.classList.add("disabled");
-	} else {
-		hovercardRow2.classList.remove("disabled");
-	}
-
-	if (!proplatesToggle.checked) {
-		proplatesRow2.classList.add("disabled");
-	} else {
-		proplatesRow2.classList.remove("disabled");
-	}
+	hovercardRow2.classList.toggle("disabled", !hovercardToggle.checked);
+	proplatesRow2.classList.toggle("disabled", !proplatesToggle.checked);
 }
 
 document.addEventListener("DOMContentLoaded", restoreOptions);
