@@ -222,7 +222,6 @@ function generateHeaderExtra(account, relationship, options) {
 		);
 		noteTextfield.placeholder = "Click to add note";
 
-		// console.log(relationship[0].note);
 		if (relationship[0].note != "") {
 			noteTextfield.textContent = relationship[0].note;
 		}
