@@ -39,28 +39,24 @@ export function addHoverCardLayer() {
  * @returns
  */
 export function addHoverCardListener(el) {
-	// console.log("adding hovercard listener to", el);
 	if (el.nodeName != "ARTICLE") return;
 
 	const nametag = /** @type {HTMLElement|null} */ (el.querySelector(".display-name"));
 	const id = el.dataset.id;
 
-	nametag.addEventListener("mouseenter", (mouseEvent) => {
+	nametag.addEventListener("mouseenter", () => {
 		hovering = nametag;
-		// console.log(hovering);
 		const enterpos = { x: mousePos.x, y: mousePos.y };
 		setTimeout(() => {
-			// if (hovering && hovering != nametag) return;
 			// if the cursor has moved more than 50 pixels since
 			// entering the name, don't generate a card
 			if (Math.hypot(mousePos.x - enterpos.x, mousePos.y - enterpos.y) > 50) return;
-			addHoverCard(nametag, id, mouseEvent);
+			addHoverCard(nametag, id);
 		}, listenerTimeout);
 	});
 
 	nametag.addEventListener("mouseleave", () => {
 		hovering = null;
-		// console.log(hovering);
 		setTimeout(() => {
 			hovercardExists = false;
 			if (hovering === nametag) return;
@@ -73,14 +69,11 @@ export function addHoverCardListener(el) {
  *
  * @param {HTMLElement} el Element which will be hovered on
  * @param {*} statusID Status data-id
- * @param {MouseEvent} mouseEvent
  */
-async function addHoverCard(el, statusID, mouseEvent) {
+async function addHoverCard(el, statusID) {
 	if (hovercardExists) return;
 
 	hovercardExists = true;
-
-	const type = el.getAttribute("type");
 
 	//remove all other hovercards
 	document.querySelectorAll("#protoots-hovercard").forEach((element) => element.remove());

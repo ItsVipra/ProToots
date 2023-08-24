@@ -47,7 +47,6 @@ export async function unfollowAccount(accountID) {
 export async function setPrivateNote(accountID, element) {
 	const accessToken = await getActiveAccessToken();
 
-	// console.log(element.value);
 	const response = await fetch(
 		`${location.protocol}//${location.host}/api/v1/accounts/${accountID}/note`,
 		{
@@ -60,6 +59,5 @@ export async function setPrivateNote(accountID, element) {
 		},
 	);
 
-	// console.log(response);
 	return response;
 }

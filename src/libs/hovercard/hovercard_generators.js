@@ -295,7 +295,6 @@ function generateHeaderExtra(account, relationship, options) {
  */
 function generateStats(account) {
 	const extraLinks = createElementWithClass("div", "account__header__extra__links");
-	// extra_links.appendChild(generateStat(account, "statuses_count", " Posts"));
 	extraLinks.appendChild(generateStat(account, "following_count", " Following"));
 	extraLinks.appendChild(generateStat(account, "followers_count", " Followers"));
 	return extraLinks;
@@ -326,7 +325,6 @@ export function addShowMoreButton(bio) {
 	const span = document.createElement("span");
 	span.textContent = "Show more";
 	showMore.appendChild(span);
-	// showMore.style.backgroundColor = "transparent";
 	showMore.addEventListener("click", () => setLess());
 
 	showMoreDiv.appendChild(showMore);
