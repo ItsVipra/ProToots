@@ -19,6 +19,7 @@ Alternatively you can download an unsigned version from the [releases page](http
 ## Known issues
 
 - None! It's perfect!
+- no but seriously, please submit any bugs you find as an issue :3
 
 Please also take a look at the FAQ below and the [issue list](https://github.com/ItsVipra/ProToots/issues).
 
