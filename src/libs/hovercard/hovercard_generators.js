@@ -333,7 +333,6 @@ export function addShowMoreButton(bio) {
 	showMoreDiv.style.marginTop = (-moredivBounds.height).toString() + "px";
 	const accountHeader = document.querySelector(".icon-button");
 	const backgroundColor = getComputedStyle(accountHeader).getPropertyValue("color");
-	console.log(backgroundColor);
 	showMoreDiv.style.setProperty("--background-color", backgroundColor);
 
 	function setMore() {

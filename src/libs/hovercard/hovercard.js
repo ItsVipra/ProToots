@@ -86,10 +86,10 @@ async function addHoverCard(el, statusID) {
 	const accountName = normaliseAccountName(el.querySelector(".display-name__account").textContent);
 
 	//show placeholder
-	let placeholder = document.createElement("img");
+	const placeholder = document.createElement("img");
 	placeholder.src = runtime.getURL("icons/fennecspin.gif");
 
-	let tempHeader = createElementWithClass("div", "account__header");
+	const tempHeader = createElementWithClass("div", "account__header");
 
 	tempHeader.appendChild(placeholder);
 	hovercard.appendChild(tempHeader);
