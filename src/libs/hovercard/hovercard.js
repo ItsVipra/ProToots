@@ -119,21 +119,7 @@ async function addHoverCard(el, statusID) {
 		addShowMoreButton(bio);
 	}
 
-	const boundingrect = hovercard.getBoundingClientRect();
-
-	const borderDistance = {
-		x: boundingrect.right - window.innerWidth,
-		y: boundingrect.bottom - window.innerHeight,
-	};
-
-	if (borderDistance.y > 0) {
-		hovercard.style.top =
-			(Number(hovercard.style.top.replace("px", "")) - borderDistance.y).toString() + "px";
-	}
-	if (borderDistance.x > 0) {
-		hovercard.style.left =
-			(Number(hovercard.style.left.replace("px", "")) - borderDistance.y).toString() + "px";
-	}
+	moveOnScreen(hovercard);
 
 	hovercard.addEventListener("mouseenter", () => (hovering = el));
 	hovercard.addEventListener("mouseleave", () => {
@@ -151,6 +137,24 @@ async function addHoverCard(el, statusID) {
 		},
 		{ once: true },
 	);
+}
+
+function moveOnScreen(hovercard) {
+	const boundingrect = hovercard.getBoundingClientRect();
+
+	const borderDistance = {
+		x: boundingrect.right - window.innerWidth,
+		y: boundingrect.bottom - window.innerHeight,
+	};
+
+	if (borderDistance.y > 0) {
+		hovercard.style.top =
+			(Number(hovercard.style.top.replace("px", "")) - borderDistance.y).toString() + "px";
+	}
+	if (borderDistance.x > 0) {
+		hovercard.style.left =
+			(Number(hovercard.style.left.replace("px", "")) - borderDistance.y).toString() + "px";
+	}
 }
 
 /**
