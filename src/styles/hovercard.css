@@ -1,3 +1,9 @@
+.protoots-hovercardlayer {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
 .protoots-hovercard {
 	all: unset;
 	background-color: black;
@@ -76,6 +82,10 @@
 	white-space: break-spaces;
 	max-height: 25vh;
 	overflow: auto;
+}
+
+.protoots-hovercard .account__header__content .showmore {
+	overflow:hidden;
 }
 
 .protoots-hovercard .hovercard-showmore {

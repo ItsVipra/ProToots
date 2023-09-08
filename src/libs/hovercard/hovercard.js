@@ -19,11 +19,8 @@ let mousePos = { x: undefined, y: undefined };
 export function addHoverCardLayer() {
 	if (document.querySelector("#hovercardlayer")) return;
 
-	layer = document.createElement("div");
+	layer = createElementWithClass("div", "protoots-hovercardlayer");
 	layer.id = "hovercardlayer";
-	layer.style.position = "absolute";
-	layer.style.top = "0";
-	layer.style.left = "0";
 
 	document.body.appendChild(layer);
 
