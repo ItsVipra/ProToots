@@ -7,10 +7,10 @@ function saveOptions(e) {
 	storage.sync.set({
 		proplate: {
 			enabled: document.querySelector("#proplates-enabled").checked,
-			statusVisibility: document.querySelector("#status").checked,
-			notificationVisibility: document.querySelector("#notification").checked,
-			accountVisibility: document.querySelector("#account").checked,
-			conversationVisibility: document.querySelector("#conversation").checked,
+			statusVisibility: document.querySelector("#plate-status").checked,
+			notificationVisibility: document.querySelector("#plate-notification").checked,
+			accountVisibility: document.querySelector("#plate-account").checked,
+			conversationVisibility: document.querySelector("#plate-conversation").checked,
 		},
 		hoverCard: {
 			enabled: document.querySelector("#hovercards-enabled").checked,
@@ -31,11 +31,11 @@ function restoreOptions() {
 		} else {
 			document.querySelector("#proplates-enabled").checked = result.proplate.enabled || false;
 			document.querySelector("#logging").checked = result.logging || false;
-			document.querySelector("#status").checked = result.proplate.statusVisibility || false;
-			document.querySelector("#notification").checked =
+			document.querySelector("#plate-status").checked = result.proplate.statusVisibility || false;
+			document.querySelector("#plate-notification").checked =
 				result.proplate.notificationVisibility || false;
-			document.querySelector("#account").checked = result.proplate.accountVisibility || false;
-			document.querySelector("#conversation").checked =
+			document.querySelector("#plate-account").checked = result.proplate.accountVisibility || false;
+			document.querySelector("#plate-conversation").checked =
 				result.proplate.conversationVisibility || false;
 
 			document.querySelector("#hovercards-enabled").checked = result.hoverCard.enabled || false;
@@ -86,14 +86,14 @@ function setDisabled() {
 	const hovercardRow2 = document.querySelector("#hovercards-row");
 	const proplatesRow2 = document.querySelector("#proplates-row");
 
-	const hovercardButtons = hovercardRow2.querySelectorAll("input");
-	const proplatesButtons = proplatesRow2.querySelectorAll("input");
+	const hovercardCheckboxes = hovercardRow2.querySelectorAll("input");
+	const proplatesCheckboxes = proplatesRow2.querySelectorAll("input");
 
-	hovercardButtons.forEach((button) => {
-		button.disabled = !hovercardToggle.checked;
+	hovercardCheckboxes.forEach((checkbox) => {
+		checkbox.disabled = !hovercardToggle.checked;
 	});
-	proplatesButtons.forEach((button) => {
-		button.disabled = !proplatesToggle.checked;
+	proplatesCheckboxes.forEach((checkbox) => {
+		checkbox.disabled = !proplatesToggle.checked;
 	});
 
 	hovercardRow2.classList.toggle("disabled", !hovercardToggle.checked);
