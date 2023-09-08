@@ -7,7 +7,10 @@ export async function getSettings() {
 		settings = await storage.sync.get();
 	} catch {
 		//  Enable the logging automatically if we cannot determine the user preference.
-		settings = {};
+		settings = {
+			proplate: {},
+			hoverCard: {},
+		};
 	}
 	return settings;
 }
