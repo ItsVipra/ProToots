@@ -159,7 +159,7 @@ async function fetchAccount(accountID) {
  * @param {string} accountID ID of account being requested
  * @returns {Promise<Array>} Array containing a relationship object
  */
-async function fetchRelationship(accountID) {
+export async function fetchRelationship(accountID) {
 	const accessToken = await getActiveAccessToken();
 	//fetch status from home server with access token
 	const response = await fetch(

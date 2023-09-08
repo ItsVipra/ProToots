@@ -1,8 +1,8 @@
-import { fetchProfile } from "../fetchPronouns";
-import { addShowMoreButton, generateProfile } from "./hovercard_generators";
-import { normaliseAccountName } from "../protootshelpers";
-import { hoverCardSettings } from "../settings";
-import { createElementWithClass } from "./hovercard_helpers";
+import { fetchProfile, fetchRelationship } from "../fetchPronouns.js";
+import { addShowMoreButton, generateProfile } from "./hovercard_generators.js";
+import { normaliseAccountName } from "../protootshelpers.js";
+import { hoverCardSettings } from "../settings.js";
+import { createElementWithClass } from "./hovercard_helpers.js";
 import { runtime } from "webextension-polyfill";
 
 const listenerTimeout = 200;
@@ -120,6 +120,17 @@ async function addHoverCard(el, statusID) {
 	}
 
 	moveOnScreen(hovercard);
+
+	//get relationship from API again and redo those elements
+	//this is because a cached relationship may easily be out of date
+	//i.e. the users sees someone new, clicks follow, which then isn't reflected in the card
+	const updatedRelationship = await fetchRelationship(account.id);
+	const [updatedProfileElement, updatedbio] = generateProfile(
+		account,
+		updatedRelationship,
+		settings,
+	);
+	hovercard.replaceChild(updatedProfileElement, profileElement);
 
 	hovercard.addEventListener("mouseenter", () => (hovering = el));
 	hovercard.addEventListener("mouseleave", () => {
