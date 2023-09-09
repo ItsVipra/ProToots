@@ -1,5 +1,6 @@
 import { insertAfter } from "../domhelpers.js";
 import { normaliseAccountName } from "../protootshelpers.js";
+import { moveOnScreen } from "./hovercard.js"; //FIXME: circular dependency
 import { followAccount, setPrivateNote, unfollowAccount } from "./hovercard_api.js";
 import { createElementWithClass, replaceEmoji } from "./hovercard_helpers.js";
 
@@ -314,7 +315,7 @@ function generateStats(account) {
 	}
 }
 
-export function addShowMoreButton(bio) {
+export function addShowMoreButton(bio, hovercard) {
 	const showMoreDiv = createElementWithClass("div", "hovercard-showmore");
 	const showMore = createElementWithClass(
 		"button",
@@ -346,6 +347,8 @@ export function addShowMoreButton(bio) {
 		showMoreDiv.style.paddingBottom = "0px";
 
 		showMore.addEventListener("click", () => setLess(), { once: true });
+
+		moveOnScreen(hovercard);
 	}
 
 	function setLess() {
@@ -359,5 +362,7 @@ export function addShowMoreButton(bio) {
 		showMoreDiv.style.paddingBottom = ".25em";
 
 		showMore.addEventListener("click", () => setMore(), { once: true });
+
+		moveOnScreen(hovercard);
 	}
 }

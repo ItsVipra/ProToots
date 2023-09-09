@@ -129,7 +129,7 @@ async function addHoverCard(el, statusID) {
 		// console.log("bio is scrollable");
 		// bio.style.overflow = "hidden";
 		updatedbio.classList.add("showmore");
-		addShowMoreButton(updatedbio);
+		addShowMoreButton(updatedbio, hovercard);
 	}
 
 	moveOnScreen(hovercard);
@@ -152,7 +152,7 @@ async function addHoverCard(el, statusID) {
 	);
 }
 
-function moveOnScreen(hovercard) {
+export function moveOnScreen(hovercard) {
 	const boundingrect = hovercard.getBoundingClientRect();
 
 	const borderDistance = {
