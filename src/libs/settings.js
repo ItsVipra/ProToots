@@ -19,6 +19,10 @@ export function isLogging() {
 	return settings.logging;
 }
 
+export function proPlateSettings() {
+	return settings.proplate;
+}
+
 export function statusVisibility() {
 	return settings.proplate.statusVisibility;
 }

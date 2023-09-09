@@ -9,7 +9,7 @@ const contributorList = [
 	"LenaEine@chaos.social",
 ];
 
-import { fetchPronouns } from "../libs/fetchPronouns";
+import { fetchPronouns } from "../libs/fetchPronouns.js";
 import {
 	accountVisibility,
 	conversationVisibility,
@@ -17,22 +17,23 @@ import {
 	hoverCardEnabled,
 	isLogging,
 	notificationVisibility,
+	proPlateSettings,
 	statusVisibility,
-} from "../libs/settings";
-import { warn, log } from "../libs/logging";
+} from "../libs/settings.js";
+import { warn, log } from "../libs/logging.js";
 import {
 	findAllDescendants,
 	hasClasses,
 	insertAfter,
 	waitForElement,
 	waitForElementRemoved,
-} from "../libs/domhelpers";
+} from "../libs/domhelpers.js";
 import {
 	accountNameFromURL,
 	addTypeAttribute,
 	normaliseAccountName,
 } from "../libs/protootshelpers.js";
-import { addHoverCardLayer, addHoverCardListener } from "../libs/hovercard/hovercard";
+import { addHoverCardLayer, addHoverCardListener } from "../libs/hovercard/hovercard.js";
 import { debug } from "../libs/logging.js";
 
 //before anything else, check whether we're on a Mastodon page
@@ -127,18 +128,20 @@ function onTootIntersection(observerentries) {
 			});
 		} else {
 			if (ArticleElement.getAttribute("protoots-type") == "conversation") {
-				waitForElement(ArticleElement, ".conversation__content__names", () =>
-					addProplate(ArticleElement),
-				);
+				waitForElement(ArticleElement, ".conversation__content__names", () => {
+					if (proPlateSettings().enabled) addProplate(ArticleElement);
+				});
 			} else if (ArticleElement.nodeName == "ASIDE") {
 				//glitch-soc notifications
 				waitForElement(ArticleElement, ".status__display-name", () => {
-					addProplate(ArticleElement);
+					{
+						if (proPlateSettings().enabled) addProplate(ArticleElement);
+					}
 				});
 			} else {
 				waitForElement(ArticleElement, ".display-name", () => {
 					if (hoverCardEnabled) addHoverCardListener(ArticleElement);
-					addProplate(ArticleElement);
+					if (proPlateSettings().enabled) addProplate(ArticleElement);
 				});
 			}
 		}
