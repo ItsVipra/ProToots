@@ -1,7 +1,7 @@
-import { insertAfter } from "../domhelpers";
-import { normaliseAccountName } from "../protootshelpers";
-import { followAccount, setPrivateNote, unfollowAccount } from "./hovercard_api";
-import { createElementWithClass, replaceEmoji } from "./hovercard_helpers";
+import { insertAfter } from "../domhelpers.js";
+import { normaliseAccountName } from "../protootshelpers.js";
+import { followAccount, setPrivateNote, unfollowAccount } from "./hovercard_api.js";
+import { createElementWithClass, replaceEmoji } from "./hovercard_helpers.js";
 
 /**
  * Calls all the other generators and puts everything into a profileDiv
@@ -328,6 +328,7 @@ export function addShowMoreButton(bio) {
 
 	showMoreDiv.appendChild(showMore);
 	insertAfter(showMoreDiv, bio);
+
 	const moredivBounds = showMoreDiv.getBoundingClientRect();
 	showMoreDiv.style.marginTop = (-moredivBounds.height).toString() + "px";
 	const accountHeader = document.querySelector(".icon-button");
@@ -337,21 +338,26 @@ export function addShowMoreButton(bio) {
 	function setMore() {
 		bio.style.maxHeight = "25vh";
 		span.textContent = "Show more";
+
 		showMoreDiv.style.marginTop = (-showMoreDiv.getBoundingClientRect().height).toString() + "px";
 		showMoreDiv.style.backgroundImage =
 			"radial-gradient(farthest-side at bottom center, var(--background-color) 0%, var(--background-color) 75%, transparent)";
 		showMoreDiv.style.paddingTop = ".25em";
 		showMoreDiv.style.paddingBottom = "0px";
+
 		showMore.addEventListener("click", () => setLess(), { once: true });
 	}
+
 	function setLess() {
 		bio.style.maxHeight = "unset";
 		span.textContent = "Show less";
+
 		showMoreDiv.style.marginTop = "0px";
 		showMoreDiv.style.backgroundImage =
 			"radial-gradient(farthest-side at top center, var(--background-color) 0%, var(--background-color) 75%, transparent)";
 		showMoreDiv.style.paddingTop = "0px";
 		showMoreDiv.style.paddingBottom = ".25em";
+
 		showMore.addEventListener("click", () => setMore(), { once: true });
 	}
 }

@@ -113,14 +113,6 @@ async function addHoverCard(el, statusID) {
 	//delete placeholder
 	hovercard.removeChild(tempHeader);
 
-	if (bio.scrollHeight > bio.clientHeight && !settings.scrollableBio) {
-		// console.log("bio is scrollable");
-		bio.style.overflow = "hidden";
-		addShowMoreButton(bio);
-	}
-
-	moveOnScreen(hovercard);
-
 	//get relationship from API again and redo those elements
 	//this is because a cached relationship may easily be out of date
 	//i.e. the users sees someone new, clicks follow, which then isn't reflected in the card
@@ -131,6 +123,16 @@ async function addHoverCard(el, statusID) {
 		settings,
 	);
 	hovercard.replaceChild(updatedProfileElement, profileElement);
+
+	//If bio would be scrollable, but that settings is disabled, add the button
+	if (updatedbio.scrollHeight > updatedbio.clientHeight && !settings.scrollableBio) {
+		// console.log("bio is scrollable");
+		// bio.style.overflow = "hidden";
+		updatedbio.classList.add("showmore");
+		addShowMoreButton(updatedbio);
+	}
+
+	moveOnScreen(hovercard);
 
 	hovercard.addEventListener("mouseenter", () => (hovering = el));
 	hovercard.addEventListener("mouseleave", () => {

@@ -84,8 +84,8 @@
 	overflow: auto;
 }
 
-.protoots-hovercard .account__header__content .showmore {
-	overflow:hidden;
+.protoots-hovercard .account__header__content.showmore {
+	overflow: hidden;
 }
 
 .protoots-hovercard .hovercard-showmore {
