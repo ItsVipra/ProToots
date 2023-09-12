@@ -107,7 +107,7 @@ async function addHoverCard(el, statusID) {
 	const settings = hoverCardSettings();
 
 	//generate the profile and add it to the card
-	const [profileElement, bio] = generateProfile(account, relationship, settings);
+	const [profileElement] = generateProfile(account, relationship, settings);
 	hovercard.appendChild(profileElement);
 
 	//delete placeholder
