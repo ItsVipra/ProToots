@@ -8,7 +8,7 @@ import { runtime } from "webextension-polyfill";
 const listenerTimeout = 200;
 
 let layer;
-let hovering = null;
+let hoveredEl = null;
 let hovercardExists = false;
 
 let mousePos = { x: undefined, y: undefined };
@@ -42,7 +42,7 @@ export function addHoverCardListener(el) {
 	const id = el.dataset.id;
 
 	nametag.addEventListener("mouseenter", () => {
-		hovering = nametag;
+		hoveredEl = nametag;
 		const enterpos = { x: mousePos.x, y: mousePos.y };
 		setTimeout(() => {
 			// if the cursor has moved more than 50 pixels since
@@ -53,10 +53,10 @@ export function addHoverCardListener(el) {
 	});
 
 	nametag.addEventListener("mouseleave", () => {
-		hovering = null;
+		hoveredEl = null;
 		setTimeout(() => {
 			hovercardExists = false;
-			if (hovering === nametag) return;
+			if (hoveredEl === nametag) return;
 			removeHoverCard(layer.querySelector(".protoots-hovercard"));
 		}, listenerTimeout);
 	});
@@ -134,12 +134,12 @@ async function addHoverCard(el, statusID) {
 
 	moveOnScreen(hovercard);
 
-	hovercard.addEventListener("mouseenter", () => (hovering = el));
+	hovercard.addEventListener("mouseenter", () => (hoveredEl = el));
 	hovercard.addEventListener("mouseleave", () => {
-		hovering = false;
+		hoveredEl = false;
 		hovercardExists = false;
 		setTimeout(() => {
-			if (hovering) return;
+			if (hoveredEl) return;
 			removeHoverCard(hovercard);
 		}, listenerTimeout);
 	});
