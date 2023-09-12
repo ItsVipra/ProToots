@@ -1,16 +1,13 @@
 /**
- * Creates a new HTML elmenent of the given tag name and the finite amount fo classes.
+ * Creates a new HTML elmenent of the given tag name and the finite amount of classes.
  *
  * @param {string} tagname
- * @param  {...string} classnames
+ * @param {string[]} classnames
  * @returns {HTMLElement}
  */
 export function createElementWithClass(tagname, ...classnames) {
 	const el = document.createElement(tagname);
-	for (const classname of classnames) {
-		el.classList.add(classname);
-	}
-
+	el.classList.add(...classnames);
 	return el;
 }
 
