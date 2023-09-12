@@ -152,6 +152,11 @@ async function addHoverCard(el, statusID) {
 	);
 }
 
+/**
+ * Moves the element into the viewport.
+ *
+ * @param {HTMLElement} hovercard The hovercard element
+ */
 export function moveOnScreen(hovercard) {
 	const boundingrect = hovercard.getBoundingClientRect();
 
@@ -162,11 +167,11 @@ export function moveOnScreen(hovercard) {
 
 	if (borderDistance.y > 0) {
 		hovercard.style.top =
-			(Number(hovercard.style.top.replace("px", "")) - borderDistance.y).toString() + "px";
+			(parseInt(hovercard.style.top.replace("px", "")) - borderDistance.y).toString() + "px";
 	}
 	if (borderDistance.x > 0) {
 		hovercard.style.left =
-			(Number(hovercard.style.left.replace("px", "")) - borderDistance.y).toString() + "px";
+			(parseInt(hovercard.style.left.replace("px", "")) - borderDistance.y).toString() + "px";
 	}
 }
 
