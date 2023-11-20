@@ -3,7 +3,7 @@
 // 8======D
 
 const contributorList = [
-	"vivien@queer.group",
+	"vi@toot.vipra.vip",
 	"jasmin@queer.group",
 	"aurora@queer-lexikon.net",
 	"LenaEine@chaos.social",
