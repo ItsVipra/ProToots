@@ -54,6 +54,8 @@ export async function fetchPronouns(dataID, accountName, type) {
 	if (!pronouns) {
 		pronouns = "null";
 		info(`no pronouns found for ${accountName}, cached null`);
+	} else {
+		info(`Found ${pronouns} for ${accountName}, caching`);
 	}
 	await cachePronouns(accountName, pronouns);
 	return pronouns;

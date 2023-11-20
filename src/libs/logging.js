@@ -1,6 +1,6 @@
 /* eslint-disable no-console -- Logging should only be done with this module. */
 
-import { isLogging } from "./settings";
+import { isLogging } from "./settings.js";
 
 /** @param {any[]} args */
 export function error(...args) {
