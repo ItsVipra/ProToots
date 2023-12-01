@@ -4,34 +4,102 @@
 	</head>
 	<body>
 		<form class="protoots-settings">
-			<div class="row2">
-				<div class="text2">
-					<label for="contexts" class="switch">Show Proplates on</label>
+			<div class="section">
+				<div class="row">
+					<div class="text">
+						<label for="hovercards-enabled" class="switch">Enable Hovercards</label>
+						<p id="hovercards-description" class="description">
+							Hover over a user to view a mini-version of their profile
+						</p>
+					</div>
+					<input
+						type="checkbox"
+						id="hovercards-enabled"
+						name="hovercards-enabled"
+						aria-describedby="hovercards-description"
+					/>
 				</div>
-				<div class="contexts">
-					<div class="togglebox">
-						<label id="status-checkbox" class="description toggle" for="status">Toots</label>
-						<input type="checkbox" name="status" id="status" />
+				<div class="row2" id="hovercards-row">
+					<div class="text2">
+						<span>Show elements in Hovercard</span>
 					</div>
-					<div class="togglebox">
-						<label id="notification-checkbox" class="description toggle" for="notification"
-							>Notifications</label
-						>
-						<input type="checkbox" name="notification" id="notification" />
+					<div class="contexts">
+						<div class="togglebox">
+							<label for="card-note" class="description toggle">Notes input</label>
+							<input type="checkbox" name="card-note" id="card-note" />
+						</div>
+						<div class="togglebox">
+							<label for="card-stats" class="description toggle">Social stats</label>
+							<input type="checkbox" name="card-stats" id="card-stats" />
+						</div>
+						<div class="togglebox">
+							<label for="card-creationDate" class="description toggle">Creation date</label>
+							<input type="checkbox" name="card-creationDate" id="card-creationDate" />
+						</div>
+						<div class="togglebox">
+							<label for="card-fields" class="description toggle">Custom fields</label>
+							<input type="checkbox" name="card-fields" id="card-fields" />
+						</div>
 					</div>
-					<div class="togglebox">
-						<label id="account-checkbox" class="description toggle" for="account">Accounts</label>
-						<input type="checkbox" name="account" id="account" />
+				</div>
+				<div class="row2">
+					<div class="text2">
+						<span>Other options</span>
 					</div>
-					<div class="togglebox">
-						<label id="conversation-checkbox" class="description toggle" for="conversation">
-							Conversations
-							<span class="beta">Beta</span>
-						</label>
-						<input type="checkbox" name="conversation" id="conversation" />
+					<div class="contexts" style="grid-template-rows: repeat(1, 1fr)">
+						<div class="togglebox">
+							<label for="card-scroll-bio" class="description toggle">Scrollable Bio</label>
+							<input type="checkbox" name="card-scroll-bio" id="card-scroll-bio" />
+						</div>
 					</div>
 				</div>
 			</div>
+
+			<div class="section">
+				<div class="row">
+					<div class="text">
+						<label for="proplates-enabled" class="switch">Enable Proplates</label>
+						<p id="proplates-description" class="description">
+							Display users' pronouns next to their name
+						</p>
+					</div>
+					<input
+						type="checkbox"
+						id="proplates-enabled"
+						name="proplates-enabled"
+						aria-describedby="proplates-description"
+					/>
+				</div>
+				<div class="row2" id="proplates-row">
+					<div class="text2">
+						<span>Show Proplates on</span>
+					</div>
+					<div class="contexts">
+						<div class="togglebox">
+							<label id="status-checkbox" class="description toggle" for="status">Toots</label>
+							<input type="checkbox" name="status" id="plate-status" />
+						</div>
+						<div class="togglebox">
+							<label id="notification-checkbox" class="description toggle" for="notification"
+								>Notifications</label
+							>
+							<input type="checkbox" name="notification" id="plate-notification" />
+						</div>
+						<div class="togglebox">
+							<label id="account-checkbox" class="description toggle" for="account">Accounts</label>
+							<input type="checkbox" name="account" id="plate-account" />
+						</div>
+						<div class="togglebox">
+							<label id="conversation-checkbox" class="description toggle" for="conversation">
+								Conversations
+								<span class="beta">Beta</span>
+							</label>
+							<input type="checkbox" name="conversation" id="plate-conversation" />
+						</div>
+					</div>
+				</div>
+			</div>
+
 			<div class="row">
 				<div class="text">
 					<label for="logging" class="switch">Enable logging</label>

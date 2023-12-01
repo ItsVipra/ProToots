@@ -1,0 +1,150 @@
+.protoots-hovercardlayer {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.protoots-hovercard {
+	all: unset;
+	background-color: black;
+	box-shadow: 0px 0px 5px 1px #ffffff;
+	border-radius: 0.5em;
+	z-index: 99;
+	position: fixed;
+	width: 23.076923076923077em;
+	animation: hovercard-fadein 0.15s linear;
+	overflow: hidden;
+	max-height: 100vh;
+	overflow: auto;
+}
+
+.protoots-hovercard .account__avatar {
+	width: 5.625em;
+	height: 5.635em;
+	overflow: hidden;
+}
+
+.protoots-hovercard .avatar {
+	z-index: 2;
+}
+
+.protoots-hovercard .account__avatar img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.protoots-hovercard .account__header__info {
+	top: unset;
+	left: unset;
+	bottom: 0.33em;
+	right: 0.75em;
+}
+
+.protoots-hovercard .relationship-tag {
+	padding: 0.125em 0.25em;
+}
+
+.protoots-hovercard .account__header__image {
+	height: 4.375em !important;
+	z-index: 1;
+}
+
+.protoots-hovercard .account__header__bar {
+	padding: 0 1em;
+	border-bottom: unset;
+}
+
+.protoots-hovercard .account__header__tabs {
+	padding-bottom: 0.33em;
+}
+
+.protoots-hovercard .account__header__tabs__name {
+	margin-top: unset;
+	margin-bottom: unset;
+	padding-left: unset;
+}
+
+.protoots-hovercard .account__header__extra {
+	margin-top: 0.5em;
+}
+
+.protoots-hovercard .account__header__account-note {
+	margin-bottom: unset;
+}
+
+.protoots-hovercard .account__header__account-note__content {
+	height: 37px;
+}
+
+.protoots-hovercard .account__header__content {
+	white-space: break-spaces;
+	max-height: 25vh;
+	overflow: auto;
+}
+
+.protoots-hovercard .account__header__content.showmore {
+	overflow: hidden;
+}
+
+.protoots-hovercard .hovercard-showmore {
+	position: relative;
+	padding-top: 0.25em;
+	display: flex;
+	justify-content: center;
+	background-color: transparent;
+	--background-color: white;
+	background-image: radial-gradient(
+		farthest-side at bottom center,
+		var(--background-color) 0%,
+		var(--background-color) 75%,
+		transparent
+	);
+}
+
+.protoots-hovercard .hovercard-showmore button {
+	background-color: transparent;
+}
+
+.protoots-hovercard .account__header__content p {
+	margin-bottom: 0.5em;
+}
+
+.protoots-hovercard .account__header__fields {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+.protoots-hovercard .account__header__fields dt,
+.protoots-hovercard .account__header__fields dd {
+	padding: 0.5em;
+}
+
+.protoots-hovercard.hidden {
+	opacity: 0;
+	user-select: none;
+	transition: opacity 0.15s linear;
+}
+
+.protoots-hovercard .account__header__extra__links {
+	padding: unset;
+}
+
+@keyframes hovercard-fadein {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes image-scroll {
+	from {
+		top: -130%;
+	}
+	to {
+		top: -150%;
+	}
+}

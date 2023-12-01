@@ -22,7 +22,7 @@
 		{
 			"matches": ["*://*/*"],
 			"js": ["content_scripts/protoots.js"],
-			"css": ["styles/proplate.css"],
+			"css": ["styles/proplate.css", "styles/hovercard.css"],
 			"run_at": "document_start"
 		}
 	],
@@ -30,6 +30,8 @@
 	"options_ui": {
 		"page": "options/options.html"
 	},
+
+	"web_accesible_resources": ["icons/fennecspin.gif"],
 
 	"browser_specific_settings": {
 		"gecko": {
