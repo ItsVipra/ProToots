@@ -89,7 +89,10 @@ function main() {
 					hasClasses(
 						n,
 						"detailed-status",
-						"status",
+						"status-public",
+						"status-unlisted",
+						"status-private",
+						"status-direct",
 						"conversation",
 						"account-authorize",
 						"notification",
