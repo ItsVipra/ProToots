@@ -51,7 +51,10 @@ export function addTypeAttribute(ActionElement) {
 	} else if (hasClasses(ActionElement, "notification", "notification__message")) {
 		ActionElement.setAttribute("protoots-type", "notification");
 		ActionElement.closest("article").setAttribute("protoots-type", "notification");
-	} else if (hasClasses(ActionElement, "account")) {
+	} else if (
+		hasClasses(ActionElement, "account") &&
+		!hasClasses(ActionElement, "account--minimal")
+	) {
 		ActionElement.setAttribute("protoots-type", "account");
 		ActionElement.closest("article").setAttribute("protoots-type", "account");
 	}
