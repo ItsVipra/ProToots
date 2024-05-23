@@ -152,10 +152,6 @@ function addtoTootObserver(ActionElement, tootObserver) {
 	// console.log(ActionElement);
 	if (ActionElement.hasAttribute("protoots-tracked")) return;
 
-	// special case for Mastodon v4.3 where "status__wrapper" are created
-	// as "status focusable" after navigating back to timeline
-	if (hasClasses(ActionElement, "status") && hasClasses(ActionElement, "focusable")) return;
-
 	addTypeAttribute(ActionElement);
 	ActionElement.setAttribute("protoots-tracked", "true");
 	tootObserver.observe(ActionElement);
