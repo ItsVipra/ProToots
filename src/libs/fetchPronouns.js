@@ -1,5 +1,5 @@
 import { debug, error, info, log, warn } from "./logging";
-import { cachePronouns, getPronouns } from "./caching";
+import { cacheProfile, cachePronouns, getProfile, getPronouns } from "./caching";
 import { normaliseAccountName } from "./protootshelpers";
 import { extractFromStatus } from "./pronouns";
 
@@ -57,6 +57,32 @@ export async function fetchPronouns(dataID, accountName, type) {
 	}
 	await cachePronouns(accountName, pronouns);
 	return pronouns;
+}
+
+export async function fetchProfile(dataID, accountName) {
+	//profile is account + relationship
+	const cacheResult = await getProfile(accountName);
+	debug(cacheResult);
+
+	if (cacheResult) return cacheResult;
+
+	if (!dataID) {
+		warn(`Could not fetch profile for user ${accountName}, because no status ID was passed.`);
+		return null;
+	}
+
+	info(`${accountName} not in cardCache, fetching status`);
+
+	const status = await fetchStatus(dataID);
+	const account = status.account;
+
+	const relationship = await fetchRelationship(account.id);
+
+	const profile = { account: account, relationship: relationship };
+
+	cacheProfile(accountName, profile);
+
+	return profile;
 }
 
 /**
@@ -129,6 +155,26 @@ async function fetchAccount(accountID) {
 }
 
 /**
+ * Fetches relationship by accountID from host_name with user's access token.
+ * @param {string} accountID ID of account being requested
+ * @returns {Promise<Array>} Array containing a relationship object
+ */
+export async function fetchRelationship(accountID) {
+	const accessToken = await getActiveAccessToken();
+	//fetch status from home server with access token
+	const response = await fetch(
+		`${location.protocol}//${location.host}/api/v1/accounts/relationships?id[]=${accountID}`,
+		{
+			headers: { Authorization: `Bearer ${accessToken}` },
+		},
+	);
+
+	const relationship = await response.json();
+
+	return relationship;
+}
+
+/**
  * Fetches the user's last <=40 direct message threads from host_name with user's access token.
  * @returns {Promise<Array>} Array containing direct message thread objects in json from.
  *
@@ -158,7 +204,7 @@ async function fetchConversations() {
  * Fetches the current access token for the user.
  * @returns {Promise<string>} The accessToken for the current user if we are logged in.
  */
-async function getActiveAccessToken() {
+export async function getActiveAccessToken() {
 	// Fortunately, Mastodon provides the initial state in a <script> element at the beginning of the page.
 	// Besides a lot of other information, it contains the access token for the current user.
 	const initialStateEl = document.getElementById("initial-state");

@@ -9,28 +9,31 @@ const contributorList = [
 	"LenaEine@chaos.social",
 ];
 
-import { fetchPronouns } from "../libs/fetchPronouns";
+import { fetchPronouns } from "../libs/fetchPronouns.js";
 import {
 	accountVisibility,
 	conversationVisibility,
 	getSettings,
+	hoverCardEnabled,
 	isLogging,
 	notificationVisibility,
+	proPlateSettings,
 	statusVisibility,
-} from "../libs/settings";
-import { warn, log } from "../libs/logging";
+} from "../libs/settings.js";
+import { warn, log } from "../libs/logging.js";
 import {
 	findAllDescendants,
 	hasClasses,
 	insertAfter,
 	waitForElement,
 	waitForElementRemoved,
-} from "../libs/domhelpers";
+} from "../libs/domhelpers.js";
 import {
 	accountNameFromURL,
 	addTypeAttribute,
 	normaliseAccountName,
 } from "../libs/protootshelpers.js";
+import { addHoverCardLayer, addHoverCardListener } from "../libs/hovercard/hovercard.js";
 import { debug } from "../libs/logging.js";
 
 //before anything else, check whether we're on a Mastodon page
@@ -42,7 +45,7 @@ checkSite();
  * If so creates an 'readystatechange' EventListener, with callback to main()
  */
 async function checkSite() {
-	getSettings();
+	await getSettings();
 
 	document.addEventListener("readystatechange", main, { once: true });
 }
@@ -67,7 +70,7 @@ function main() {
 	const tootObserver = new IntersectionObserver((entries) => {
 		onTootIntersection(entries);
 	});
-
+	if (hoverCardEnabled()) addHoverCardLayer();
 	// We are tracking navigation changes with the location and a MutationObserver on `document`,
 	// because the popstate event from the History API is only triggered with the back/forward buttons.
 	let lastUrl = location.href;
@@ -121,23 +124,28 @@ function main() {
  */
 function onTootIntersection(observerentries) {
 	for (const observation of observerentries) {
-		const ArticleElement = observation.target;
+		const ArticleElement = /** @type {HTMLElement|null} */ (observation.target);
 		if (!observation.isIntersecting) {
 			waitForElementRemoved(ArticleElement, ".protoots-proplate", () => {
 				ArticleElement.removeAttribute("protoots-checked");
 			});
 		} else {
 			if (ArticleElement.getAttribute("protoots-type") == "conversation") {
-				waitForElement(ArticleElement, ".conversation__content__names", () =>
-					addProplate(ArticleElement),
-				);
+				waitForElement(ArticleElement, ".conversation__content__names", () => {
+					if (proPlateSettings().enabled) addProplate(ArticleElement);
+				});
 			} else if (ArticleElement.nodeName == "ASIDE") {
 				//glitch-soc notifications
 				waitForElement(ArticleElement, ".status__display-name", () => {
-					addProplate(ArticleElement);
+					{
+						if (proPlateSettings().enabled) addProplate(ArticleElement);
+					}
 				});
 			} else {
-				waitForElement(ArticleElement, ".display-name", () => addProplate(ArticleElement));
+				waitForElement(ArticleElement, ".display-name", () => {
+					if (hoverCardEnabled) addHoverCardListener(ArticleElement);
+					if (proPlateSettings().enabled) addProplate(ArticleElement);
+				});
 			}
 		}
 	}
@@ -232,6 +240,7 @@ async function addProplate(element) {
 		}
 		//add plate to nametag
 		insertAfter(proplate, nametagEl);
+		log("added proplate to", nametagEl);
 	}
 
 	/**
@@ -349,7 +358,7 @@ async function addProplate(element) {
 			accountName = accountNameFromURL(getAccountName(accountNameEl, "href"));
 		}
 
-		let nametagEl = getNametagEl(element, ".notification__display-name");
+		const nametagEl = getNametagEl(element, ".notification__display-name");
 		if (!nametagEl) return;
 
 		element.setAttribute("protoots-checked", "true");
@@ -367,6 +376,7 @@ async function addProplate(element) {
 		element.setAttribute("protoots-checked", "true");
 
 		generateProPlate(statusId, accountName, nametagEl, "account");
+		element.setAttribute("protoots-checked", "true");
 	}
 
 	async function addToConversation(element) {
