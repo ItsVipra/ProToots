@@ -1,11 +1,13 @@
 import sanitizeHtml from "sanitize-html";
 import { htmlDecode } from "./domhelpers.js";
+import { allKnownPronouns } from "./generated/pronouns/index.js";
+import { debug } from "./logging.js";
 
 const fieldMatchers = [/\bpro.*nouns?\b/i, /\bpronomen\b/i, /(i )?go(es)? by/i];
 const knownPronounUrls = [
-	/pronouns\.page\/(@(?<username>\w+))?:?(?<pronouns>[\w/:]+)?/,
-	/pronouns\.within\.lgbt\/(?<pronouns>[\w/]+)/,
-	/pronouns\.cc\/pronouns\/(?<pronouns>[\w/]+)/,
+	/pronouns\.page\/([a-zA-Z]+\/[a-zA-Z]+)/,
+	/pronouns\.within\.lgbt\/([\w/]+)/,
+	/pronouns\.cc\/pronouns\/([\w/]+)/,
 ];
 
 /**
@@ -21,60 +23,92 @@ export async function extractFromStatus(status) {
 	// get account from status and pull out fields
 	const account = status.account;
 	const { fields, note } = account;
-	let pronouns;
+	const searchFields = [...(fields ?? []), { name: "__protoots-bio__", value: note }];
 
-	if (fields) {
-		for (const f of fields) {
-			pronouns = await extractFromField(f);
-			if (pronouns) break;
-		}
+	const pronounSearchMatch = await findPronouns(searchFields);
+	if (!pronounSearchMatch) return null;
+	const { value, exactMatch } = pronounSearchMatch;
+
+	// If the result is already exact, we can skip all further processings in the pipeline.
+	if (exactMatch) return value;
+
+	// If we can extract the pronouns of one of the known URLs, return the result.
+	for (const url of knownPronounUrls) {
+		const m = value.match(url);
+		if (m) return m.pop();
 	}
 
-	if (!pronouns && note) {
-		pronouns = extractFromBio(note);
-	}
+	// First, check whether we can find a pronouns.page link inside of the value.
+	const fromPronounsPage = await extractPronounsPagePronouns(value);
+	if (fromPronounsPage) return fromPronounsPage;
 
-	pronouns = sanitizePronouns(pronouns);
-	return pronouns;
+	// Otherwise, continue with the sanitation and return whatever we found.
+	let text = sanitizeHtml(value, { allowedTags: [], allowedAttributes: {} });
+	text = sanitizePronouns(text);
+	return text;
 }
 
 /**
- * @param {{name: string, value: string}} field The field value
- * @returns {Promise<string|null>} The pronouns or null.
+ * Searches through the field values and names for pronouns.
+ * If the match does not need further processing, exactMatch is set to true.
+ *
+ * @param {{name: string, value: string}[]} fields
+ * @returns {Promise<{value: string, exactMatch: boolean}|null>}
  */
-async function extractFromField(field) {
-	let pronounsRaw;
-	for (const matcher of fieldMatchers) {
-		if (field.name.match(matcher)) {
-			pronounsRaw = field.value;
-			break;
-		}
+async function findPronouns(fields) {
+	for (const { name, value } of fields) {
+		// Either search for a known field name.
+		debug("Searching for known field names");
+		const hasMatch = fieldMatchers.find((m) => name.match(m)) !== undefined;
+		if (hasMatch) return { value: value, exactMatch: false };
+
+		// Or check whether the either the name or the value contains a set of known pronouns.
+		debug("Searching for pronouns in text");
+		const textualValues = [value, name];
+		const fromKnownPronouns = textualValues.map(searchForKnownPronouns).find((x) => x);
+		if (fromKnownPronouns) return { value: fromKnownPronouns, exactMatch: true };
 	}
 
-	if (!pronounsRaw) return null;
-	let text = sanitizeHtml(pronounsRaw, { allowedTags: [], allowedAttributes: {} });
-	// If one of pronoun URLs matches, overwrite the current known value.
-	for (const knownUrlRe of knownPronounUrls) {
-		if (!knownUrlRe.test(pronounsRaw)) continue;
-		const { pronouns, username } = pronounsRaw.match(knownUrlRe).groups;
+	const textValues = [...fields.map((f) => f.value), ...fields.map((f) => f.name)].filter((v) => v);
 
-		// For now, only the pronouns.page regexp has a username value, so we can be sure
-		// that we don't query the wrong API.
-		if (username) {
-			return await queryUserFromPronounsPage(username);
-		}
-
-		// In case that we have single-word pronoun.page values, like "https://en.pronouns.page/it",
-		// we want to normalize that to include the possessive pronoun as well.
-		if (pronounsRaw.includes("pronouns.page") && !pronouns.includes("/")) {
-			return await normalizePronounPagePronouns(pronouns);
-		}
-
-		text = pronouns;
+	// If fields and bio neither contain known pronouns or match against the field matcher,
+	// search for static URL matches inside all values next.
+	const containsKnownURL = textValues
+		.flatMap((v) => knownPronounUrls.map((re) => v.match(re)))
+		.find((x) => x);
+	if (containsKnownURL) {
+		return {
+			value: containsKnownURL[0],
+			exactMatch: false,
+		};
 	}
 
-	if (!text) return null;
-	return text;
+	// Finally, as last try, search for all occurrences of pronouns.page links.
+	// Due to the API calls they are the most "expensive" and therefore are used as a last resort.
+	for (const v of textValues) {
+		const res = await extractPronounsPagePronouns(v);
+		if (res) return { value: res, exactMatch: true };
+	}
+
+	// If all the checks above fail, the search failed.
+	return null;
+}
+
+/**
+ * Extracts and sanitizes pronouns.page URLs from the given text.
+ * @param {string} text
+ * @returns {Promise<string|null>}
+ */
+async function extractPronounsPagePronouns(text) {
+	const pattern = /pronouns\.page\/(@(?<username>\w+))?:?(?<pronouns>[\w/]+)?/i;
+	const match = text.match(pattern);
+	if (!match) return null;
+
+	debug("found pronouns.page link", match);
+	const { username, pronouns } = match.groups;
+	const res = pronouns ?? (await queryUserFromPronounsPage(username));
+
+	return normalizePronounPagePronouns(res);
 }
 
 /**
@@ -83,6 +117,7 @@ async function extractFromField(field) {
  * @returns {Promise<string|null>} The pronouns that have set the "yes" or "meh" opinion.
  */
 async function queryUserFromPronounsPage(username) {
+	debug("pronouns not in link, fetching profile");
 	// Example page: https://en.pronouns.page/api/profile/get/andrea?version=2
 	const resp = await fetch(`https://en.pronouns.page/api/profile/get/${username}?version=2`);
 	if (resp.status >= 400) {
@@ -118,9 +153,11 @@ async function queryUserFromPronounsPage(username) {
 
 /**
  * @param {string} val
- * @returns {Promise<string>}
+ * @returns {Promise<string|null>}
  */
 async function normalizePronounPagePronouns(val) {
+	if (!val) return null;
+
 	const match = val.match(/pronouns\.page\/(.+)/);
 	if (match) val = match[1];
 
@@ -139,10 +176,10 @@ async function normalizePronounPagePronouns(val) {
 	// do further processing.
 	try {
 		const {
-			morphemes: { pronoun_subject, possessive_pronoun },
+			morphemes: { pronoun_subject: sub, possessive_determiner: det },
 		} = await pronounNameResp.json();
 
-		return [pronoun_subject, possessive_pronoun].join("/");
+		return [sub, det].join("/");
 	} catch {
 		return val;
 	}
@@ -190,124 +227,63 @@ function sanitizePronouns(str) {
 	return str === "" ? null : str;
 }
 
-const knownPronouns = [
-	"ae",
-	"aer",
-	"aers",
-	"aerself",
-	"co",
-	"co's",
-	"cos",
-	"coself",
-	"e",
-	"eir",
-	"eirs",
-	"em",
-	"ems",
-	"emself",
-	"es",
-	"ey",
-	"fae",
-	"faer",
-	"faers",
-	"faerself",
-	"he",
-	"her",
-	"hers",
-	"herself",
-	"him",
-	"himself",
-	"hir",
-	"hirs",
-	"hirself",
-	"his",
-	"hu",
-	"hum",
-	"hus",
-	"huself",
-	"it",
-	"its",
-	"itself",
-	"ne",
-	"nem",
-	"nemself",
-	"nir",
-	"nirs",
-	"nirself",
-	"one",
-	"one's",
-	"oneself",
-	"per",
-	"pers",
-	"perself",
-	"s/he",
-	"she",
-	"their",
-	"theirs",
-	"them",
-	"themself",
-	"themselves",
-	"they",
-	"thon",
-	"thon's",
-	"thons",
-	"thonself",
-	"ve",
-	"ver",
-	"vers",
-	"verself",
-	"vi",
-	"vim",
-	"vims",
-	"vimself",
-	"vir",
-	"virs",
-	"virself",
-	"vis",
-	"xe",
-	"xem",
-	"xemself",
-	"xyr",
-	"xyrs",
-	"ze",
-	"zhe",
-	"zher",
-	"zhers",
-	"zherself",
-	"zir",
-	"zirs",
-	"zirself",
-];
-
 /**
- * Tries to extract pronouns from the bio/note. Only "known" pronouns are returned, which is
+ * Tries to extract pronouns from the given text. Only "known" pronouns are returned, which is
  * a compromise for the pattern matching. At no point we want to limit the pronouns used by persons.
- * @param {string} bio The bio
- * @returns {string|null} The result or null
+ * @param {string} text The text to search for pronouns.
+ * @returns {string|null} The result or null.
  */
-function extractFromBio(bio) {
-	const exactMatches = bio.matchAll(/(\w+) ?\/ ?(\w+)/gi);
-	for (const [match, subjective, objective] of exactMatches) {
-		if (
-			knownPronouns.includes(subjective.toLowerCase()) &&
-			knownPronouns.includes(objective.toLowerCase())
-		) {
-			return match.replaceAll(" ", "");
-		}
-	}
+function searchForKnownPronouns(text) {
+	if (!text) return null;
 
-	const followedByColon = bio.matchAll(/pronouns?:\W+([\w/+]+)/gi);
+	debug("Searching for explicit naming, any/no pronouns");
+	//search for explicitly mentioned pronouns first, lower likelyhood of false positives
+	const followedByColon = text.matchAll(/pronouns?:\W+([\w/+]+)/gi);
 	for (const match of followedByColon) {
-		return match.pop(); // first group is last entry in array
+		return match.pop() ?? null; // first group is last entry in array
 	}
-	const anyAllPronouns = bio.match(/(any|all) +pronouns/gi);
+	const anyAllPronouns = text.match(/(any|all) +pronouns/gi);
 	if (anyAllPronouns) {
 		return anyAllPronouns[0];
 	}
-	const noPronouns = bio.match(/(no|none) +pronouns/);
+	const noPronouns = text.match(/(no|none) +pronouns/);
 	if (noPronouns) {
 		return noPronouns[0];
 	}
 
+	debug("Searching for known pronouns");
+	// This is a rather complex regular expression to search for pronouns. Therefore, here's the explanation
+	// in plain English: We search for all words that are followed by a slash (/),
+	// which are followed by at least one another word that matches this pattern.
+	//
+	// Why not just two of them? Well, for combinations of multiple subjective pronouns, like "sie/she/elle",
+	// we wanna display the whole set of pronouns if possible.
+	const exactMatches = text.matchAll(/(\w+)( ?[/] ?(\w+)){1,}/gi);
+	for (const [match] of exactMatches) {
+		// Once we have our match, split it by the known separators and check sequentially
+		// whether we know one of the pronouns. If that's the case, return everything in the match
+		// that's followed by this pronoun.
+		//
+		// Unfortunately, in the above case ("sie/she/elle"), it would return just "she/elle", because
+		// we don't know about common localized pronouns yet. And we can't return the whole set,
+		// because pronoun URLs like pronoun.page/they/them would return something like "page/they/them",
+		// which obviously is wrong.
+		debug("pronoun candidate:", match);
+		const parts = match.split(/[/,]/).map((x) => x.trim());
+		const known = [];
+		for (const p of parts) {
+			if (allKnownPronouns.includes(p.toLowerCase())) {
+				// debug("Found known pronoun", p);
+				known.push(p);
+			}
+		}
+
+		if (known.length) {
+			debug("Known pronouns found:", known);
+			return known.join("/");
+		}
+	}
+
+	debug("No known pronouns found");
 	return null;
 }
