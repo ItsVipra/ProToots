@@ -42,7 +42,7 @@ checkSite();
  * If so creates an 'readystatechange' EventListener, with callback to main()
  */
 async function checkSite() {
-	getSettings();
+	await getSettings();
 
 	document.addEventListener("readystatechange", main, { once: true });
 }

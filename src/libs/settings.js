@@ -1,11 +1,14 @@
 import { storage } from "webextension-polyfill";
+import { debug } from "./logging.js";
 
 let settings;
 
 export async function getSettings() {
 	try {
 		settings = await storage.sync.get();
+		debug("Retrieved settings", settings);
 	} catch {
+		debug("Failed to retrieve settings from storage.");
 		//  Enable the logging automatically if we cannot determine the user preference.
 		settings = {};
 	}
